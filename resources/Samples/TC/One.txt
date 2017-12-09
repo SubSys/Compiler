@@ -1,0 +1,55 @@
+module Main exposing (..)
+
+import Sudo.Helm.Native
+
+
+type Either a b
+    = Left a
+    | Right b
+
+type Maybe a
+    = Nothing
+    | Just a
+
+type User = Anonymous | Named String
+
+
+delta a =
+    case a of
+        [] -> 0
+        [x1, x2, x3] -> x3
+        (x :: []) -> 0
+        (x :: _) -> x
+        (x1 :: x2 :: x3 :: [] ) -> x1
+
+
+alpha x =
+    case x of
+        Anonymous -> "Unknown User"
+        Named s -> s
+
+
+beta x =
+    case x of
+        Just x -> x
+        _ -> 0
+
+gamma =
+    Just "Lorem"
+
+
+
+phi =
+    Left (Just "a")
+
+
+test1 x y =
+    x y
+
+fst x =
+    case x of
+        (y, _) -> y
+
+snd x =
+    case x of
+        (_, y) -> y

@@ -1,0 +1,25 @@
+module Basic.Types exposing (..)
+
+type Maybe a
+    = Nothing
+    | Just a
+
+type Either a b
+    = Left a
+    | Right b
+
+
+type Result error value
+    = Err error
+    | Ok value
+
+
+
+type Lister a = Empty | Node a Lister
+
+
+
+type Color = Red | Green | Blue
+
+
+

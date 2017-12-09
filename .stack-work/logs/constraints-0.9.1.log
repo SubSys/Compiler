@@ -1,0 +1,13 @@
+Configuring constraints-0.9.1...
+Building constraints-0.9.1...
+Preprocessing library constraints-0.9.1...
+[1 of 7] Compiling Data.Constraint  ( src/Data/Constraint.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Constraint.o )
+[2 of 7] Compiling Data.Constraint.Deferrable ( src/Data/Constraint/Deferrable.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Constraint/Deferrable.o )
+[3 of 7] Compiling Data.Constraint.Forall ( src/Data/Constraint/Forall.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Constraint/Forall.o )
+[4 of 7] Compiling Data.Constraint.Lifting ( src/Data/Constraint/Lifting.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Constraint/Lifting.o )
+[5 of 7] Compiling Data.Constraint.Nat ( src/Data/Constraint/Nat.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Constraint/Nat.o )
+[6 of 7] Compiling Data.Constraint.Symbol ( src/Data/Constraint/Symbol.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Constraint/Symbol.o )
+[7 of 7] Compiling Data.Constraint.Unsafe ( src/Data/Constraint/Unsafe.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Constraint/Unsafe.o )
+Installing library in
+/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/lib/x86_64-osx-ghc-8.0.2/constraints-0.9.1-4tIdyprvVTIKgYJ7yyTQfA
+Registering constraints-0.9.1...

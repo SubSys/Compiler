@@ -1,0 +1,32 @@
+
+
+
+interface Omega a where
+
+
+
+implement Omega for Type where
+
+implement Omega for (Type a)
+    sudo
+        a := Int
+        
+        a == not (null a) || on_error
+
+
+    where
+
+
+sudo
+    alpha a =
+
+runtime
+    alpha
+
+
+alpha : a -> b
+    ensure
+        a ~ Eq
+        a ~ Ord
+alpha a =
+

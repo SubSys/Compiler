@@ -1,0 +1,16 @@
+Configuring prelude-hs-0.1.0.0...
+Preprocessing library prelude-hs-0.1.0.0...
+[ 1 of 11] Compiling Proto.Util.Text  ( src/Proto/Util/Text.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Proto/Util/Text.o )
+[ 2 of 11] Compiling Proto.Util.Misc  ( src/Proto/Util/Misc.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Proto/Util/Misc.o )
+[ 3 of 11] Compiling Proto.Util.List  ( src/Proto/Util/List.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Proto/Util/List.o )
+[ 4 of 11] Compiling Proto.Util       ( src/Proto/Util.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Proto/Util.o )
+[ 5 of 11] Compiling Proto.System.Console ( src/Proto/System/Console.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Proto/System/Console.o )
+[ 6 of 11] Compiling Proto.Data       ( src/Proto/Data.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Proto/Data.o )
+[ 7 of 11] Compiling Proto.Class      ( src/Proto/Class.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Proto/Class.o )
+[ 8 of 11] Compiling Core.List.Util   ( src/Core/List/Util.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Core/List/Util.o )
+[ 9 of 11] Compiling Core.Either.Util ( src/Core/Either/Util.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Core/Either/Util.o )
+[10 of 11] Compiling Core.Control.Flow ( src/Core/Control/Flow.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Core/Control/Flow.o )
+[11 of 11] Compiling Core             ( src/Core.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Core.o )
+Installing library in
+/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/lib/x86_64-osx-ghc-8.0.2/prelude-hs-0.1.0.0-JH3MIJhjUun8ugzabtCsf9
+Registering prelude-hs-0.1.0.0...

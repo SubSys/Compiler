@@ -1,0 +1,20 @@
+
+
+
+
+test : Fn@(A -> B) -> List A -> List B
+    - Fn := Lorem
+    - A  := Instance(Ord), Instance(Num)
+test x y =
+    ...
+
+
+test : (a -> b) -> List a -> List b
+test a b =
+
+drop test =
+    
+
+
+
+

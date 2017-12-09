@@ -1,0 +1,70 @@
+Configuring derive-2.6.2...
+Building derive-2.6.2...
+Preprocessing library derive-2.6.2...
+[ 1 of 54] Compiling Language.Haskell.TH.Compat ( src/Language/Haskell/TH/Compat.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Language/Haskell/TH/Compat.o )
+[ 2 of 54] Compiling Language.Haskell.TH.Data ( src/Language/Haskell/TH/Data.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Language/Haskell/TH/Data.o )
+[ 3 of 54] Compiling Language.Haskell.TH.ExpandSynonym ( src/Language/Haskell/TH/ExpandSynonym.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Language/Haskell/TH/ExpandSynonym.o )
+[ 4 of 54] Compiling Language.Haskell.TH.Helper ( src/Language/Haskell/TH/Helper.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Language/Haskell/TH/Helper.o )
+[ 5 of 54] Compiling Language.Haskell.TH.Peephole ( src/Language/Haskell/TH/Peephole.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Language/Haskell/TH/Peephole.o )
+
+src/Language/Haskell/TH/Peephole.hs:78:1: warning:
+    Pattern match checker exceeded (2000000) iterations in
+    an equation for ‘peep’. (Use -fmax-pmcheck-iterations=n
+    to set the maximun number of iterations to n)
+[ 6 of 54] Compiling Language.Haskell.TH.All ( src/Language/Haskell/TH/All.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Language/Haskell/TH/All.o )
+[ 7 of 54] Compiling Language.Haskell ( src/Language/Haskell.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Language/Haskell.o )
+[ 8 of 54] Compiling Language.Haskell.Convert ( src/Language/Haskell/Convert.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Language/Haskell/Convert.o )
+[ 9 of 54] Compiling Derive.Flags     ( src/Derive/Flags.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Derive/Flags.o )
+[10 of 54] Compiling Data.Derive.Internal.Instance ( src/Data/Derive/Internal/Instance.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Internal/Instance.o )
+[11 of 54] Compiling Data.Derive.DSL.HSE ( src/Data/Derive/DSL/HSE.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/DSL/HSE.o )
+[12 of 54] Compiling Derive.Utils     ( src/Derive/Utils.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Derive/Utils.o )
+[13 of 54] Compiling Data.Derive.DSL.DSL ( src/Data/Derive/DSL/DSL.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/DSL/DSL.o )
+[14 of 54] Compiling Data.Derive.DSL.SYB ( src/Data/Derive/DSL/SYB.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/DSL/SYB.o )
+[15 of 54] Compiling Data.Derive.DSL.Apply ( src/Data/Derive/DSL/Apply.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/DSL/Apply.o )
+[16 of 54] Compiling Data.Derive.DSL.Derive ( src/Data/Derive/DSL/Derive.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/DSL/Derive.o )
+[17 of 54] Compiling Data.DeriveDSL   ( src/Data/DeriveDSL.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/DeriveDSL.o )
+[18 of 54] Compiling Data.Derive.Internal.Derivation ( src/Data/Derive/Internal/Derivation.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Internal/Derivation.o )
+[19 of 54] Compiling Data.Derive.DataAbstract ( src/Data/Derive/DataAbstract.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/DataAbstract.o )
+[20 of 54] Compiling Data.Derive.Default ( src/Data/Derive/Default.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Default.o )
+[21 of 54] Compiling Data.Derive.EnumCyclic ( src/Data/Derive/EnumCyclic.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/EnumCyclic.o )
+[22 of 54] Compiling Data.Derive.Fold ( src/Data/Derive/Fold.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Fold.o )
+[23 of 54] Compiling Data.Derive.From ( src/Data/Derive/From.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/From.o )
+[24 of 54] Compiling Data.Derive.Has  ( src/Data/Derive/Has.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Has.o )
+[25 of 54] Compiling Data.Derive.Internal.Traversal ( src/Data/Derive/Internal/Traversal.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Internal/Traversal.o )
+[26 of 54] Compiling Data.Derive.Is   ( src/Data/Derive/Is.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Is.o )
+[27 of 54] Compiling Data.Derive.JSON ( src/Data/Derive/JSON.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/JSON.o )
+[28 of 54] Compiling Data.Derive.LazySet ( src/Data/Derive/LazySet.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/LazySet.o )
+[29 of 54] Compiling Data.Derive.Lens ( src/Data/Derive/Lens.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Lens.o )
+[30 of 54] Compiling Data.Derive.Monoid ( src/Data/Derive/Monoid.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Monoid.o )
+[31 of 54] Compiling Data.Derive.NFData ( src/Data/Derive/NFData.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/NFData.o )
+[32 of 54] Compiling Data.Derive.Ref  ( src/Data/Derive/Ref.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Ref.o )
+[33 of 54] Compiling Data.Derive.Serial ( src/Data/Derive/Serial.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Serial.o )
+[34 of 54] Compiling Data.Derive.Serialize ( src/Data/Derive/Serialize.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Serialize.o )
+[35 of 54] Compiling Data.Derive.Set  ( src/Data/Derive/Set.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Set.o )
+[36 of 54] Compiling Data.Derive.UniplateDirect ( src/Data/Derive/UniplateDirect.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/UniplateDirect.o )
+[37 of 54] Compiling Data.Derive.UniplateTypeable ( src/Data/Derive/UniplateTypeable.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/UniplateTypeable.o )
+[38 of 54] Compiling Data.Derive.Update ( src/Data/Derive/Update.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Update.o )
+[39 of 54] Compiling Derive.Derivation ( src/Derive/Derivation.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Derive/Derivation.o )
+[40 of 54] Compiling Derive.Generate  ( src/Derive/Generate.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Derive/Generate.o )
+[41 of 54] Compiling Data.Derive.Class.Default ( src/Data/Derive/Class/Default.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Class/Default.o )
+[42 of 54] Compiling Data.Derive.Class.Arities ( src/Data/Derive/Class/Arities.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Class/Arities.o )
+[43 of 54] Compiling Data.Derive.Instance.Arities ( src/Data/Derive/Instance/Arities.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Instance/Arities.o )
+[44 of 54] Compiling Data.Derive.Bounded ( src/Data/Derive/Bounded.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Bounded.o )
+[45 of 54] Compiling Data.Derive.BinaryDefer ( src/Data/Derive/BinaryDefer.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/BinaryDefer.o )
+[46 of 54] Compiling Data.Derive.Binary ( src/Data/Derive/Binary.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Binary.o )
+[47 of 54] Compiling Data.Derive.Arities ( src/Data/Derive/Arities.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Arities.o )
+[48 of 54] Compiling Data.Derive.ArbitraryOld ( src/Data/Derive/ArbitraryOld.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/ArbitraryOld.o )
+[49 of 54] Compiling Data.Derive.Arbitrary ( src/Data/Derive/Arbitrary.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/Arbitrary.o )
+[50 of 54] Compiling Data.Derive.All  ( src/Data/Derive/All.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/Derive/All.o )
+[51 of 54] Compiling Data.DeriveTH    ( src/Data/DeriveTH.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/DeriveTH.o )
+[52 of 54] Compiling Derive.Test      ( src/Derive/Test.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Derive/Test.o )
+[53 of 54] Compiling Derive.Main      ( src/Derive/Main.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Derive/Main.o )
+[54 of 54] Compiling Data.DeriveMain  ( src/Data/DeriveMain.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/Data/DeriveMain.o )
+Preprocessing executable 'derive' for derive-2.6.2...
+[1 of 1] Compiling Main             ( Main.hs, .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/derive/derive-tmp/Main.o )
+Linking .stack-work/dist/x86_64-osx/Cabal-1.24.2.0/build/derive/derive ...
+Installing library in
+/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/lib/x86_64-osx-ghc-8.0.2/derive-2.6.2-ETUCy5a416WLjJMmcI4HKF
+Installing executable(s) in
+/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/bin
+Registering derive-2.6.2...
