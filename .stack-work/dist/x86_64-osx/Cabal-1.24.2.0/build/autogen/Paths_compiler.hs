@@ -30,7 +30,7 @@ version = Version [0,1,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/bin"
-libdir     = "/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/lib/x86_64-osx-ghc-8.0.2/compiler-0.1.0.0-E9b9TutjCg66jEjnpf40d5"
+libdir     = "/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/lib/x86_64-osx-ghc-8.0.2/compiler-0.1.0.0-ADYuxZqXGJ16zK4aELOZUG"
 dynlibdir  = "/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/lib/x86_64-osx-ghc-8.0.2"
 datadir    = "/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/share/x86_64-osx-ghc-8.0.2/compiler-0.1.0.0"
 libexecdir = "/Users/colbyn/SubSystems/Toolchain/Compiler/.stack-work/install/x86_64-osx/lts-8.20/8.0.2/libexec"

@@ -14,7 +14,8 @@ extra-source-files:  README.md
 cabal-version:       >=1.10
 
 library
-  hs-source-dirs:      libs/helm-frontend
+  hs-source-dirs:      libs/prelude-hs
+                     , libs/helm-frontend
                      , libs/helm-backend
                      , libs/rust
                      , libs/metal
@@ -22,7 +23,6 @@ library
                      , dev
 
   build-depends:       base >=4.2 && <5
-                     , prelude-hs
   
                      , aeson >= 0.11
                      , aeson-pretty < 0.8

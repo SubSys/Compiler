@@ -175,13 +175,6 @@
   (major1) == 2 && (major2) <  2 || \
   (major1) == 2 && (major2) == 2 && (minor) <= 1)
 
-/* package prelude-hs-0.1.0.0 */
-#define VERSION_prelude_hs "0.1.0.0"
-#define MIN_VERSION_prelude_hs(major1,major2,minor) (\
-  (major1) <  0 || \
-  (major1) == 0 && (major2) <  1 || \
-  (major1) == 0 && (major2) == 1 && (minor) <= 0)
-
 /* package pretty-1.1.3.3 */
 #define VERSION_pretty "1.1.3.3"
 #define MIN_VERSION_pretty(major1,major2,minor) (\
@@ -364,7 +357,7 @@
   (major1) == 0 && (major2) <  29 || \
   (major1) == 0 && (major2) == 29 && (minor) <= 2)
 
-#define CURRENT_COMPONENT_ID "compiler-0.1.0.0-E9b9TutjCg66jEjnpf40d5"
+#define CURRENT_COMPONENT_ID "compiler-0.1.0.0-ADYuxZqXGJ16zK4aELOZUG"
 
-#define CURRENT_PACKAGE_KEY "compiler-0.1.0.0-E9b9TutjCg66jEjnpf40d5"
+#define CURRENT_PACKAGE_KEY "compiler-0.1.0.0-ADYuxZqXGJ16zK4aELOZUG"
 
