@@ -23,7 +23,7 @@ The syntax, and semantics of Helm are supposed to mimic the Elm language. Althou
     Sudo.Helm.Native.plusInt left right
 ```
 
-I’m considering, allowing such functionality in user code… Although perhaps with some rules, to prevent such functions as:
+I’m considering allowing such functionality in user code… Although perhaps with some rules, to prevent such functions as:
 
 ```
 (+) : Float -> Int -> Float
