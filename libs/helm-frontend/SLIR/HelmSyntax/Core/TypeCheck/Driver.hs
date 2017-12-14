@@ -57,7 +57,7 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as R
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System                 as Sys
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.TypeSystem             as TS
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Constraints     as Con
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Scope           as Scope
 
@@ -67,6 +67,7 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Syntax.Decl as Decl
 
 -- ~ Init Stuff
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Init.Unions as Union
+import qualified SLIR.HelmSyntax.Core.TypeCheck.Init.Overloads as Overloads
 
 -- ~ Finish
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Resolve as Resolve
@@ -90,12 +91,16 @@ typeCheck input = do
 
 typeCheck' ::  Payload.Module -> Either Text Payload.Module
 typeCheck' payload =
-    let -- Initial Data
-        env = initialEnv $ Payload.getUnions payload
+    let 
         fns = Payload.getFunctions payload
         
+        -- Initial Data
+        env = initialEnv $ Payload.getUnions payload
+        overloads = Overloads.initOverloads  fns
+        
+        
         -- Finish
-        result = Resolve.resolveDecls Decl.inferDecl env fns
+        result = Resolve.resolveDecls Decl.inferDecl (env, overloads) fns
         
     in
         case result of

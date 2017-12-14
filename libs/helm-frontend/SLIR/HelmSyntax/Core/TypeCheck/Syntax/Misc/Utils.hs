@@ -51,7 +51,7 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as R
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System                 as Sys
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.TypeSystem             as TS
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Constraints     as Con
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Scope           as Scope
 
@@ -69,7 +69,7 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Syntax.Base.Values as V
 
 inferList :: (a -> Sys.Syntax a) -> [a] -> Sys.State ([a], [T.Type], Env.Env)
 inferList f []     = do
-    env <- M.ask
+    env <- Sys.getEnv
     
     return ([], [], env)
 

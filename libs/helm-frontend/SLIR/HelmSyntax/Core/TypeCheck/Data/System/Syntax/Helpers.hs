@@ -52,10 +52,9 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as Con
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Env                    as Env
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as Report
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System                 as Sys
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.TypeSystem             as TS
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
 -- *
 
 

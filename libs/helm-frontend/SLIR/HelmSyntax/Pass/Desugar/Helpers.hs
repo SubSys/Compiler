@@ -56,9 +56,6 @@ import qualified SLIR.HelmSyntax.AST.Data.TermLevel.Patterns    as P
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
-
--- ~~ ...
-import qualified SLIR.HelmSyntax.AST.Data.Base.Ident.Advance as SudoID
 -- *
 
 

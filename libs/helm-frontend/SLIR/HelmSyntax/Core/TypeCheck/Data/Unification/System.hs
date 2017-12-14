@@ -44,16 +44,24 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 --- Local
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as Report
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as Con
+import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 -- *
 
+
+
+-- | Constraint solver monad
+type Solve a = M.ExceptT Report.TypeError (M.State Counter) a
 
 
 
 type Unifier = (Sub.Subst, [Con.Constraint])
 
--- | Constraint solver monad
-type Solve a = M.ExceptT Report.TypeError M.Identity a
+
+newtype Counter = Counter Int
+
+
+initCounter :: Counter
+initCounter = Counter 0
 
 

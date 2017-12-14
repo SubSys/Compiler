@@ -1,6 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module Framework.Render.Display (
       packDoc
+    , packDoc'
     , packDebugDoc
 ) where
 
@@ -27,5 +28,14 @@ packDebugDoc doc =
     P.displayTStrict toSimpleDoc
     where
         toSimpleDoc = P.renderPretty 0.4 400 (R.debug doc)
+
+
+
+packDoc' :: P.Doc -> Text
+packDoc' doc =
+    P.displayTStrict toSimpleDoc
+    where
+        toSimpleDoc = P.renderPretty 0.4 400 doc
+
 
 

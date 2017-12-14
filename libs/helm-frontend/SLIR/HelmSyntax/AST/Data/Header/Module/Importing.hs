@@ -39,7 +39,7 @@ pattern Importing importItems = IR.ModuleImporting importItems
 -- e.g.
 --     * import Sample.One as One
 --     * import Sample.One
-pattern Qualified :: IR.Namespace -> Maybe (IR.Big Text) -> IR.ImportDecl
+pattern Qualified :: IR.Namespace -> Maybe IR.Big -> IR.ImportDecl
 pattern Qualified namespace optAsName = IR.ImportQualified namespace optAsName
 
 

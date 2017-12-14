@@ -46,6 +46,7 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as Con
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Env                    as Env
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as Report
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
 -- *
 
 
@@ -60,7 +61,9 @@ newtype Counter = Counter Int
     deriving (Show)
 
 
-type State a = M.RWST Env.Env [Con.Constraint] Counter (M.Except Report.TypeError) a
+type Overloaded = Map.Map CID.Ident [T.Scheme]
+
+type State a = M.RWST (Env.Env, Overloaded) [Con.Constraint] Counter (M.Except Report.TypeError) a
 
 
 
@@ -105,14 +108,14 @@ incCounter = do
 
 
 -- | Run the inference monad
-runState :: Env.Env
+runState :: (Env.Env, Overloaded)
          -> State a
          -> Either Report.TypeError (a, [Con.Constraint])
 runState env m = M.runExcept $ M.evalRWST m env initCounter
 
 
 
-runInfer :: Env.Env
+runInfer :: (Env.Env, Overloaded)
          -> State (a, T.Type, Env.Env)
          -> Either Report.TypeError (a, T.Type, Env.Env, [Con.Constraint])
 runInfer env m =
@@ -123,9 +126,19 @@ runInfer env m =
 
 
 
+-- *
+-- | Misc. State Helpers
+-- *
 
 
+getEnv :: State Env.Env
+getEnv =
+    fst <$> M.ask
 
+
+getOverloads :: State Overloaded
+getOverloads =
+    snd <$> M.ask
 
 
 

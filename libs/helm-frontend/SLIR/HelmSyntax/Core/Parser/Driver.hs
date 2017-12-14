@@ -1,6 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module SLIR.HelmSyntax.Core.Parser.Driver (
-    parser
+      parser
+    , runHeaderParser
 ) where
 
 
@@ -77,6 +78,19 @@ parser source =
                 return $ Right payload
 
 
+runHeaderParser :: IO String -> IO (Either ErrorMessage Payload.ModuleHeader)
+runHeaderParser source =
+    do
+        result <- runParser parseHeader "" <$> source
+    
+        case result of
+            Left err ->
+                return $ Left $ Text.pack (parseErrorPretty err)
+            Right payload ->
+                return $ Right payload
+
+
+
 -- | Root Parser
 --
 parseModule :: Parser Payload.Module
@@ -89,4 +103,8 @@ parseModule = do
         , Payload.program = program
         }
 
+
+parseHeader :: Parser Payload.ModuleHeader
+parseHeader =
+    Header.parseHeader
 

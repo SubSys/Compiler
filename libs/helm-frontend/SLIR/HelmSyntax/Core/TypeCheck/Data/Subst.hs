@@ -32,6 +32,7 @@ import qualified Data.Foldable as Fold
 import qualified Data.Monoid   as Monoid
 
 import qualified Data.Generics.Uniplate.Data as Uni
+import qualified Text.Show.Prettyprint as PP
 
 
 --- Local Deps
@@ -55,15 +56,29 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as Con
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as Report
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Env                    as Env
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
+
+-- ~ Subst
 -- *
 
 
 
 
-newtype Subst = Subst (Map.Map CID.Ident T.Type)
+newtype Subst  = Subst (Map.Map CID.Ident T.Type)
     deriving (Eq, Ord, Show, Monoid.Monoid)
 
+
+
+-- *
+-- | Type Utils
+-- *
+
+
+
+
+-- *
+-- | Substitutable
+-- *
 
 class Substitutable a where
     apply :: Subst -> a -> a
@@ -107,8 +122,8 @@ instance Substitutable Env.Env where
 --
 compose :: Subst -> Subst -> Subst
 compose (Subst s1) (Subst s2) =
-
-    Subst $ Map.map (apply (Subst s1)) s2 `Map.union` s1
+    Subst
+        $ Map.map (apply (Subst s1)) s2 `Map.union` s1
 
 
 -- *
@@ -130,15 +145,49 @@ emptySubst = Monoid.mempty
 
 
 applyTypeSubst :: Subst -> T.Type -> T.Type
-applyTypeSubst (Subst s) =
-    Uni.transform f
+applyTypeSubst (Subst s) ty =
+    ty  |> Uni.transform f
+        |> Uni.transform cleanup
+
     where
+        f (T.Superposed var@(T.Var x m) ts) = 
+            let name = CID.ident x
+                var' = Map.findWithDefault var name s
+            in
+                case var' of
+                    T.Var{} ->
+                        T.Superposed var' ts
+                    _ ->
+                        error $ "How did this happen?\n" ++ PP.prettyShow var'
+        
+        f (T.Superposed var ts) = 
+            var
+
         f var@(T.Var x m) = 
             let name = CID.ident x
                 t'   = Map.findWithDefault var name s
             in
                 t'
         f x = x
+        
+        
+        -- NOTE: Tmp hack...
+        -- * E.g. `<a : Bool/Bool>` = Bool
+        -- ** ^ (This should be resolved as a constraint)
+        -- ** I.e. emit `<Bool : Bool/Bool>` = Bool
+        --    maybe in `SLIR.HelmSyntax.Core.TypeCheck.Data.System.Constraints`?
+        --    Then be simplified, in `SLIR.HelmSyntax.Core.TypeCheck.Data.Unification`, or simmular?
+        -- * Although perhaps this is the best spot for such transformations...
+
+        cleanup :: T.Type -> T.Type
+        cleanup node@(T.Superposed _ (x:xs)) =
+            if List.all (== x) xs then
+                x
+            else
+                node
+        
+        cleanup x = x
+        
 
 queryTypeVars :: T.Type -> Set.Set CID.Ident
 queryTypeVars ty =
@@ -153,10 +202,16 @@ applySchemeSubst (Subst s) (T.Forall as t) =
         s' = Subst $ Fold.foldr Map.delete s $ CID.idents as
 
 
+
 querySchemeVars :: T.Scheme -> Set.Set CID.Ident
 querySchemeVars (T.Forall as t) =
     let as' = CID.idents as
     in
         ftv t `Set.difference` Set.fromList as'
+
+
+
+
+
 
 

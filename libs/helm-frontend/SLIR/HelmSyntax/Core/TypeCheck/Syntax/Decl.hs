@@ -52,7 +52,7 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as R
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System                 as Sys
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.TypeSystem             as TS
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Constraints     as Con
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Scope           as Scope
 
@@ -77,9 +77,8 @@ inferDecl :: Decl.Function -> Sys.Syntax Decl.Function
 inferDecl fn@(ifSudoFFI -> True)  = ignoreDecl fn
 inferDecl fn@(isRec -> True)      = inferRecDecl fn
 
-
 inferDecl (Decl.FnDecl name args expr sig meta) = do
-    initialEnv <- M.ask
+    initialEnv <- Sys.getEnv
     (tv, scheme) <- TS.freshTSPair
     -- *
     
@@ -98,12 +97,21 @@ inferDecl (Decl.FnDecl name args expr sig meta) = do
     let newEnv = Env.extend initialEnv (CID.ident name, scheme)
     -- *
     
-    binder (Decl.FnDecl name args' expr' sig meta) tv newEnv
+    
+    
+    -- *
+    overloadFlag <- Scope.isOverloaded name
+    case overloadFlag of
+        Just{} ->
+            enter (Decl.FnDecl name args' expr' sig meta) tv
+        
+        Nothing ->
+            binder (Decl.FnDecl name args' expr' sig meta) tv newEnv
 
 
 
 inferDecl (Decl.OpDecl sym args expr sig meta) = do
-    initialEnv <- M.ask
+    initialEnv <- Sys.getEnv
     (tv, scheme) <- TS.freshTSPair
     
     -- * Infer Expr
@@ -121,7 +129,14 @@ inferDecl (Decl.OpDecl sym args expr sig meta) = do
     let newEnv = Env.extend initialEnv (CID.ident sym, scheme)
     -- *
     
-    binder (Decl.OpDecl sym args' expr' sig meta) tv newEnv
+    -- *
+    overloadFlag <- Scope.isOverloaded sym
+    case overloadFlag of
+        Just{}  ->
+            enter  (Decl.OpDecl sym args' expr' sig meta) tv
+
+        Nothing ->
+            binder (Decl.OpDecl sym args' expr' sig meta) tv newEnv
 
 
 
@@ -152,7 +167,7 @@ isRec (Decl.OpDecl sym _ body _ _) =
 
 inferRecDecl :: Decl.Function -> Sys.Syntax Decl.Function
 inferRecDecl (Decl.FnDecl name args expr sig meta) = do
-    initialEnv <- M.ask
+    initialEnv <- Sys.getEnv
     -- *
     
     -- *
@@ -186,8 +201,16 @@ inferRecDecl (Decl.FnDecl name args expr sig meta) = do
     let newEnv = Env.extend initialEnv (CID.ident name, scheme)
     -- *
     
+    
     -- *
-    binder (Decl.FnDecl name args expr' sig meta) returnType newEnv
+    overloadFlag <- Scope.isOverloaded name
+    case overloadFlag of
+        Just{} ->
+            error
+                "TODO - Not yet supported: inferring **recursive overloaded** function declarations."
+        
+        Nothing ->
+            binder (Decl.FnDecl name args expr' sig meta) returnType newEnv
 
 
 
@@ -202,7 +225,7 @@ inferArgs = inferList inferArg
 
 inferArg :: ID.Low -> Sys.Syntax ID.Low
 inferArg name = do
-    env <- M.ask
+    env <- Sys.getEnv
     (tv, scheme) <- TS.freshTSPair
 
     let env' = Env.extend env (CID.ident name, scheme)

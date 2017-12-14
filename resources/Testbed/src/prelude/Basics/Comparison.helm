@@ -1,0 +1,16 @@
+module Basics.Comparison exposing (..)
+
+(>)
+(<)
+(<=)
+(>=)
+max
+min
+
+type Order
+    = LT
+    | EQ
+    | GT
+
+compare : comparable -> comparable -> Order
+

@@ -1,10 +1,53 @@
-# Compiler
+# The Helm Compiler
+> Although eventually I would like to support multiple languages, with some conveniences for interoperability.
 
 
-* Initial compiler infrastructure for H(Elm) -> Rust -> LLVM -> Wasm.
+
+* Initial compiler infrastructure for Helm -> Rust -> LLVM -> Wasm.
 * Very messy & still figuring things out!
 
-* Eventually I would like this to evolve into a CPU/GPU compiler toolchain, using Elm’s api conventions/patterns for the CPU variant.
+* Eventually I would like this to evolve into a CPU/GPU compiler toolchain, using Elm’s api conventions/patterns for the Helm CPU variant.
+
+
+## NOTE: Recent update:
+
+The syntax, and semantics of Helm are supposed to mimic the Elm language. Although I’ve updated type inference with a notion of function overloading. E.g:
+```
+(+) : Float -> Float -> Float
+(+) left right =
+    Sudo.Helm.Native.plusFloat left right
+
+
+(+) : Int -> Int -> Int
+(+) left right =
+    Sudo.Helm.Native.plusInt left right
+```
+
+I’m considering, allowing such functionality in user code… Although perhaps with some rules, to prevent such functions as:
+
+```
+(+) : Float -> Int -> Float
+(+) left right =
+    Sudo.Helm.Native.plus left right
+```
+
+This may be, simply:
+1.  All overloaded functions must have a type signature (already required for obvious reasons).
+    - E.g. `(+) : Int -> Int -> Int`
+2. All overloaded functions must be of the same type *(although kinda ambiguous, not sure how else to describe the pattern)
+    - E.g.
+        - `(+) : Float -> Float -> Float`
+        - `(+) : Int -> Int -> Int`
+3. Unless, in the context of #2
+    1. All overloaded occurrences of an identifier reduce to the same type.
+        - E.g.
+            - `(==) : Int -> Int -> Bool`
+            - `(==) : Float -> Float -> Bool`
+
+
+Lastly, regarding function overloading, perhaps this can include some interesting error/feedback reporting facilities (something to explore one day)…
+
+
 
 ## Currently takes input like this:
 ```
@@ -282,10 +325,8 @@ data ScalarType
 ```
 
 # Not yet supported (that immediately comes to mind)
-- Some hacky notion of type classes/overloading for special functions
 - Records (at some point in the compilation pipeline)
 - Type aliases
-- …
 - Friendly, or helpful error messages. I.e. Type inferences errors will currently say something like ‘unification fail’, or whatnot…
 - Whatever feature doesn’t compile ;)
 - Module System: At this stage, just to keep things simple while figuring out/implementing core features, comping single files for now…

@@ -28,8 +28,6 @@ import qualified Framework.IR.Standard.Data as StdIR
 
 
 --- Local
-import SLIR.HelmSyntax.Render.Instances ()
-
 -- ~ HelmSyntax IR
 import qualified SLIR.HelmSyntax.Data.Payload as Payload
 
@@ -49,10 +47,9 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
--- ~~ Header
-import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Base      as Header
-import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Exporting as Export
-import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Importing as Import
+-- ~ Renderers
+import qualified SLIR.HelmSyntax.Render.Syntax.TopLevel.Functions as Decl
+import qualified SLIR.HelmSyntax.Render.Syntax.TopLevel.Unions    as Decl
 -- *
 
 
@@ -60,13 +57,13 @@ import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Importing as Import
 
 renderFunctions :: [Decl.Function] -> Text
 renderFunctions xs =
-    map Display.packDoc xs
+    map (Display.packDoc' . Decl.renderFunction) xs
         |> Text.unlines
 
 
 renderUnions :: [Decl.Union] -> Text
 renderUnions xs =
-    map Display.packDoc xs
+    map (Display.packDoc' . Decl.renderUnion) xs
         |> Text.unlines
 
 

@@ -29,6 +29,8 @@ module SLIR.HelmSyntax.AST.Data.Base.Types (
     , pattern Int'
     , pattern Float'
     , pattern Bool'
+    
+    , pattern Superposed
 ) where
 
 
@@ -45,7 +47,7 @@ import SLIR.HelmSyntax.Internal.AST.Instances.Essential ()
 
 
 
-pattern Record :: [(IR.Low Text, IR.Type)] -> Maybe IR.Meta -> IR.Type
+pattern Record :: [(IR.Low, IR.Type)] -> Maybe IR.Meta -> IR.Type
 pattern Record fields metaOpt = IR.RecordType fields metaOpt
 
 pattern Tuple :: [IR.Type] -> Maybe IR.Meta -> IR.Type
@@ -54,10 +56,10 @@ pattern Tuple ts metaOpt = IR.TupleType ts metaOpt
 pattern List :: IR.Type -> Maybe IR.Meta -> IR.Type
 pattern List ty metaOpt = IR.ListType ty metaOpt
 
-pattern Union :: IR.Big Text -> [IR.Type] -> Maybe IR.Meta -> IR.Type
+pattern Union :: IR.Big -> [IR.Type] -> Maybe IR.Meta -> IR.Type
 pattern Union name args metaOpt = IR.UnionType name args metaOpt
 
-pattern Var :: IR.Low Text -> Maybe IR.Meta -> IR.Type
+pattern Var :: IR.Low -> Maybe IR.Meta -> IR.Type
 pattern Var id' metaOpt = IR.VarType id' metaOpt
 
 pattern Arr :: IR.Type -> IR.Type -> Maybe IR.Meta -> IR.Type
@@ -93,7 +95,7 @@ pattern Bool metaOpt = IR.LiteralType (IR.BoolType metaOpt)
 -- | Misc.
 -- *
 
-pattern Record' :: [(IR.Low Text, IR.Type)] -> IR.Type
+pattern Record' :: [(IR.Low, IR.Type)] -> IR.Type
 pattern Record' fields = IR.RecordType fields Nothing
 
 pattern Tuple' :: [IR.Type] -> IR.Type
@@ -102,10 +104,10 @@ pattern Tuple' ts = IR.TupleType ts Nothing
 pattern List' :: IR.Type  -> IR.Type
 pattern List' ty = IR.ListType ty Nothing
 
-pattern Union' :: IR.Big Text -> [IR.Type] -> IR.Type
+pattern Union' :: IR.Big -> [IR.Type] -> IR.Type
 pattern Union' name args = IR.UnionType name args Nothing
 
-pattern Var' :: IR.Low Text -> IR.Type
+pattern Var' :: IR.Low -> IR.Type
 pattern Var' id' = IR.VarType id' Nothing
 
 pattern Arr' :: IR.Type -> IR.Type -> IR.Type
@@ -129,3 +131,27 @@ pattern Float' = IR.LiteralType (IR.FloatType Nothing)
 
 pattern Bool' :: IR.Type
 pattern Bool' = IR.LiteralType (IR.BoolType Nothing)
+
+
+
+-- *
+-- | # Type Schemes
+-- *
+
+-- pattern Forall :: [IR.Low] -> T.Type -> T.Scheme
+-- pattern Forall as t = IR.Forall
+
+
+
+-- *
+-- | Etc
+-- *
+
+
+pattern Superposed :: IR.Type -> [IR.Type] -> IR.Type
+pattern Superposed con ts = IR.Superposed con ts
+
+
+
+
+

@@ -23,6 +23,10 @@ import qualified Data.Foldable as Fold
 import qualified Data.Monoid   as Monoid
 
 import qualified Data.Generics.Uniplate.Data as Uni
+import qualified Text.Show.Prettyprint as PP
+
+import qualified Data.Either as Either
+import qualified Data.String as String
 
 
 --- Local Deps
@@ -45,12 +49,15 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 --- Local
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as Report
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as Con
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.System     as Sys
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification            as Unify
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
+
+import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 -- *
+
+
 
 
 
@@ -60,7 +67,7 @@ runSolve cs =
     let
         st = (Sub.emptySubst, cs)
     in
-        M.runIdentity $ M.runExceptT $ solver st
+        fst $ M.runState (M.runExceptT $ solver st) Sys.initCounter
 
 
 

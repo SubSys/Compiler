@@ -49,6 +49,7 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 
 type Constraint = (T.Type, T.Type)
+    -- deriving (Eq, Ord, Show)
 
 
 

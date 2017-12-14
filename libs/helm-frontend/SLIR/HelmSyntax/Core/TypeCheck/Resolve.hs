@@ -54,7 +54,7 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as R
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System                 as Sys
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.TypeSystem             as TS
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Scope           as Scope
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Solver     as Solver
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as Con
@@ -73,10 +73,10 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as C
 
 
 resolveDecls :: (Decl.Function -> Sys.Syntax Decl.Function)
-             -> Env.Env
+             -> (Env.Env, Sys.Overloaded)
              -> [Decl.Function]
              -> Either Report.TypeError ([Decl.Function], Env.Env, [Con.Constraint])
-resolveDecls f env []       = Right ([], env, [])
+resolveDecls f env []       = Right ([], fst env, [])
 resolveDecls f env (fn:fns) =
     case resolveDecl f env fn of
         Left err -> Left err
@@ -84,13 +84,15 @@ resolveDecls f env (fn:fns) =
             finish env' cs fn' fns
     
     where
+        overloads = snd env
+        
         finish :: Env.Env
                -> [Con.Constraint]
                -> Decl.Function
                -> [Decl.Function]
                -> Either Report.TypeError ([Decl.Function], Env.Env, [Con.Constraint])
         finish env cs fn fns =
-            case resolveDecls f env fns of
+            case resolveDecls f (env,  overloads) fns of
                 Left err -> Left err
                 Right (rest, env', cs') ->
                     Right (fn : rest, env', cs ++ cs')
@@ -98,7 +100,7 @@ resolveDecls f env (fn:fns) =
 
 
 resolveDecl :: (Decl.Function -> Sys.Syntax Decl.Function)
-            -> Env.Env
+            -> (Env.Env, Sys.Overloaded)
             -> Decl.Function
             -> Either Report.TypeError (Decl.Function, Env.Env, [Con.Constraint])
 resolveDecl f env0 fn =
@@ -109,6 +111,10 @@ resolveDecl f env0 fn =
                 Left err -> Left err
                 Right subst ->
                     Right $ solution fn' ty env1 subst cs
+    
+    where
+        resEnv e =
+            (e, snd env0)
 
 
 

@@ -44,7 +44,7 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 --- Local
 import SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as Con
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident as CID
 -- *
 
 
@@ -59,7 +59,9 @@ data TypeError
     | UnboundVariable Text
     | UnboundConstructor Text
     | Ambigious [Constraint]
+    | AmbigiousOverloadedType T.Type [T.Type]
     | UnificationMismatch [T.Type] [T.Type]
+    | OverloadedTypeFail T.Type [T.Type]
     deriving (Show)
 
 

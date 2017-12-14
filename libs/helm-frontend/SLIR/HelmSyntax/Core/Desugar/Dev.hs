@@ -44,10 +44,11 @@ import qualified SLIR.HelmSyntax.Data.Payload as Payload
 --- Local Deps
 -- ~ HelmSyntax AST
 -- ~~ Base
-import qualified SLIR.HelmSyntax.AST.Data.Base.Etc    as Etc
-import qualified SLIR.HelmSyntax.AST.Data.Base.Ident  as ID
-import qualified SLIR.HelmSyntax.AST.Data.Base.Types  as T
-import qualified SLIR.HelmSyntax.AST.Data.Base.Values as V
+import qualified SLIR.HelmSyntax.AST.Data.Base.Etc      as Etc
+import qualified SLIR.HelmSyntax.AST.Data.Base.Ident    as ID
+import qualified SLIR.HelmSyntax.AST.Data.Base.Types    as T
+import qualified SLIR.HelmSyntax.AST.Data.Base.Values   as V
+import qualified SLIR.HelmSyntax.AST.Data.Base.Metadata as Meta
 
 -- ~~ TermLevel
 import qualified SLIR.HelmSyntax.AST.Data.TermLevel.Expressions as E
@@ -57,10 +58,6 @@ import qualified SLIR.HelmSyntax.AST.Data.TermLevel.Patterns    as P
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
-
--- ~~ ...
-import qualified SLIR.HelmSyntax.AST.Data.Base.Ident.Advance as SudoID
-import qualified SLIR.HelmSyntax.AST.Data.Base.Metadata as Meta
 -- *
 
 

@@ -61,9 +61,6 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
--- ~~ ...
-import qualified SLIR.HelmSyntax.AST.Data.Base.Ident.Advance as SudoID
-
 --- Local
 import qualified SLIR.HelmSyntax.Pass.Desugar.Helpers as Helper
 -- *
@@ -105,7 +102,7 @@ desugarBinOps fns =
         |> deSugarRefs
     
     where
-        symBinders = [txt | (SudoID.Sym (SudoID.Binder txt) _ _) <- Uni.universeBi fns]
+        symBinders = [txt | (ID.Sym txt _ _) <- Uni.universeBi fns]
         
         pack i txt =
             let idx = Text.pack $ show i

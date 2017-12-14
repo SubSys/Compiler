@@ -1,5 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternGuards #-}
 module SLIR.HelmSyntax.Core.TypeCheck.Sudo.FFI.Helpers (
       ifSudoFFI
     , ignoreDecl
@@ -52,7 +53,7 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as R
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System                 as Sys
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.TypeSystem             as TS
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Constraints     as Con
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Scope           as Scope
 
@@ -92,7 +93,7 @@ checkExpr _ = False
 ignoreDecl :: Decl.Function -> Sys.Syntax Decl.Function
 
 ignoreDecl fn@(Decl.OpDecl name args expr (Just (Etc.Unresolved ty _)) meta) = do
-    initialEnv <- M.ask
+    initialEnv <- Sys.getEnv
     -- *
 
     -- *
@@ -103,12 +104,20 @@ ignoreDecl fn@(Decl.OpDecl name args expr (Just (Etc.Unresolved ty _)) meta) = d
     -- *
     let newEnv = Env.extend initialEnv (CID.ident name, scheme)
     -- *
-
-    binder fn t newEnv
+    
+    
+    -- *
+    overloadFlag <- Scope.isOverloaded name
+    case overloadFlag of
+        Just{} ->
+            enter fn t
+        
+        Nothing ->
+            binder fn t newEnv
 
 
 ignoreDecl fn@(Decl.FnDecl name args expr (Just (Etc.Unresolved ty _)) meta) = do
-    initialEnv <- M.ask
+    initialEnv <- Sys.getEnv
     -- *
 
     -- *
@@ -120,7 +129,13 @@ ignoreDecl fn@(Decl.FnDecl name args expr (Just (Etc.Unresolved ty _)) meta) = d
     let newEnv = Env.extend initialEnv (CID.ident name, scheme)
     -- *
 
-    binder fn t newEnv
+    -- *
+    overloadFlag <- Scope.isOverloaded name
+    case overloadFlag of
+        Just{} ->
+            enter fn t
+        Nothing ->
+            binder fn t newEnv
 
 
 

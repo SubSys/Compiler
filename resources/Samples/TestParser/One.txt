@@ -3,6 +3,7 @@ module Main exposing (..)
 import Sudo.Helm.Native
 
 
+
 type Either a b
     = Left a
     | Right b
@@ -16,86 +17,52 @@ type User = Anonymous | Named String
 type Visibility = All | Active | Completed
 
 
+(+) : Float -> Float -> Float
+(+) left right =
+    Sudo.Helm.Native.plus left right
+
+
 (+) : Int -> Int -> Int
 (+) left right =
     Sudo.Helm.Native.plus left right
 
+
 (-) : Int -> Int -> Int
 (-) left right =
-    Sudo.Helm.Native.sub left right
+    Sudo.Helm.Native.plus left right
+
 
 (==) : Int -> Int -> Bool
 (==) left right =
-    Sudo.Helm.Native.isEq left right
+    Sudo.Helm.Native.plus left right
 
 
-alpha x =
-    case x of
-        Nothing -> 1
-        Just 1  -> 0
-        Just x  -> x
+(==) : Float -> Float -> Bool
+(==) left right =
+    Sudo.Helm.Native.plus left right
 
 
-test1 =
-    if True then
-        Left "Lorem"
-    else
-        Right "Lorem"
+alpha x y =
+    x + y
 
-id x = x
+beta x =
+    alpha x 1
 
-delta1 z =
-    let
-        id x y = x
-        
-        x : Int
-        x = id (0 + z) 0
-        
-        y : Int
-        y = 1
-    in
-        x + y + z
-
-delta2 z =
-    let
-        id x y = x
-        
-        x : Int
-        x = id (0 + z) 0
-        
-        y : Int
-        y = 1
-    in
-        x + y
-
-
-x1 = True
-x2 = True
-x3 = True
-x4 = True
 
 gamma =
-    if True then
-        1
-    else if False then
-        2
-    else if False then
-        3
-    else
-        4
+    alpha 1
 
 
-omega x y z =
-    x y z
 
-phi f x =
-    f x
+delta =
+    alpha 1.0 2.0
 
 
-test = phi id
+phi x y =
+    x == y
 
-test2 = test 0
 
-
+test =
+    phi 0
 
 

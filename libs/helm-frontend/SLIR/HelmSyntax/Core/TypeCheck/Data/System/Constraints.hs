@@ -51,11 +51,10 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as Con
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Env                    as Env
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Report                 as Report
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Subst                  as Sub
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System                 as Sys
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.TypeSystem             as TS
 import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.System.Scope           as Scope
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident        as CID
 -- *
 
 
@@ -64,7 +63,6 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident        as C
 --
 unify :: T.Type -> T.Type -> Sys.Constrain
 unify t1 t2 = M.tell [(t1, t2)]
-
 
 
 app :: T.Type -> T.Type -> Sys.Constrain' T.Type
@@ -77,20 +75,13 @@ app t1 t2 = do
 
 
 binOpApp :: ID.Sym -> T.Type -> T.Type -> Sys.Constrain' T.Type
-binOpApp sym et1 et2 = do
-    tv <- TS.freshType
-    -- *
-    
-    -- *
-    let t1 = et1 `T.Arr'` (et2 `T.Arr'` tv)
-    t2 <- Scope.lookupSym sym
-    -- *
-    
-    -- *
-    unify t1 t2
-    -- *
-    
-    return tv
+binOpApp sym t1 t2 = do
+    res <- Scope.isOverloaded sym
+    case res of
+        Nothing -> binOpApp' sym t1 t2
+        Just ts -> 
+            overloadedBinOp ts sym t1 t2
+
 
 
 
@@ -108,6 +99,52 @@ unifySignature t (Just (Etc.Unresolved t' meta)) =
 
 
 
+-- *
+-- | Misc. Internal Helpers
+-- *
+
+-- | Default Constraints (not overloaded).
+--
+binOpApp' :: ID.Sym -> T.Type -> T.Type -> Sys.Constrain' T.Type
+binOpApp' sym et1 et2 = do
+    tv <- TS.freshType
+    -- *
+
+    -- *
+    let t1 = et1 `T.Arr'` (et2 `T.Arr'` tv)
+    t2 <- Scope.lookupSym sym
+    -- *
+
+    -- *
+    unify t1 t2
+    -- *
+
+    return tv
+
+
+-- Should I use overloaded or superposed?
+
+-- I.e. overloaded [t1 : ts]
+
+overloadedBinOp :: [T.Type] -> ID.Sym -> T.Type -> T.Type -> Sys.Constrain' T.Type
+overloadedBinOp ts sym et1 et2 = do
+    tv <- TS.freshType
+    
+    superTv <- TS.freshType
+    -- *
+
+    -- *
+    let t1 = et1 `T.Arr'` (et2 `T.Arr'` tv)
+        t2 = T.Superposed superTv ts
+    -- *
+
+    -- *
+    unify t1 t2
+    -- *
+    
+    
+    -- *
+    return tv
 
 
 

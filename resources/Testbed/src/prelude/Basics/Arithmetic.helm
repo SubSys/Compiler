@@ -1,0 +1,56 @@
+module Basics.Arithmetic exposing (..)
+
+
+import Sudo.Helm.Native
+
+(+) : Int -> Int -> Int
+(+) left right =
+    Sudo.Helm.Native.add left right
+
+
+(+) : Float -> Float -> Float
+(+) left right =
+    Sudo.Helm.Native.add left right
+
+
+(-) : Int -> Int -> Int
+(-) left right =
+    Sudo.Helm.Native.sub left right
+
+
+(-) : Float -> Float -> Float
+(-) left right =
+    Sudo.Helm.Native.sub left right
+
+
+(*) : Int -> Int -> Int
+(*) left right =
+    Sudo.Helm.Native.mul left right
+
+
+(*) : Float -> Float -> Float
+(*) left right =
+    Sudo.Helm.Native.mul left right
+
+
+(^) : Int -> Int -> Int
+(^) left right =
+    Sudo.Helm.Native.exp left right
+
+
+(^) : Float -> Float -> Float
+(^) left right =
+    Sudo.Helm.Native.exp left right
+
+
+(/) : Float -> Float -> Float
+(/) left right =
+    Sudo.Helm.Native.floatDiv left right
+
+
+(//) : Int -> Int -> Int
+(//) left right =
+    Sudo.Helm.Native.intDiv left right
+
+
+

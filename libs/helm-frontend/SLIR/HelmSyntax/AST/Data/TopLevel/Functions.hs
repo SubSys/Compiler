@@ -34,31 +34,23 @@ import SLIR.HelmSyntax.Internal.AST.Instances.Essential ()
 
 
 
-pattern FnDecl :: IR.Low Text
-               -> [IR.Low Text]
+pattern FnDecl :: IR.Low
+               -> [IR.Low]
                -> IR.Expr
                -> Maybe IR.Signature
                -> Maybe IR.Meta
                -> IR.Function
 
-pattern FnDecl name args expr optSig optMeta
-    <- IR.FnDecl (unwrapLowBinder -> name) (unwrapArgs -> args) expr optSig optMeta
-    where
-        FnDecl name args expr optSig optMeta = mkFnDecl name args expr optSig optMeta
+pattern FnDecl name args expr optSig optMeta = IR.FnDecl name args expr optSig optMeta
 
-
-pattern OpDecl :: IR.Sym Text
-               -> [IR.Low Text]
+pattern OpDecl :: IR.Sym
+               -> [IR.Low]
                -> IR.Expr
                -> Maybe IR.Signature
                -> Maybe IR.Meta
                -> IR.Function
 
-pattern OpDecl symbol args expr optSig optMeta
-    <- IR.OpDecl (unwrapSymBinder -> symbol) (unwrapArgs -> args) expr optSig optMeta
-    where
-        OpDecl symbol args expr optSig optMeta = mkOpDecl symbol args expr optSig optMeta
-
+pattern OpDecl symbol args expr optSig optMeta = IR.OpDecl symbol args expr optSig optMeta
 
 
 
@@ -70,34 +62,25 @@ pattern OpDecl symbol args expr optSig optMeta
 -- | Internal Helpers
 -- *
 
-unwrapLowBinder :: IR.Low IR.Binder -> IR.Low Text
-unwrapLowBinder (IR.Low (IR.Binder txt) ns meta) =
+unwrapLowBinder :: IR.Low -> IR.Low
+unwrapLowBinder (IR.Low txt ns meta) =
     IR.Low txt ns meta
 
-unwrapLowBinder (IR.Low (IR.BinderIndex idx) ns meta) =
-    let txt = Text.pack $ show idx
-    in
-        IR.Low (Text.cons 'λ' txt) ns meta
 
-
-unwrapSymBinder :: IR.Sym IR.Binder -> IR.Sym Text
-unwrapSymBinder (IR.Sym (IR.Binder txt) ns meta) =
+unwrapSymBinder :: IR.Sym -> IR.Sym
+unwrapSymBinder (IR.Sym txt ns meta) =
     IR.Sym txt ns meta
 
-unwrapSymBinder (IR.Sym (IR.BinderIndex idx) ns meta) =
-    let txt = Text.pack $ show idx
-    in
-        IR.Sym (Text.cons 'λ' txt) ns meta
 
 
-unwrapArgs :: [IR.Low IR.Binder] -> [IR.Low Text]
+unwrapArgs :: [IR.Low] -> [IR.Low]
 unwrapArgs =
     map unwrapLowBinder
 
 
 
-mkFnDecl :: IR.Low Text
-         -> [IR.Low Text]
+mkFnDecl :: IR.Low
+         -> [IR.Low]
          -> IR.Expr
          -> Maybe IR.Signature
          -> Maybe IR.Meta
@@ -111,8 +94,8 @@ mkFnDecl (toRefIdent -> ident) (toRefArgs -> args) =
 
 
 
-mkOpDecl :: IR.Sym Text
-         -> [IR.Low Text]
+mkOpDecl :: IR.Sym
+         -> [IR.Low]
          -> IR.Expr
          -> Maybe IR.Signature
          -> Maybe IR.Meta
@@ -122,17 +105,17 @@ mkOpDecl (toRefSymbol -> ident) (toRefArgs -> args) =
     IR.OpDecl ident args
 
 
-toRefArgs :: [IR.Low Text] -> [IR.Low IR.Binder]
+toRefArgs :: [IR.Low] -> [IR.Low]
 toRefArgs = map toRefIdent
 
-toRefIdent ::  IR.Low Text -> IR.Low IR.Binder
+toRefIdent ::  IR.Low -> IR.Low
 toRefIdent (IR.Low txt ns meta) =
-    IR.Low (IR.Binder txt) ns meta
+    IR.Low txt ns meta
 
 
-toRefSymbol :: IR.Sym Text -> IR.Sym IR.Binder
+toRefSymbol :: IR.Sym -> IR.Sym 
 toRefSymbol (IR.Sym txt ns meta) =
-    IR.Sym (IR.Binder txt) ns meta
+    IR.Sym txt ns meta
 
 
 

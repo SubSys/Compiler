@@ -42,7 +42,7 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 --- Local
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Data.Canonical.Ident as CID
+import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident as CID
 -- *
 
 

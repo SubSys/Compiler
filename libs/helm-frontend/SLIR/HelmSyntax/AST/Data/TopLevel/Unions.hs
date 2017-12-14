@@ -20,8 +20,8 @@ import SLIR.HelmSyntax.Internal.AST.Instances.Essential ()
 -- *
 
 
-pattern Union :: IR.Big Text
-              -> [IR.Low Text]
+pattern Union :: IR.Big
+              -> [IR.Low]
               -> [IR.Constructor]
               -> Maybe IR.Meta
               -> IR.Union
@@ -29,6 +29,6 @@ pattern Union :: IR.Big Text
 pattern Union name args valueConstructors optMeta = IR.Union name args valueConstructors optMeta
 
 
-pattern Constructor :: IR.Big Text -> [IR.Type] -> Maybe IR.Meta -> IR.Constructor
+pattern Constructor :: IR.Big -> [IR.Type] -> Maybe IR.Meta -> IR.Constructor
 pattern Constructor name args optMeta = IR.Constructor name args optMeta
 

@@ -20,10 +20,6 @@ import qualified Control.Monad.State.Lazy as State
 
 --- Local
 import qualified SLIR.HelmSyntax.Internal.AST as IR
-
--- ~ Instance Deps
-import SLIR.HelmSyntax.Internal.AST.Instances.StripMeta ()
-import SLIR.HelmSyntax.Internal.AST.Classes.StripMeta (StripMeta(..), stripMeta)
 -- *
 
 
@@ -270,18 +266,18 @@ instance Eq IR.Pattern where
 -- *
 
 
-instance Eq a => Eq (IR.Low a) where
+instance Eq IR.Low where
     (==) (IR.Low x1 ns1 _)
          (IR.Low x2 ns2 _) =
              (x1 == x2) && (ns1 == ns2)
 
 
-instance Eq a => Eq (IR.Sym a) where
+instance Eq IR.Sym where
     (==) (IR.Sym x1 ns1 _)
          (IR.Sym x2 ns2 _) =
              (x1 == x2) && (ns1 == ns2)
 
-instance Eq a => Eq (IR.Big a) where
+instance Eq IR.Big where
     (==) (IR.Big x1 ns1 _)
          (IR.Big x2 ns2 _) =
              (x1 == x2) && (ns1 == ns2)

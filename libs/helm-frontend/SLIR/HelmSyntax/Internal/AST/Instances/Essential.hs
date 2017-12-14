@@ -16,9 +16,9 @@ import SLIR.HelmSyntax.Internal.AST.Instances.Essential.Equality
 -- *
 
 
-deriving instance Ord a => Ord (IR.Low a)
-deriving instance Ord a => Ord (IR.Sym a)
-deriving instance Ord a => Ord (IR.Big a)
+deriving instance Ord IR.Low
+deriving instance Ord IR.Sym
+deriving instance Ord IR.Big
 
 deriving instance Ord IR.Namespace
 

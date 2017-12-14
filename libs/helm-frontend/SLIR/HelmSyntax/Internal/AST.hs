@@ -11,28 +11,6 @@ import Data.Data (Data, Typeable)
 
 
 -- *
--- | Internal Specials
--- *
-data Binder
-    = Binder Text
-    | BinderIndex Int
-    deriving (Show, Data, Typeable, Eq, Ord)
-
-
-data Ref
-    = Ref Text
-    | RefIndex Int
-    deriving (Show, Data, Typeable, Eq, Ord)
-
-
-data Index
-    = Index Int
-    | Unknown
-    deriving (Show, Data, Typeable, Eq, Ord)
-
-
-
--- *
 -- | # TopLevel
 -- *
 
@@ -42,9 +20,9 @@ data Index
 -- | ## Fixities
 -- *
 data Infix
-    = InfixL (Sym Text) OpPrecedence (Maybe Meta)
-    | InfixR (Sym Text) OpPrecedence (Maybe Meta)
-    | InfixN (Sym Text) OpPrecedence (Maybe Meta)
+    = InfixL Sym OpPrecedence (Maybe Meta)
+    | InfixR Sym OpPrecedence (Maybe Meta)
+    | InfixN Sym OpPrecedence (Maybe Meta)
     deriving (Show, Data, Typeable)
 
 
@@ -59,8 +37,8 @@ data OpPrecedence = OpPrecedence Int (Maybe Meta)
 -- | ## Functions
 -- *
 data Function
-    = FnDecl (Low Binder) [Low Binder] Expr (Maybe Signature) (Maybe Meta)
-    | OpDecl (Sym Binder) [Low Binder] Expr (Maybe Signature) (Maybe Meta)
+    = FnDecl Low [Low] Expr (Maybe Signature) (Maybe Meta)
+    | OpDecl Sym [Low] Expr (Maybe Signature) (Maybe Meta)
     deriving (Show, Data, Typeable)
 
 
@@ -70,10 +48,10 @@ data Function
 -- *
 -- | ## Unions
 -- *
-data Union = Union (Big Text) [Low Text] [Constructor] (Maybe Meta)
+data Union = Union Big [Low] [Constructor] (Maybe Meta)
     deriving (Data, Typeable, Show)
 
-data Constructor = Constructor (Big Text) [Type] (Maybe Meta)
+data Constructor = Constructor Big [Type] (Maybe Meta)
     deriving (Show, Data, Typeable)
 
 
@@ -96,15 +74,15 @@ data Constructor = Constructor (Big Text) [Type] (Maybe Meta)
 -- | ## Expressions
 -- *
 data Expr
-    = VarExpr (Low Ref) (Maybe Meta)
+    = VarExpr Low (Maybe Meta)
     | LitExpr  LiteralValue (Maybe Meta)
-    | RecordExpr [(Low Text, Expr)] (Maybe Meta)
+    | RecordExpr [(Low, Expr)] (Maybe Meta)
     | TupleExpr [Expr] (Maybe Meta)
     | ListExpr [Expr] (Maybe Meta)
     
-    | ConExpr (Big Text) (Maybe Meta)
+    | ConExpr Big (Maybe Meta)
     
-    | BinOpExpr (Sym Ref) Expr Expr (Maybe Meta)
+    | BinOpExpr Sym Expr Expr (Maybe Meta)
     
     | IfExpr [(Expr, Expr)] Expr (Maybe Meta)
     
@@ -113,14 +91,14 @@ data Expr
     | CaseExpr Expr [CaseAlt] (Maybe Meta)
     
     -- | TODO: Handle Ref(s)?
-    | RecordUpdateExpr (Low Text) [(Low Text, Expr)] (Maybe Meta)
-    | RecordAccessExpr (Low Text) (Maybe Expr) (Maybe Meta)
+    | RecordUpdateExpr Low [(Low, Expr)] (Maybe Meta)
+    | RecordAccessExpr Low (Maybe Expr) (Maybe Meta)
     
     | ParensExpr Expr (Maybe Meta)
     
     | AppExpr Expr Expr (Maybe Meta)
     
-    | AbsExpr (Low Binder) Expr (Maybe Meta)
+    | AbsExpr Low Expr (Maybe Meta)
     
     deriving (Show, Data, Typeable)
 
@@ -151,7 +129,7 @@ data CaseAlt = CaseAlt Pattern Expr (Maybe Meta)
 data Pattern
     = LitPattern  LiteralValue (Maybe Meta)
     
-    | RecordPattern [Low Text] (Maybe Meta)
+    | RecordPattern [Low] (Maybe Meta)
     
     | ListPattern [Pattern] (Maybe Meta)
     
@@ -170,8 +148,8 @@ data Pattern
     
     | TuplePattern [Pattern] (Maybe Meta)
     
-    | ConPattern (Big Text) [Pattern] (Maybe Meta)
-    | VarPattern (Low Text) (Maybe Meta)
+    | ConPattern Big [Pattern] (Maybe Meta)
+    | VarPattern Low (Maybe Meta)
     | WildcardPattern (Maybe Meta)
     deriving (Show, Data, Typeable)
 
@@ -195,13 +173,13 @@ data Pattern
 -- *
 
 
-data Sym a = Sym a (Maybe Namespace)  (Maybe Meta)
+data Sym = Sym Text (Maybe Namespace)  (Maybe Meta)
     deriving (Show, Data, Typeable)
 
-data Low a = Low a (Maybe Namespace)  (Maybe Meta)
+data Low = Low Text (Maybe Namespace)  (Maybe Meta)
     deriving (Show, Data, Typeable)
 
-data Big a = Big a (Maybe Namespace)  (Maybe Meta)
+data Big = Big Text (Maybe Namespace)  (Maybe Meta)
     deriving (Show, Data, Typeable)
 
 
@@ -221,14 +199,16 @@ newtype Namespace = Namespace [Text]
 -- *
 data Type
     = LiteralType LiteralType
-    | RecordType [(Low Text, Type)] (Maybe Meta)
+    | RecordType [(Low, Type)] (Maybe Meta)
     | TupleType  [Type] (Maybe Meta)
     | ListType   Type (Maybe Meta)
 
-    | UnionType (Big Text) [Type] (Maybe Meta)
-    | VarType (Low Text) (Maybe Meta)
+    | UnionType Big [Type] (Maybe Meta)
+    | VarType Low (Maybe Meta)
     | ArrType Type Type (Maybe Meta)
     | ParensType Type (Maybe Meta)
+    
+    | Superposed Type [Type]
     deriving (Show, Data, Typeable)
 
 
@@ -246,8 +226,24 @@ data LiteralType
 -- *
 -- | ### Type Schemes
 -- *
-data Scheme = Forall [Low Text] Type
+
+-- NOTE:
+-- * `Superposed` - Sometimes abbreviated as `Super` throughout codebase.
+
+data Scheme
+    = Forall [Low] Type
     deriving (Show, Data, Typeable)
+
+
+-- data Forall = Forall [Low] Type
+--     deriving (Show, Data, Typeable)
+
+
+
+
+
+
+
 
 
 
@@ -303,7 +299,7 @@ data ImportDecl
     -- e.g.
     --     * import Sample.One as One
     --     * import Sample.One
-    = ImportQualified Namespace (Maybe (Big Text))
+    = ImportQualified Namespace (Maybe Big)
     
     -- |
     -- e.g.
