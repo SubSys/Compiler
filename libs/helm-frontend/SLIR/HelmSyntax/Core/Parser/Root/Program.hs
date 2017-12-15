@@ -1,35 +1,27 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TupleSections #-}
-module SLIR.HelmSyntax.Core.Parser.Driviver.Program (
+module SLIR.HelmSyntax.Core.Parser.Root.Program (
     parseProgram
 ) where
 
 
 -- *
 import Core
+import Core.List.Util (flatten)
 import Core.Control.Flow
-import Core.List.Util (singleton)
 
 import qualified Data.Text as Text
-import qualified Data.List as List
 import qualified Text.Megaparsec.Char.Lexer as L
-import qualified Text.Megaparsec.Char as C
 
 
 --- Frameworks
 import Framework.Parser
 
 
---- Local
-import qualified SLIR.HelmSyntax.Core.Parser.Base.Ident         as ID
-
-import qualified SLIR.HelmSyntax.Core.Parser.TopLevel.Unions       as Decl
-import qualified SLIR.HelmSyntax.Core.Parser.TopLevel.Functions    as Decl
-import qualified SLIR.HelmSyntax.Core.Parser.TopLevel.Fixities     as Decl
-
-
--- ~ HelmSyntax IR
+--- Local Deps
+-- HelmSyntax Payload
 import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Initialization as Init
 
 -- ~ HelmSyntax AST
 -- ~~ Base
@@ -48,9 +40,21 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 -- ~~ Header
-import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Base      as Header
-import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Exporting as Export
-import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Importing as Import
+import qualified SLIR.HelmSyntax.AST.Data.Header.Base       as Base
+import qualified SLIR.HelmSyntax.AST.Data.Header.ImportDecl as Decl
+-- ~~ Metadata
+import qualified SLIR.HelmSyntax.AST.Data.Base.Metadata as Meta
+
+--- Local
+-- ~ Sub Parsers
+import qualified SLIR.HelmSyntax.Core.Parser.Base.Ident         as ID
+import qualified SLIR.HelmSyntax.Core.Parser.Base.Metadata      as Meta
+
+-- ~~ Header - Sub Parsers
+import qualified SLIR.HelmSyntax.Core.Parser.Base.Ident            as ID
+import qualified SLIR.HelmSyntax.Core.Parser.TopLevel.Unions       as Decl
+import qualified SLIR.HelmSyntax.Core.Parser.TopLevel.Functions    as Decl
+import qualified SLIR.HelmSyntax.Core.Parser.TopLevel.Fixities     as Decl
 -- *
 
 
@@ -126,6 +130,10 @@ getUnions =
     where
         get (Union x) = Just x
         get _ = Nothing
+
+
+
+
 
 
 

@@ -284,40 +284,20 @@ data Signature
 -- *
 -- | # Header
 -- *
-data ModuleExporting
-    = ExportExplicit [Entry]
-    | ExportEverything
+
+
+-- *
+-- | ## Header Base
+-- *
+data Entries
+    = Everything
+    | Explicit [Entry]
     deriving (Show, Data, Typeable)
 
 
-newtype ModuleImporting = ModuleImporting [ImportDecl]
-    deriving (Show, Data, Typeable)
-
-
-data ImportDecl
-    -- |
-    -- e.g.
-    --     * import Sample.One as One
-    --     * import Sample.One
-    = ImportQualified Namespace (Maybe Big)
-    
-    -- |
-    -- e.g.
-    --      import Something (Alpha, red, green, Blue(..))
-    | ImportExplicit Namespace [Entry]
-    
-    -- |
-    -- e.g.
-    --      import Something.Alpha (..)
-    | ImportEverything Namespace
-    deriving (Show, Data, Typeable)
-
-
--- | Base (Module Header) Types
---
 data Entry
-    = ValueEntry Text
-    | UnionEntry Text UnionExposing
+    = ValueEntry IsSym Text
+    | UnionEntry Text (Maybe UnionExposing)
     deriving (Show, Data, Typeable)
 
 
@@ -326,6 +306,19 @@ data UnionExposing
     | UnionExplicit [Text]
     deriving (Show, Data, Typeable)
 
+type IsSym = Bool
+
+-- *
+-- | ## Header Import Declarations
+-- *
+
+data ImportDecl
+    = ImportDecl Namespace (Maybe AsName) (Maybe ExplicitExposing)
+    deriving (Show, Data, Typeable)
+
+type AsName = Big
+
+type ExplicitExposing = Entries
 
 
 

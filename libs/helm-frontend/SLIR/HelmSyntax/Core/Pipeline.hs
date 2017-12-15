@@ -16,6 +16,7 @@ import qualified SLIR.HelmSyntax.Core.Desugar.Driver   as Driver
 
 -- ~ HelmSyntax IR
 import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Initialization as Init
 
 --- Local Deps
 -- ~ HelmSyntax AST
@@ -36,9 +37,9 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 -- *
 
 
-pipeline :: IO String -> IO (Either Text Payload.Module)
-pipeline source =
+pipeline :: Init.SourcePath -> IO Init.SourceCode -> IO (Either Text Payload.Module)
+pipeline path source =
     source
-        |> Driver.parser
+        |> Driver.runModuleParser path
         |> Driver.typeCheck
         |> Driver.desugar

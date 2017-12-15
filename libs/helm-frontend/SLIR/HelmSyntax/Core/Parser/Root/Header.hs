@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Core.Parser.Driver (
-      runModuleParser
-    , runHeaderParser
+{-# LANGUAGE TupleSections #-}
+module SLIR.HelmSyntax.Core.Parser.Root.Header (
+    parseModuleHeader
 ) where
 
 
@@ -10,14 +10,12 @@ import Core
 import Core.List.Util (flatten)
 import Core.Control.Flow
 
-import Prelude (IO, return, (<$>))
-
 import qualified Data.Text as Text
 import qualified Text.Megaparsec.Char.Lexer as L
 
 
 --- Frameworks
-import qualified Framework.Parser as Parser (parseErrorPretty, runParser)
+import Framework.Parser
 
 
 --- Local Deps
@@ -53,37 +51,28 @@ import qualified SLIR.HelmSyntax.Core.Parser.Base.Ident         as ID
 import qualified SLIR.HelmSyntax.Core.Parser.Base.Metadata      as Meta
 
 -- ~~ Header - Sub Parsers
-import qualified SLIR.HelmSyntax.Core.Parser.Root as Root
+import qualified SLIR.HelmSyntax.Core.Parser.Header.Base        as Base
+import qualified SLIR.HelmSyntax.Core.Parser.Header.ModuleDecl  as ModuleDecl
+import qualified SLIR.HelmSyntax.Core.Parser.Header.ImportDecl  as ImportDecl
 -- *
 
 
 
+parseModuleHeader :: Init.SourcePath -> Parser Payload.ModuleHeader
+parseModuleHeader path = do
+    (moduleName, exports) <- ModuleDecl.parseModuleDecl <?> "module declaration"
 
--- | Parse the entire module.
---
-runModuleParser :: Init.SourcePath -> IO Init.SourceCode -> IO (Either Text Payload.Module)
-runModuleParser path source = do
-    result <- Parser.runParser (Root.parseModule path) "" <$> source
+    imports <- many (ImportDecl.parseImportDecl <?> "import declaration")
     
-    case result of
-        Left err ->
-            return $ Left $ Text.pack (Parser.parseErrorPretty err)
-        
-        Right payload ->
-            return $ Right payload
+    return
+        Payload.ModuleHeader
+            { Payload.moduleName = moduleName
+            , Payload.exports    = exports
+            , Payload.imports    = imports
+            , Payload.modulePath = path
+            }
 
 
 
--- | Parse just the module header.
--- (Useful for obtaining dependency information…)
---
-runHeaderParser :: Init.SourcePath -> IO Init.SourceCode -> IO (Either Text Payload.ModuleHeader)
-runHeaderParser path source = do
-    result <- Parser.runParser (Root.parseHeader path) "" <$> source
-    case result of
-        Left err ->
-            return $ Left $ Text.pack (Parser.parseErrorPretty err)
-        Right payload ->
-            return $ Right payload
 
 

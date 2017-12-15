@@ -79,8 +79,9 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Resolve as Resolve
 
 
 typeCheck :: IO (Either Text Payload.Module) -> IO (Either Text Payload.Module)
-typeCheck input = do
-    result <- input
+typeCheck upstream = do
+    result <- upstream
+    
     case result of
         Left err -> return $ Left err
         Right payload ->

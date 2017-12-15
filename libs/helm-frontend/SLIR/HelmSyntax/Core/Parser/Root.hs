@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Core.Parser.Driver (
-      runModuleParser
-    , runHeaderParser
+module SLIR.HelmSyntax.Core.Parser.Root (
+      parseModule
+    , parseHeader
 ) where
 
 
@@ -10,14 +10,12 @@ import Core
 import Core.List.Util (flatten)
 import Core.Control.Flow
 
-import Prelude (IO, return, (<$>))
-
 import qualified Data.Text as Text
 import qualified Text.Megaparsec.Char.Lexer as L
 
 
 --- Frameworks
-import qualified Framework.Parser as Parser (parseErrorPretty, runParser)
+import Framework.Parser
 
 
 --- Local Deps
@@ -53,37 +51,32 @@ import qualified SLIR.HelmSyntax.Core.Parser.Base.Ident         as ID
 import qualified SLIR.HelmSyntax.Core.Parser.Base.Metadata      as Meta
 
 -- ~~ Header - Sub Parsers
-import qualified SLIR.HelmSyntax.Core.Parser.Root as Root
+import qualified SLIR.HelmSyntax.Core.Parser.Root.Program as Program
+import qualified SLIR.HelmSyntax.Core.Parser.Root.Header  as Header
 -- *
 
 
 
 
--- | Parse the entire module.
---
-runModuleParser :: Init.SourcePath -> IO Init.SourceCode -> IO (Either Text Payload.Module)
-runModuleParser path source = do
-    result <- Parser.runParser (Root.parseModule path) "" <$> source
+
+-- *
+-- | # Root Parser
+-- *
+parseModule :: Init.SourcePath -> Parser Payload.Module
+parseModule path = do
+    header <- Header.parseModuleHeader path
+    program <- Program.parseProgram
     
-    case result of
-        Left err ->
-            return $ Left $ Text.pack (Parser.parseErrorPretty err)
-        
-        Right payload ->
-            return $ Right payload
+    return Payload.Module
+        { Payload.header = header
+        , Payload.program = program
+        }
 
 
+parseHeader :: Init.SourcePath -> Parser Payload.ModuleHeader
+parseHeader =
+    Header.parseModuleHeader
 
--- | Parse just the module header.
--- (Useful for obtaining dependency information…)
---
-runHeaderParser :: Init.SourcePath -> IO Init.SourceCode -> IO (Either Text Payload.ModuleHeader)
-runHeaderParser path source = do
-    result <- Parser.runParser (Root.parseHeader path) "" <$> source
-    case result of
-        Left err ->
-            return $ Left $ Text.pack (Parser.parseErrorPretty err)
-        Right payload ->
-            return $ Right payload
+
 
 

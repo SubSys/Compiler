@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE FlexibleContexts #-}
 module SLIR.HelmSyntax.Core.TypeCheck.Syntax.Expr (
     inferExpr
 ) where
@@ -82,14 +83,6 @@ import qualified SLIR.HelmSyntax.Core.TypeCheck.Resolve as Resolve
 inferExpr :: (Decl.Function -> Sys.Syntax Decl.Function)
           -> E.Expr
           -> Sys.Syntax E.Expr
-
-inferExpr f (E.Var name meta) = do
-    t <- Scope.lookupEnv name
-    -- *
-    
-    -- *
-    enter (E.Var name meta) t
-
 
 inferExpr f (E.Lit val meta) = do
     (val', t, _) <- V.inferLit val
@@ -240,9 +233,17 @@ inferExpr f (E.RecordAccess field object meta) =
     error "TODO - Not yet supported: 'inferExpr RecordAccess'…"
 
 
-
-
-
+inferExpr f (E.Var name meta) = do
+    res <- Scope.isOverloaded name
+    case res of
+        Nothing -> do
+            t <- Scope.lookupEnv name
+            enter (E.Var name meta) t
+        
+        Just ts -> do
+            t <- genOverloaded ts
+            
+            enter (E.Var name meta) t
 
 
 
@@ -261,8 +262,57 @@ inferExpr f (E.RecordAccess field object meta) =
 -- *
 
 
--- TODO:
+-- |  Generalize Overloaded Types
+-- TODO: Move...
+genOverloaded :: [T.Type] -> Sys.State T.Type
+genOverloaded ts
+    | List.all (== base1) restBases = do
+        t <- TS.instantiate $ TS.closeOver base1
+        -- *
 
+        -- *
+        superTv <- TS.freshType
+        let t2 = T.Superposed superTv ts
+        -- *
+        
+        -- *
+        Con.unify t t2
+        -- *
+        
+        -- *
+        return t
+    
+    | otherwise =
+        M.throwError (Report.ConflictingOverloadedTypeArity ts)
+
+
+    where
+        
+        xs1@(base1:restBases) = map base ts
+        
+        base :: T.Type -> T.Type
+        base x = fst $ M.runState (Uni.transformM f x) [0..]
+        
+        f :: (M.MonadState [Int] m) => T.Type -> m T.Type
+        f (T.Arr t1 t2 _) = return $ T.Arr' t1 t2
+        
+        f x = do
+            (x:xs) <- M.get
+            M.put xs
+            
+            return $ T.Var' (ID.Low' (label x) Nothing)
+        
+        
+        label x =
+            Text.pack $ show x
+        
+        
+        -- checkBases :: T.Type -> T.Type -> Bool
+        -- checkBases 
+
+
+
+-- TODO:
 withLocalWriter :: [Con.Constraint] -> Sys.State a -> Sys.State a
 withLocalWriter cs0 =
     M.censor override

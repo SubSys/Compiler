@@ -2,8 +2,9 @@
 {-# LANGUAGE PatternSynonyms #-}
 -- | Base (Module Header) Types
 --
-module SLIR.HelmSyntax.AST.Data.Header.Module.Base (
-      IR.Entry(..)
+module SLIR.HelmSyntax.AST.Data.Header.Base (
+      IR.Entries(..)
+    , IR.Entry(..)
     , IR.UnionExposing(..)
 ) where
 

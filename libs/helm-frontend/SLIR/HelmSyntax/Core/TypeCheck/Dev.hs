@@ -73,13 +73,18 @@ import qualified SLIR.HelmSyntax.AST.Toolbox.TopLevel.Functions.Overloaded as Ov
 
 
 
-sample =
-    ParserSample.sampleOne
-        |> Driver.parser
-        |> Driver.typeCheck
+upstream =
+    let filePath   = Text.pack ParserSample.sampleOnePath
+        sourceCode = ParserSample.sampleOne
+    in
+        sourceCode
+            |> Driver.runModuleParser filePath
+            |> Driver.typeCheck
+
+
 
 run = do
-    input <- sample
+    input <- upstream
     
     case input of
         Left err      -> putStrLn (Text.unpack err)
@@ -87,9 +92,14 @@ run = do
 
 
 
-run' payload =
+run' payload = do
     -- M.mapM_ PP.prettyPrint fns
     -- putStrLn $ Text.unpack (Display.renderFunctions functions)
+    
+    
+    PP.prettyPrint (Payload.getModuleHeader payload)
+    
+    putStrLn (List.replicate 80 '-')
     
     putStrLn $ Text.unpack (Display.renderFunctions functions)
     

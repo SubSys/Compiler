@@ -1,10 +1,16 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Core.TypeCheck.Data.Report where
+module SLIR.HelmSyntax.Data.Initialization (
+      SourceCode
+    , SourcePath
+) where
+
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
+import Core.List.Util    (flatten)
+
 import Prelude (return, String, IO, show, error, (<$>))
 
 import Data.List.Index  (imap)
@@ -23,9 +29,13 @@ import qualified Data.Foldable as Fold
 import qualified Data.Monoid   as Monoid
 
 import qualified Data.Generics.Uniplate.Data as Uni
+import qualified Text.Show.Prettyprint as PP
 
 
 --- Local Deps
+-- ~ HelmSyntax IR
+import qualified SLIR.HelmSyntax.Data.Payload as Payload
+
 -- ~ HelmSyntax AST
 -- ~~ Base
 import qualified SLIR.HelmSyntax.AST.Data.Base.Etc    as Etc
@@ -43,30 +53,15 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 --- Local
-import SLIR.HelmSyntax.Core.TypeCheck.Data.Unification.Constraint as Con
-import qualified SLIR.HelmSyntax.AST.Auxiliary.Canonical.Ident as CID
 -- *
 
 
 
+type SourceCode = String
 
-
-
-
-data TypeError
-    = UnificationFail T.Type T.Type
-    | InfiniteType CID.Ident T.Type
-    | UnboundVariable Text
-    | UnboundConstructor Text
-    | Ambigious [Constraint]
-    | AmbigiousOverloadedType T.Type [T.Type]
-    | UnificationMismatch [T.Type] [T.Type]
-    | OverloadedTypeFail T.Type [T.Type]
-    | ConflictingOverloadedTypeArity [T.Type]
-    deriving (Show)
-
-
-
+-- |
+-- Source Code File Path
+type SourcePath = Text
 
 
 

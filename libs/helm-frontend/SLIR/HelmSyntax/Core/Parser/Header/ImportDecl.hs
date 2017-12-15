@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Core.Parser.Driver (
-      runModuleParser
-    , runHeaderParser
+{-# LANGUAGE TupleSections #-}
+module SLIR.HelmSyntax.Core.Parser.Header.ImportDecl (
+    parseImportDecl
 ) where
 
 
@@ -10,20 +10,16 @@ import Core
 import Core.List.Util (flatten)
 import Core.Control.Flow
 
-import Prelude (IO, return, (<$>))
-
 import qualified Data.Text as Text
 import qualified Text.Megaparsec.Char.Lexer as L
 
 
 --- Frameworks
-import qualified Framework.Parser as Parser (parseErrorPretty, runParser)
+import Framework.Parser
 
 
 --- Local Deps
--- HelmSyntax Payload
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
-import qualified SLIR.HelmSyntax.Data.Initialization as Init
+
 
 -- ~ HelmSyntax AST
 -- ~~ Base
@@ -44,6 +40,7 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 -- ~~ Header
 import qualified SLIR.HelmSyntax.AST.Data.Header.Base       as Base
 import qualified SLIR.HelmSyntax.AST.Data.Header.ImportDecl as Decl
+
 -- ~~ Metadata
 import qualified SLIR.HelmSyntax.AST.Data.Base.Metadata as Meta
 
@@ -52,38 +49,50 @@ import qualified SLIR.HelmSyntax.AST.Data.Base.Metadata as Meta
 import qualified SLIR.HelmSyntax.Core.Parser.Base.Ident         as ID
 import qualified SLIR.HelmSyntax.Core.Parser.Base.Metadata      as Meta
 
--- ~~ Header - Sub Parsers
-import qualified SLIR.HelmSyntax.Core.Parser.Root as Root
+import qualified SLIR.HelmSyntax.Core.Parser.Header.Base        as Base
 -- *
 
 
 
 
--- | Parse the entire module.
+-- | Parse import declaration.
+-- E.g.
+-- * `import Sample.Lib`
+-- * `import Sample.Lib as Lib`
+-- * `import Sample.Lib exposing (x, y, z)`
+-- * `import Sample.Lib as Lib exposing (x, y , z)`
 --
-runModuleParser :: Init.SourcePath -> IO Init.SourceCode -> IO (Either Text Payload.Module)
-runModuleParser path source = do
-    result <- Parser.runParser (Root.parseModule path) "" <$> source
+parseImportDecl :: Parser Decl.ImportDecl
+parseImportDecl = do
+    reservedWord "import"
+    name             <- ID.parseNamespace
+    asName           <- optional asName
+    explicitExposing <- optional (try parseExplicitExposing)
     
-    case result of
-        Left err ->
-            return $ Left $ Text.pack (Parser.parseErrorPretty err)
-        
-        Right payload ->
-            return $ Right payload
+    scn
+    return
+        $ Decl.ImportDecl name asName explicitExposing
 
 
 
--- | Parse just the module header.
--- (Useful for obtaining dependency information…)
---
-runHeaderParser :: Init.SourcePath -> IO Init.SourceCode -> IO (Either Text Payload.ModuleHeader)
-runHeaderParser path source = do
-    result <- Parser.runParser (Root.parseHeader path) "" <$> source
-    case result of
-        Left err ->
-            return $ Left $ Text.pack (Parser.parseErrorPretty err)
-        Right payload ->
-            return $ Right payload
+
+parseExplicitExposing :: Parser Base.Entries
+parseExplicitExposing =
+    L.lineFold scn $ \scn' -> do
+        -- optional scn'
+        reservedWord "exposing"
+        -- optional scn'
+        Base.parseEntries
+
+
+
+-- *
+-- | Internal Helpers
+-- *
+
+
+asName :: Parser ID.Big
+asName =
+    reservedWord "as" *> ID.parseBig
 
 

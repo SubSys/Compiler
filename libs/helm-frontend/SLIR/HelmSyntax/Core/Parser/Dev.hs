@@ -1,11 +1,13 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Core.Desugar.Dev where
+module SLIR.HelmSyntax.Core.Parser.Dev where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
-import Prelude (return, String, IO, show, error)
+import Core.List.Util    (flatten)
+
+import Prelude (return, String, IO, show, error, (<$>), (>>))
 
 import Data.List.Index  (imap)
 
@@ -34,20 +36,23 @@ import qualified Text.Show.Prettyprint as PP
 import qualified SLIR.HelmSyntax.Render.Utils as Display
 
 -- ~ HelmSyntax Cores
-import qualified SLIR.HelmSyntax.Core.Parser.Driver    as Driver
-import qualified SLIR.HelmSyntax.Core.TypeCheck.Driver as Driver
-import qualified SLIR.HelmSyntax.Core.Desugar.Driver   as Driver
+-- import qualified SLIR.HelmSyntax.Core.Parser.Driver    as Driver
 
 -- ~ HelmSyntax IR
 import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Initialization as Init
+
+
+--- Frameworks
+import qualified Framework.Parser as Parser (runParser, parseErrorPretty)
 
 --- Local Deps
 -- ~ HelmSyntax AST
 -- ~~ Base
-import qualified SLIR.HelmSyntax.AST.Data.Base.Etc      as Etc
-import qualified SLIR.HelmSyntax.AST.Data.Base.Ident    as ID
-import qualified SLIR.HelmSyntax.AST.Data.Base.Types    as T
-import qualified SLIR.HelmSyntax.AST.Data.Base.Values   as V
+import qualified SLIR.HelmSyntax.AST.Data.Base.Etc    as Etc
+import qualified SLIR.HelmSyntax.AST.Data.Base.Ident  as ID
+import qualified SLIR.HelmSyntax.AST.Data.Base.Types  as T
+import qualified SLIR.HelmSyntax.AST.Data.Base.Values as V
 import qualified SLIR.HelmSyntax.AST.Data.Base.Metadata as Meta
 
 -- ~~ TermLevel
@@ -58,46 +63,40 @@ import qualified SLIR.HelmSyntax.AST.Data.TermLevel.Patterns    as P
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
--- *
 
+--- Local
+-- ~ Parsers
+import qualified SLIR.HelmSyntax.Core.Parser.Driver as Driver
+-- *
 
 {-# ANN module "HLint: ignore" #-}
 
 
-sample =
-    ParserSample.sampleOne
-        |> Driver.parser
-        |> Driver.typeCheck
-        -- |> Driver.desugar
+
+upstream =
+    let filePath   = Text.pack ParserSample.sampleOnePath
+        sourceCode = ParserSample.sampleOne
+    in
+        sourceCode
+            |> Driver.runModuleParser filePath
+
+
 
 run = do
-    input <- sample
-    
-    case input of
-        Left err      -> putStrLn (Text.unpack err)
-        Right payload -> run' payload
+    result <- upstream
+    case result of
+        Left err ->
+            putStrLn $ Text.unpack err
+        Right payload ->
+            run' payload
 
 
 
 run' payload =
-    -- M.mapM_ PP.prettyPrint fns
-    -- putStrLn $ Text.unpack (Display.renderFunctions functions)
-    
-    putStrLn $ Text.unpack (Display.renderFunctions functions)
-    
-    -- M.mapM_ PP.prettyPrint functions
-    
-    
+    putStrLn $ Text.unpack $ Display.renderFunctions fns
     where
-        functions  = Payload.getFunctions payload
-            -- |> map noMeta
+        fns = Payload.getFunctions payload
 
 
-
-noMeta x =
-    Uni.transformBi f x
-    where
-        f :: Maybe Meta.Meta -> Maybe Meta.Meta
-        f x = Nothing
 
 

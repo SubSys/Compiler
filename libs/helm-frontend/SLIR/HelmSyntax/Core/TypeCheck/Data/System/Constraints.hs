@@ -74,6 +74,7 @@ app t1 t2 = do
     return tv
 
 
+
 binOpApp :: ID.Sym -> T.Type -> T.Type -> Sys.Constrain' T.Type
 binOpApp sym t1 t2 = do
     res <- Scope.isOverloaded sym
@@ -103,8 +104,12 @@ unifySignature t (Just (Etc.Unresolved t' meta)) =
 -- | Misc. Internal Helpers
 -- *
 
+
+
 -- | Default Constraints (not overloaded).
 --
+
+
 binOpApp' :: ID.Sym -> T.Type -> T.Type -> Sys.Constrain' T.Type
 binOpApp' sym et1 et2 = do
     tv <- TS.freshType

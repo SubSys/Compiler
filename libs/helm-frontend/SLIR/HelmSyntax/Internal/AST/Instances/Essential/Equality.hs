@@ -419,51 +419,30 @@ instance Eq IR.Signature where
 -- *
 
 
-instance Eq IR.ModuleExporting where
-    (==) (IR.ExportExplicit entries1)
-         (IR.ExportExplicit entries2) =
-             entries1 == entries2
-         
-         
-    (==) IR.ExportEverything
-         IR.ExportEverything = True
-    
-    _ == _ = False
 
-
-
-instance Eq IR.ModuleImporting where
-    (==) (IR.ModuleImporting importDecls1)
-         (IR.ModuleImporting importDecls2) =
-             importDecls1 == importDecls2
-
-
-instance Eq IR.ImportDecl where
-    (==) (IR.ImportQualified namespace1 asName1)
-         (IR.ImportQualified namespace2 asName2) =
-                (namespace1 == namespace2)
-             && (asName1 == asName2)
-    
-    (==) (IR.ImportExplicit namespace1 entries1)
-         (IR.ImportExplicit namespace2 entries2) =
-             (namespace1 == namespace2) && (entries1 == entries2)
-
-
-    (==) (IR.ImportEverything namespace1)
-         (IR.ImportEverything namespace2) =
-             namespace1 == namespace2
-    
-    _ == _ = False
 
 
 
 
 -- | Base (Module Header) Types
 --
+instance Eq IR.ImportDecl where
+    (==) (IR.ImportDecl ns1 asName1 exposing1)
+         (IR.ImportDecl ns2 asName2 exposing2) =
+                (ns1 == ns2)
+             && (asName1 == asName2)
+             && (exposing1 == exposing2)
+
+instance Eq IR.Entries where
+    (==) IR.Everything IR.Everything = True
+    (==) (IR.Explicit entries1)
+         (IR.Explicit entries2) =
+             entries1 == entries2
+
 instance Eq IR.Entry where
-    (==) (IR.ValueEntry txt1)
-         (IR.ValueEntry txt2) =
-             txt1 == txt2
+    (==) (IR.ValueEntry isSym1 txt1)
+         (IR.ValueEntry isSym2 txt2) =
+             (txt1 == txt2) && (isSym1 == isSym2)
 
     (==) (IR.UnionEntry txt1 unionExposing1)
          (IR.UnionEntry txt2 unionExposing2) =

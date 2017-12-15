@@ -4,7 +4,8 @@
     "repository": "https://github.com/elm-lang/html.git",
     "license": "BSD3",
     "source-directories": [
-        "src"
+          "src/app"
+        , "src/prelude"
     ],
     "exposed-modules": [
         "Html",

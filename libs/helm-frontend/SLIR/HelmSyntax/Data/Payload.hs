@@ -7,6 +7,7 @@ module SLIR.HelmSyntax.Data.Payload (
     
     -- |
     -- Header Utils
+    , getModuleHeader
     , getModuleName
     
     -- |
@@ -44,26 +45,20 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 -- ~~ Header
-import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Base      as Header
-import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Exporting as Export
-import qualified SLIR.HelmSyntax.AST.Data.Header.Module.Importing as Import
+import qualified SLIR.HelmSyntax.AST.Data.Header.Base       as Base
+import qualified SLIR.HelmSyntax.AST.Data.Header.ImportDecl as Decl
 -- *
 
 
 
-data Module = Module
-    { header :: ModuleHeader
-    , program :: Program
-    }
-    deriving (Show)
-
-
 data ModuleHeader = ModuleHeader
     { moduleName :: ID.Namespace
-    , exporting :: Export.ModuleExporting
-    , importing :: Import.ModuleImporting
+    , modulePath :: Text
+    , exports    :: Base.Entries
+    , imports    :: [Decl.ImportDecl]
     }
     deriving (Show)
+
 
 data Program = Program
     { functions :: [Decl.Function]
@@ -72,6 +67,12 @@ data Program = Program
     }
     deriving (Show)
 
+
+data Module = Module
+    { header :: ModuleHeader
+    , program :: Program
+    }
+    deriving (Show)
 
 
 -- *
@@ -82,6 +83,9 @@ getModuleName datum =
     moduleName $ header datum
 
 
+getModuleHeader :: Module -> ModuleHeader
+getModuleHeader =
+    header
 
 
 -- *
