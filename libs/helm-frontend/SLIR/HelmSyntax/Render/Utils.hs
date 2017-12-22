@@ -2,6 +2,8 @@
 module SLIR.HelmSyntax.Render.Utils (
       renderFunctions
     , renderUnions
+    , displayModule
+    , displayProgram
 ) where
 
 
@@ -28,8 +30,10 @@ import qualified Framework.IR.Standard.Data as StdIR
 
 
 --- Local
--- ~ HelmSyntax IR
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+-- ~ HelmSyntax Interfaces
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload   as Module
+import qualified SLIR.HelmSyntax.Data.Interface.Program.Payload as Program
+import qualified SLIR.HelmSyntax.Data.Interface.Utils              as IUtil
 
 -- ~ HelmSyntax AST
 -- ~~ Base
@@ -50,6 +54,7 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 -- ~ Renderers
 import qualified SLIR.HelmSyntax.Render.Syntax.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.Render.Syntax.TopLevel.Unions    as Decl
+import qualified SLIR.HelmSyntax.Render.Syntax                    as Syntax
 -- *
 
 
@@ -65,5 +70,19 @@ renderUnions :: [Decl.Union] -> Text
 renderUnions xs =
     map (Display.packDoc' . Decl.renderUnion) xs
         |> Text.unlines
+
+
+displayModule :: Module.Module -> Text
+displayModule x =
+    Syntax.renderModule x
+        |> Display.packDoc'
+
+
+
+
+displayProgram :: Program.Program -> Text
+displayProgram x =
+    Syntax.renderProgram x
+        |> Display.packDoc'
 
 

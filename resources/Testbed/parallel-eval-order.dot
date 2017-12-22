@@ -1,0 +1,10 @@
+digraph
+{
+  "Basics.Arithmetic Basics.Booleans Basics.Comparison Basics.Equality Basics.Result Basics.Trigonometry List Sudo.Helm.Native Tmp"
+  "Basics.Functional"
+  "Core"
+  "Framework.Elite.Parser.Process Framework.Elite.Pipeline.Process Framework.Elite.Pipeline.Transform Framework.Elite.Pipeline.Transmute Main"
+  "Basics.Arithmetic Basics.Booleans Basics.Comparison Basics.Equality Basics.Result Basics.Trigonometry List Sudo.Helm.Native Tmp" -> "Basics.Functional"
+  "Basics.Functional" -> "Core"
+  "Core" -> "Framework.Elite.Parser.Process Framework.Elite.Pipeline.Process Framework.Elite.Pipeline.Transform Framework.Elite.Pipeline.Transmute Main"
+}

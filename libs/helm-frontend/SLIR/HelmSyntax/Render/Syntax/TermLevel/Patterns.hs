@@ -20,7 +20,7 @@ import qualified Framework.Render.Utils as Util
 
 --- Local
 -- ~ HelmSyntax IR
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 
 -- ~ HelmSyntax AST
 -- ~~ Base

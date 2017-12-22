@@ -1,4 +1,4 @@
-module Basics.Equality exposing ((==))
+module Basics.Equality exposing ((==), (/=))
 
 
 import Sudo.Helm.Native
@@ -25,6 +25,26 @@ import Sudo.Helm.Native
     Sudo.Helm.Native.isEqBool left right
 
 
+
+(/=) : Int -> Int -> Bool
+(/=) left right =
+    Sudo.Helm.Native.isEqInt left right
+
+(/=) : Float -> Float -> Bool
+(/=) left right =
+    Sudo.Helm.Native.isEqFloat left right
+
+(/=) : Char -> Char -> Bool
+(/=) left right =
+    Sudo.Helm.Native.isEqChar left right
+
+(/=) : String -> String -> Bool
+(/=) left right =
+    Sudo.Helm.Native.isEqString left right
+
+(/=) : Bool -> Bool -> Bool
+(/=) left right =
+    Sudo.Helm.Native.isEqBool left right
 
 
 

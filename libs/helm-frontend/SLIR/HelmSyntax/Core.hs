@@ -12,7 +12,7 @@ import Core.Control.Flow ((|>), (<|))
 import Prelude (mapM_, IO, String, return)
 
 --- Local
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 import qualified SLIR.HelmSyntax.Core.Pipeline as Pipeline
 import qualified SLIR.HelmSyntax.Feed.HelmCore as HelmCore
 

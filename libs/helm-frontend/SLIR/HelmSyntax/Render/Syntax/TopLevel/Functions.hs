@@ -20,7 +20,7 @@ import qualified Framework.Render.Utils as Util
 
 --- Local
 -- ~ HelmSyntax IR
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 
 -- ~ HelmSyntax AST
 -- ~~ Base
@@ -59,9 +59,14 @@ import qualified SLIR.HelmSyntax.Render.Syntax.TermLevel.Expr     as E
 renderFunction (Decl.FnDecl id' args expr sig meta) =
     renderFunction' (ID.renderLow id') args expr sig
 
-renderFunction (Decl.OpDecl opID args expr sig meta) =
-    renderFunction' (Util.parens $ ID.renderSym opID) args expr sig
+renderFunction (Decl.OpDecl (ID.Sym txt Nothing _) args expr sig meta) =
+    renderFunction' (Util.parens $ render txt) args expr sig
 
+renderFunction (Decl.OpDecl (ID.Sym txt (Just ns) _) args expr sig meta) =
+    let
+        name = ID.renderNamespace ns <> "." <> Util.parens (render txt)
+    in
+        renderFunction' name args expr sig
 
 
 renderFunction' :: Doc -> [ID.Low] -> E.Expr -> Maybe Etc.Signature -> Doc

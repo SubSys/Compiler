@@ -53,6 +53,7 @@ extra-deps:
     - constraints-0.9.1
     - uniplate-1.6.12
     - bound-2.0.1
+    - algebraic-graphs-0.0.5
 
 # Override default flag values for local packages and extra-deps
 flags: {}

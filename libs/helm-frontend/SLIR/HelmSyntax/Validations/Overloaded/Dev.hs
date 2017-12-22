@@ -35,12 +35,12 @@ import qualified Text.Show.Prettyprint as PP
 import qualified SLIR.HelmSyntax.Render.Utils as Display
 
 -- ~ HelmSyntax Cores
-import qualified SLIR.HelmSyntax.Core.Parser.Driver    as Driver
+import qualified SLIR.HelmSyntax.Core.Module.Parser.Driver    as Driver
 import qualified SLIR.HelmSyntax.Core.TypeCheck'.Driver as Driver
 import qualified SLIR.HelmSyntax.Core.Desugar.Driver   as Driver
 
 -- ~ HelmSyntax IR
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 
 
 --- Local Deps

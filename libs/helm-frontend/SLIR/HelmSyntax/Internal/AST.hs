@@ -100,6 +100,8 @@ data Expr
     
     | AbsExpr Low Expr (Maybe Meta)
     
+    | AltAbsExpr [Low] Expr (Maybe Scheme)
+    
     deriving (Show, Data, Typeable)
 
 
@@ -327,8 +329,11 @@ type ExplicitExposing = Entries
 -- *
 data Meta
     = Meta
-        { span :: Span
-        , modulePath :: Text
+        { span :: Maybe Span
+        , modulePath :: Maybe Text
+        
+        -- TODO: Use Namespace
+        , originalNamespace :: Maybe [Text]
         }
     deriving (Show, Data, Typeable, Eq, Ord)
 

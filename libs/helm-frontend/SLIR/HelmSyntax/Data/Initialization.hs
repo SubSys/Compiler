@@ -34,7 +34,7 @@ import qualified Text.Show.Prettyprint as PP
 
 --- Local Deps
 -- ~ HelmSyntax IR
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 
 -- ~ HelmSyntax AST
 -- ~~ Base

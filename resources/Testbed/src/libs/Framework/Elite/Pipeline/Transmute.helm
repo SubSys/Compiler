@@ -1,0 +1,16 @@
+module Framework.Elite.Pipeline.Transmute exposing (..)
+
+
+import Core
+
+
+
+-- port ExpressionScheme Expression : ExpressionScheme Expression -> Expression
+-- port ExpressionScheme String : ExpressionScheme String -> String
+
+-- port PatternScheme a : PatternScheme a -> a
+
+
+-- type Scheme f a -> Scheme f a -> a
+
+

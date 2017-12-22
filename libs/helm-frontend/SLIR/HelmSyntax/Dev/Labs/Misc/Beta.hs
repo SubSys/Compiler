@@ -33,7 +33,7 @@ import qualified Text.Show.Prettyprint as PP
 
 
 --- Local
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 import qualified SLIR.HelmSyntax.Render.Utils as Display
 
 
@@ -58,19 +58,19 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 -- ~ Parsers
-import qualified SLIR.HelmSyntax.Core.Parser.Base.Types            as T
-import qualified SLIR.HelmSyntax.Core.Parser.Base.Etc              as Etc
-import qualified SLIR.HelmSyntax.Core.Parser.Base.Ident            as ID
-import qualified SLIR.HelmSyntax.Core.Parser.TermLevel.Expressions as E
-import qualified SLIR.HelmSyntax.Core.Parser.TopLevel.Unions       as Decl
-import qualified SLIR.HelmSyntax.Core.Parser.TopLevel.Functions    as Decl
-import qualified SLIR.HelmSyntax.Core.Parser.TopLevel.Fixities     as Decl
+import qualified SLIR.HelmSyntax.Core.Module.Parser.Base.Types            as T
+import qualified SLIR.HelmSyntax.Core.Module.Parser.Base.Etc              as Etc
+import qualified SLIR.HelmSyntax.Core.Module.Parser.Base.Ident            as ID
+import qualified SLIR.HelmSyntax.Core.Module.Parser.TermLevel.Expressions as E
+import qualified SLIR.HelmSyntax.Core.Module.Parser.TopLevel.Unions       as Decl
+import qualified SLIR.HelmSyntax.Core.Module.Parser.TopLevel.Functions    as Decl
+import qualified SLIR.HelmSyntax.Core.Module.Parser.TopLevel.Fixities     as Decl
 
 
-import qualified SLIR.HelmSyntax.Core.Parser.Driviver.Program as Program
-import qualified SLIR.HelmSyntax.Core.Parser.Driviver.Header  as Header
+import qualified SLIR.HelmSyntax.Core.Module.Parser.Driviver.Program as Program
+import qualified SLIR.HelmSyntax.Core.Module.Parser.Driviver.Header  as Header
 
-import qualified SLIR.HelmSyntax.Core.Parser.Driver as ParserCore
+import qualified SLIR.HelmSyntax.Core.Module.Parser.Driver as ParserCore
 -- *
 
 

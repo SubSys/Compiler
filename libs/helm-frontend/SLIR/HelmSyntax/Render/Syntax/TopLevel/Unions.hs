@@ -20,7 +20,7 @@ import qualified Framework.Render.Utils as Util
 
 --- Local
 -- ~ HelmSyntax IR
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 
 -- ~ HelmSyntax AST
 -- ~~ Base
@@ -80,14 +80,14 @@ renderConstructor (Decl.Constructor name args meta) =
 renderConstructors :: [Decl.Constructor] -> Doc
 renderConstructors [x] = Util.indent 4 $ "=" <+> renderConstructor x
 renderConstructors (x:xs) =
-    let rest = map renderConstructor xs
+    let rest = map constr xs
           |> Util.vcat
     in
         Util.indent 4 $ "=" <+> renderConstructor x <$$> rest
 
     where
         constr con =
-            "|" <+> render con
+            "|" <+> renderConstructor con
 
 
 

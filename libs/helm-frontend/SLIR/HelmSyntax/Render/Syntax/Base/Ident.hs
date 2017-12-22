@@ -23,7 +23,7 @@ import qualified Framework.Render.Utils as Util
 
 --- Local
 -- ~ HelmSyntax IR
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 
 -- ~ HelmSyntax AST
 -- ~~ Base
@@ -60,7 +60,7 @@ renderBig (ID.Big name (Just ns) meta) =
 renderSym :: ID.Sym -> Doc
 renderSym (ID.Sym name Nothing   meta) = render name
 renderSym (ID.Sym name (Just ns) meta) =
-        renderNamespace ns <> "." <> render name
+        renderNamespace ns <> "." <> Util.parens (render name)
 
 
 renderNamespace :: ID.Namespace -> Doc

@@ -1,0 +1,9 @@
+module Basics.Result exposing (..)
+
+
+
+type Result error value
+    = Err error
+    | Ok value
+
+

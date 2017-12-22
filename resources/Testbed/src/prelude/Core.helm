@@ -1,0 +1,18 @@
+module Core exposing (..)
+
+
+import Basics.Arithmetic exposing (..)
+import Basics.Booleans exposing (..)
+import Basics.Comparison exposing (..)
+import Basics.Equality exposing (..)
+import Basics.Functional exposing (..)
+import Basics.Trigonometry exposing (..)
+import Basics.Result exposing (..)
+
+
+import List exposing (..)
+
+
+
+
+

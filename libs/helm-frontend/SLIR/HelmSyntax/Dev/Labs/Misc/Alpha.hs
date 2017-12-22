@@ -32,7 +32,7 @@ import qualified Text.Show.Prettyprint as PP
 
 
 --- Local
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 import qualified SLIR.HelmSyntax.Render.Utils as Display
 
 
@@ -57,7 +57,7 @@ import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.TopLevel.Unions    as Decl
 
 -- ~ HelmSyntax Cores
-import qualified SLIR.HelmSyntax.Core.Parser.Driver as ParserCore
+import qualified SLIR.HelmSyntax.Core.Module.Parser.Driver as ParserCore
 
 -- ~ HelmSyntax AST Toolbox
 -- ~~ Globalize

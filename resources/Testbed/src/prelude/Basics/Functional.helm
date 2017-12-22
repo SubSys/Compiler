@@ -1,0 +1,17 @@
+module Basics.Functional exposing (..)
+
+
+-- *
+-- | Higher Order Utilities
+-- *
+
+
+import List
+
+
+
+identity : a -> a
+identity x = x
+
+
+

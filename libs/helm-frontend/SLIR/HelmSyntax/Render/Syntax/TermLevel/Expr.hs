@@ -20,7 +20,7 @@ import qualified Framework.Render.Utils as Util
 
 --- Local
 -- ~ HelmSyntax IR
-import qualified SLIR.HelmSyntax.Data.Payload as Payload
+import qualified SLIR.HelmSyntax.Data.Interface.Module.Payload as Payload
 
 -- ~ HelmSyntax AST
 -- ~~ Base
@@ -150,6 +150,31 @@ renderExpr f (E.Record fields meta) =
     where
         field :: (ID.Low, E.Expr) -> Doc
         field (name, val) = ID.renderLow name <+> ":" <+> renderExpr f val
+
+
+
+
+
+renderExpr f (E.AltAbs args expr Nothing) =
+    let
+        args'   = map ID.renderLow args
+                 |> Util.punctuate Util.space
+                 |> Util.hcat
+        expr'   = renderExpr f expr
+    in
+        Util.parens (args' <+> expr')
+
+
+renderExpr f (E.AltAbs args expr (Just scheme)) =
+    let
+        args'   = map ID.renderLow args
+                 |> Util.punctuate Util.space
+                 |> Util.hcat
+        expr'   = renderExpr f expr
+        scheme' = T.renderScheme scheme
+    in
+        Util.indent 2 $ scheme' <$$> Util.parens (args' <+> expr')
+
 
 
 

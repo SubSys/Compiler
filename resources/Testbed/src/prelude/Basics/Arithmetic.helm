@@ -1,8 +1,15 @@
-module Basics.Arithmetic exposing (..)
+module Basics.Arithmetic
+    exposing
+        ( plus
+        , (+)
+        , (*)
+        , (^)
+        , (/)
+        , (//)
+        )
 
 
 import Sudo.Helm.Native
-
 
 
 (+) : Int -> Int -> Int
@@ -54,5 +61,8 @@ import Sudo.Helm.Native
 (//) left right =
     Sudo.Helm.Native.intDiv left right
 
+
+plus x y =
+    x + y
 
 

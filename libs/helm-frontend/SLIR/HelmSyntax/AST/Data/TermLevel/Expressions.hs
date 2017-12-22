@@ -1,6 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE ViewPatterns #-}
 module SLIR.HelmSyntax.AST.Data.TermLevel.Expressions (
       IR.Expr
     , pattern Var
@@ -34,6 +33,9 @@ module SLIR.HelmSyntax.AST.Data.TermLevel.Expressions (
     , pattern Parens'
     , pattern App'
     , pattern Abs'
+    
+    -- Specials
+    , pattern AltAbs
 ) where
 
 
@@ -58,9 +60,7 @@ import SLIR.HelmSyntax.Internal.AST.Instances.Essential ()
 
 
 pattern Var :: IR.Low -> Maybe IR.Meta -> IR.Expr
-pattern Var id' metaOpt <- IR.VarExpr (unwrapLowRef -> id') metaOpt
-    where
-        Var name optMeta = mkVarTerm name optMeta
+pattern Var name metaOpt = IR.VarExpr name metaOpt
 
 
 pattern Lit ::  IR.LiteralValue -> Maybe IR.Meta -> IR.Expr
@@ -83,9 +83,7 @@ pattern Con :: IR.Big -> Maybe IR.Meta -> IR.Expr
 pattern Con id' metaOpt = IR.ConExpr id' metaOpt
 
 pattern BinOp :: IR.Sym -> IR.Expr -> IR.Expr -> Maybe IR.Meta -> IR.Expr
-pattern BinOp sym e1 e2 metaOpt <- IR.BinOpExpr (unwrapSymRef -> sym) e1 e2 metaOpt
-    where
-        BinOp sym e1 e2 optMeta = mkBinOpTerm sym e1 e2 optMeta
+pattern BinOp sym e1 e2 metaOpt = IR.BinOpExpr sym e1 e2 metaOpt
 
 
 pattern If :: [(IR.Expr, IR.Expr)] -> IR.Expr -> Maybe IR.Meta -> IR.Expr
@@ -126,9 +124,7 @@ pattern App e1 e2 metaOpt = IR.AppExpr e1 e2 metaOpt
 
 
 pattern Abs :: IR.Low -> IR.Expr -> Maybe IR.Meta -> IR.Expr
-pattern Abs arg expr metaOpt <- IR.AbsExpr (unwrapLowBinder -> arg) expr metaOpt
-    where
-        Abs arg expr optMeta = mkAbsTerm arg expr optMeta
+pattern Abs arg expr metaOpt = IR.AbsExpr arg expr metaOpt
 
 
 
@@ -137,9 +133,7 @@ pattern Abs arg expr metaOpt <- IR.AbsExpr (unwrapLowBinder -> arg) expr metaOpt
 -- *
 
 pattern Var' :: IR.Low -> IR.Expr
-pattern Var' id' <- IR.VarExpr (unwrapLowRef -> id') Nothing
-    where
-        Var' id' = mkVarTerm id' Nothing
+pattern Var' id' = IR.VarExpr id' Nothing
 
 pattern Lit' ::  IR.LiteralValue -> IR.Expr
 pattern Lit' val = IR.LitExpr val Nothing
@@ -158,9 +152,7 @@ pattern Con' :: IR.Big -> IR.Expr
 pattern Con' id' = IR.ConExpr id' Nothing
 
 pattern BinOp' :: IR.Sym -> IR.Expr -> IR.Expr -> IR.Expr
-pattern BinOp' sym e1 e2 <- IR.BinOpExpr (unwrapSymRef -> sym) e1 e2 Nothing
-    where
-        BinOp' sym e1 e2 = mkBinOpTerm sym e1 e2 Nothing
+pattern BinOp' sym e1 e2 = IR.BinOpExpr sym e1 e2 Nothing
 
 pattern If' :: [(IR.Expr, IR.Expr)] -> IR.Expr -> IR.Expr
 pattern If' intros elseExpr = IR.IfExpr intros elseExpr Nothing
@@ -180,9 +172,7 @@ pattern App' :: IR.Expr -> IR.Expr -> IR.Expr
 pattern App' e1 e2 = IR.AppExpr e1 e2 Nothing
 
 pattern Abs' :: IR.Low -> IR.Expr -> IR.Expr
-pattern Abs' arg expr <- IR.AbsExpr (unwrapLowBinder -> arg) expr Nothing
-    where
-        Abs' arg expr = mkAbsTerm arg expr Nothing
+pattern Abs' arg expr = IR.AbsExpr arg expr Nothing
 
 pattern Case' :: IR.Expr -> [IR.CaseAlt] -> IR.Expr
 pattern Case' con alts = IR.CaseExpr con alts Nothing
@@ -194,49 +184,13 @@ pattern RecordUpdate' var fields = IR.RecordUpdateExpr var fields Nothing
 
 
 
-
-
-
-
-
 -- *
--- | Internal Helpers
+-- | Specials
 -- *
-prefix = Text.pack "λ"
-
-unwrapLowRef :: IR.Low -> IR.Low
-unwrapLowRef (IR.Low txt ns meta) =
-    IR.Low txt ns meta
 
 
-unwrapLowBinder :: IR.Low -> IR.Low
-unwrapLowBinder (IR.Low txt ns meta) =
-    IR.Low txt ns meta
+pattern AltAbs :: [IR.Low] -> IR.Expr -> Maybe IR.Scheme -> IR.Expr
+pattern AltAbs args expr scheme = IR.AltAbsExpr args expr scheme
 
 
-unwrapSymRef :: IR.Sym -> IR.Sym
-unwrapSymRef (IR.Sym txt ns meta) =
-    IR.Sym txt ns meta
-
-
-mkVarTerm :: IR.Low -> Maybe IR.Meta -> IR.Expr
-mkVarTerm (IR.Low txt ns meta) optMeta =
-    let ident = IR.Low txt ns meta
-    in
-        IR.VarExpr ident optMeta
-
-
-mkBinOpTerm :: IR.Sym -> IR.Expr -> IR.Expr -> Maybe IR.Meta -> IR.Expr
-mkBinOpTerm (IR.Sym txt ns meta) e1 e2 optMeta =
-    let ident = IR.Sym txt ns meta
-    in
-        IR.BinOpExpr ident e1 e2 optMeta
-
-
-mkAbsTerm :: IR.Low -> IR.Expr -> Maybe IR.Meta -> IR.Expr
-mkAbsTerm (IR.Low txt ns meta) expr metaOpt =
-    let ident = IR.Low txt ns meta
-    in
-        IR.AbsExpr ident expr metaOpt
-    
 

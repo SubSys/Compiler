@@ -2,17 +2,18 @@
     "version": "2.0.0",
     "summary": "Fast HTML, rendered with virtual DOM diffing",
     "repository": "https://github.com/elm-lang/html.git",
-    "license": "BSD3",
     "source-directories": [
           "src/app"
         , "src/prelude"
+        , "src/libs"
     ],
     "exposed-modules": [
-        "Html",
-        "Html.Attributes",
-        "Html.Events",
-        "Html.Keyed",
-        "Html.Lazy"
+          "Main"
+        , "Basics.Arithmetic"
+        , "Basics.Booleans"
+        , "Basics.Comparison"
+        , "Basics.Equality"
+        , "List"
     ],
     "dependencies": {
         "elm-lang/core": "5.0.0 <= v < 6.0.0",
