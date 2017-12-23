@@ -61,8 +61,10 @@ import qualified SLIR.HelmSyntax.AST.Data.Header.ImportDecl as Decl
 
 
 --- Local
-import qualified SLIR.HelmSyntax.Core.Module.Normalize.Utils.Namespace as NS
-import qualified SLIR.HelmSyntax.Core.Module.Normalize.Data.System     as Sys
+import qualified SLIR.HelmSyntax.Core.Module.Normalize.Utils.Namespace    as NS
+import qualified SLIR.HelmSyntax.Core.Module.Normalize.Data.System        as Sys
+import qualified SLIR.HelmSyntax.Core.Module.Normalize.Syntax.Base.Types  as T
+import qualified SLIR.HelmSyntax.Core.Module.Normalize.Syntax.Base.Ident  as ID
 -- *
 
 
@@ -83,33 +85,44 @@ normPattern (P.Lit lit meta) =
     return
         $ P.Lit lit meta
 
-normPattern (P.Record vars meta) =
-    return
-        $ P.Record vars meta
+-- normPattern (P.Record vars meta) =
+--     return
+--         $ P.Record vars meta
 
-normPattern (P.List xs meta) =
-    return
-        $ P.List xs meta
+normPattern (P.List xs meta) = do
+    xs' <- M.mapM normPattern xs
+    
+    return (P.List xs' meta)
 
-normPattern (P.Cons xs rest meta) =
-    return
-        $ P.Cons xs rest meta
 
-normPattern (P.Tuple items meta) =
-    return
-        $ P.Tuple items meta
+normPattern (P.Cons xs (Just rest) meta) = do
+    xs' <- M.mapM normPattern xs
+    rest' <- normPattern rest
+    
+    return (P.Cons xs' (Just rest') meta)
 
-normPattern (P.Con id' args meta) =
-    return
-        $ P.Con id' args meta
+normPattern (P.Cons xs Nothing meta) = do
+    xs' <- M.mapM normPattern xs
+    
+    return (P.Cons xs' Nothing meta)
+
+normPattern (P.Tuple items meta) = do
+    items' <- M.mapM normPattern items
+    
+    return (P.Tuple items' meta)
+
+normPattern (P.Con name args meta) = do
+    name' <- ID.normBig name
+    args' <- M.mapM normPattern args
+    
+    return (P.Con name' args' meta)
 
 normPattern (P.Var id' meta) =
-    return
-        $ P.Var id' meta
+    
+    return (P.Var id' meta)
 
 normPattern (P.Wildcard meta) =
-    return
-        $ P.Wildcard meta
+    return (P.Wildcard meta)
 
 
 
