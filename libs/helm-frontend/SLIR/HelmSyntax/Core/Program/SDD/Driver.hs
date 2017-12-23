@@ -86,6 +86,7 @@ import qualified SLIR.HelmSyntax.Core.Program.SDD.Init.Unions as Init
 
 -- Post-Work
 import qualified SLIR.HelmSyntax.Core.Program.SDD.PostWork.Lift as Lift
+import qualified SLIR.HelmSyntax.Core.Program.SDD.PostWork.Desugar as Desugar
 -- *
 
 
@@ -131,8 +132,9 @@ runSDD' payload =
 
 
 finalize :: [Decl.Function] -> [Decl.Function]
-finalize =
-    Lift.processDecls
+finalize decls =
+    decls |> Lift.processDecls
+          |> Desugar.desugar
 
 
 formatError :: Report.TypeError -> Text
