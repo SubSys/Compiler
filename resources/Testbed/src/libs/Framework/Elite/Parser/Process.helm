@@ -1,3 +1,0 @@
-module Framework.Elite.Parser.Process exposing (..)
-
-import Core

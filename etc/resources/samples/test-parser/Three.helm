@@ -1,0 +1,172 @@
+module Three exposing (..)
+
+
+import Helm.Compiler.Sudo.Native
+
+
+
+type Maybe a
+    = Nothing
+    | Just a
+
+type Either a b
+    = Left a
+    | Right b
+
+type User = Anonymous | Named String
+
+type Visibility = All | Active | Completed
+
+
+
+
+plus : Int -> Int -> Int
+plus x y =
+    Helm.Compiler.Sudo.Native.plus x y
+
+plus : Float -> Float -> Float
+plus x y =
+    Helm.Compiler.Sudo.Native.plus x y
+
+
+isEq : Char -> Char -> Bool
+isEq x y =
+    Helm.Compiler.Sudo.Native.isEqChar x y
+
+isEq : String -> String -> Bool
+isEq x y =
+    Helm.Compiler.Sudo.Native.isEqChar x y
+
+
+isEq : Int -> Int -> Bool
+isEq x y =
+    Helm.Compiler.Sudo.Native.isEqInt x y
+
+
+(+) : Int -> Int -> Int
+(+) leftA rightA =
+    Helm.Compiler.Sudo.Native.plus leftA rightA
+
+
+(+) : Float -> Float -> Float
+(+) leftA rightA =
+    Helm.Compiler.Sudo.Native.plus leftA rightA
+
+
+(-) : Int -> Int -> Int
+(-) leftA rightA =
+    Helm.Compiler.Sudo.Native.sub leftA rightA
+
+
+(-) : Float -> Float -> Float
+(-) leftA rightA =
+    Helm.Compiler.Sudo.Native.sub leftA rightA
+
+
+
+(==) : Int -> Int -> Bool
+(==) leftA rightA =
+    Helm.Compiler.Sudo.Native.isEqInt leftA rightA
+
+(==) : Float -> Float -> Bool
+(==) leftA rightA =
+    Helm.Compiler.Sudo.Native.isEqFloat leftA rightA
+
+(==) : Char -> Char -> Bool
+(==) leftA rightA =
+    Helm.Compiler.Sudo.Native.isEqChar leftA rightA
+
+(==) : String -> String -> Bool
+(==) leftA rightA =
+    Helm.Compiler.Sudo.Native.isEqString leftA rightA
+
+
+alpha x y =
+    x + y
+
+
+beta x y =
+    x == y
+
+
+gamma x y =
+    plus x y
+
+
+delta x y =
+    isEq x y
+
+epsilon x =
+    isEq x 1
+
+
+zeta =
+    1 == 1
+
+
+eta y =
+    isEq 1 y
+
+
+theta =
+    isEq 1
+
+iota x y =
+    x + y
+
+
+kappa =
+    iota 1 1
+
+lambda x =
+    iota 1 x
+
+
+mu : Int -> Int -> Int
+mu x y =
+    Helm.Compiler.Sudo.Native.plus x y
+
+
+nu x y =
+    mu x y
+
+xi x =
+    mu 1 x
+
+omicron =
+    mu 1
+
+pi =
+    mu
+
+
+rho =
+    1 + 1
+
+sigma x =
+    plus x 1
+
+tau x =
+    isEq x 1
+
+
+upsilon x =
+    isEq 1 x
+
+
+phi x =
+    plus x 1
+
+
+chi x =
+    plus 1 x
+
+
+psi f x y =
+    f x y
+
+
+omega x y =
+    (1 + x) == y
+
+

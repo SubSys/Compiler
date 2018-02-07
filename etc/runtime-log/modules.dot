@@ -1,0 +1,18 @@
+digraph
+{
+  "Core"
+  "Core.Basics"
+  "Core.Basics.Booleans Core.Basics.Comparison Core.Basics.Equality Core.Basics.Math Core.Basics.Utils.Functional"
+  "Core.Char Core.List Core.Maybe Core.Platform.Cmd Core.Platform.Sub"
+  "Core.Debug"
+  "Core.Platform"
+  "Core.Result Core.String Core.Tuple"
+  "Main"
+  "Core" -> "Core.Debug"
+  "Core.Basics" -> "Core.Char Core.List Core.Maybe Core.Platform.Cmd Core.Platform.Sub"
+  "Core.Basics.Booleans Core.Basics.Comparison Core.Basics.Equality Core.Basics.Math Core.Basics.Utils.Functional" -> "Core.Basics"
+  "Core.Char Core.List Core.Maybe Core.Platform.Cmd Core.Platform.Sub" -> "Core.Platform"
+  "Core.Debug" -> "Main"
+  "Core.Platform" -> "Core.Result Core.String Core.Tuple"
+  "Core.Result Core.String Core.Tuple" -> "Core"
+}

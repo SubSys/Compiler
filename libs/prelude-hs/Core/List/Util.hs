@@ -1,9 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module Core.List.Util (flatten, singleton) where
 
--- *
+
 import qualified Data.List as List
--- *
+
 
 
 flatten :: [[a]] -> [a]         
