@@ -1,3 +1,8 @@
+# NOTE: New development on the `mvp-redesign` branch
+> This is the old codebase, left here temporarily...
+
+I’ve learned a lot since I began this project. To such an extent that I’ve realized, everything is too messy, complicated, and hopefully can be vastly simplified, and or improved.
+
 # The Helm Compiler
 > Although eventually I would like to support multiple languages, with some conveniences for interoperability.
 
