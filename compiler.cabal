@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: db18fbe58f566b2ce70aac5994408d3500f088f1994cc3465125e80ca5532d39
+-- hash: e9aef74b9c08f97eb267f1ba555999102fdc5826953dcb18840c209ec767d4f9
 
 name:           Compiler
 version:        0.1.0.0
@@ -129,6 +129,12 @@ library
       SLIR.HelmSyntax.AST.Utils.Scope
       SLIR.HelmSyntax.Internal.AST
       SLIR.HelmSyntax.Module.Core.InfixResolve.Driver
+      SLIR.HelmSyntax.Module.Core.Ordering.Data.Node
+      SLIR.HelmSyntax.Module.Core.Ordering.Data.Report
+      SLIR.HelmSyntax.Module.Core.Ordering.Debug.Dot.Export
+      SLIR.HelmSyntax.Module.Core.Ordering.Dev
+      SLIR.HelmSyntax.Module.Core.Ordering.Validations.Functions
+      SLIR.HelmSyntax.Module.Core.Ordering.Validations.Unions
       SLIR.HelmSyntax.Module.Core.Parser.Dev
       SLIR.HelmSyntax.Module.Core.Parser.Driver
       SLIR.HelmSyntax.Module.Core.Parser.Syntax
@@ -187,6 +193,9 @@ library
       SLIR.HelmSyntax.Module.System.Normalize.Dev
       SLIR.HelmSyntax.Module.System.Normalize.Driver
       SLIR.HelmSyntax.Module.System.Normalize.Syntax
+      SLIR.HelmSyntax.Module.Validity.UserspaceLiteral.Driver
+      SLIR.HelmSyntax.Pipeline
+      SLIR.HelmSyntax.Pipeline.Interface.ToProgram
       SLIR.HelmSyntax.Program.Core.Desugar.Dev
       SLIR.HelmSyntax.Program.Core.Desugar.Driver
       SLIR.HelmSyntax.Program.Core.Desugar.P1.Pass

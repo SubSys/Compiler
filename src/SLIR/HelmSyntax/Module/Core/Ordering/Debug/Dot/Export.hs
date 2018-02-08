@@ -1,6 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns #-}
-module SLIR.HelmSyntax.Program.Core.Lift.Dev where
+module SLIR.HelmSyntax.Module.Core.Ordering.Debug.Dot.Export (
+    debugLog
+) where
+
 
 -- *
 import Core
@@ -8,7 +10,7 @@ import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Data.Monoid ((<>))
 import Prelude
-    (return
+    ( return
     , String
     , IO
     , show
@@ -51,7 +53,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-import qualified Data.String                  as String
+
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -60,23 +62,22 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
--- + HelmSyntax Module Interface
-import qualified SLIR.HelmSyntax.Program.Data.Interface as I
+-- + Graphing & Related
+import qualified Algebra.Graph              as G
+import qualified Algebra.Graph.Export.Dot   as Dot
+import qualified Algebra.Graph.AdjacencyMap as AM
 
--- + HelmSyntax AST Renderer
-import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
+
+
+-- + HelmSyntax Module Interface
+import qualified SLIR.HelmSyntax.Module.Data.Interface as I
 
 -- + HelmSyntax AST Utils
-import qualified SLIR.HelmSyntax.AST.Utils.Scope                         as Scope
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident               as ID
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI   as SudoFFI
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.Recursive as Rec
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Type                as T
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Binders             as Binder
+import qualified SLIR.HelmSyntax.AST.Utils.Scope           as Scope
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident as ID
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -96,65 +97,14 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
--- + Dev Utils
-import qualified SLIR.HelmSyntax.Module.Dev.Utils.Interface.ToProgram as DevUtil
-import qualified SLIR.HelmSyntax.Program.Dev.Utils.Interface.ToModule as DevUtil
-
-
--- + HelmSyntax - Module Drivers
-import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver            as Driver
-import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver         as Driver
-
--- + HelmSyntax - Program Drivers
-import qualified SLIR.HelmSyntax.Program.Core.Uncurry.Driver   as Driver
-import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver as Driver'
-import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver as Driver
-
 -- + Local
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+debugLog :: Pre.FilePath -> AM.AdjacencyMap Text -> IO ()
+debugLog filePath graph =
+    TIO.writeFile filePath (Dot.exportAsIs graph)
 
 
-
-
-
-inputFilePath = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
-
-
-
-
-
-upstream =
-    let filePath   = inputFilePath
-        sourceCode = SIO.readFile inputFilePath
-    in
-        sourceCode
-            |> Driver.runModuleParser filePath
-            |> Driver.typeCheck
-            |> DevUtil.toProgram
-            |> Driver.desugar
-
-
-
-run = do
-    result <- upstream
-    case result of
-        Left err ->
-            putStrLn $ Text.unpack err
-        Right payload ->
-            run' payload
-
-
-
-run' payload = do
-    
-    
-    (TIO.putStrLn . Syntax.renderFunctions) fns
-
-
-    where
-        fns = I.getFunctions payload
 

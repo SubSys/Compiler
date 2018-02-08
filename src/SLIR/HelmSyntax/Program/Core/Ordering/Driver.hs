@@ -1,6 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ViewPatterns #-}
-module SLIR.HelmSyntax.Program.Core.Lift.Dev where
+module SLIR.HelmSyntax.Program.Core.Ordering.Driver (
+    sortEvalOrder
+  , sortEvalOrder'
+) where
+
 
 -- *
 import Core
@@ -18,6 +22,8 @@ import Prelude
     , (>>)
     , fromIntegral
     )
+
+import qualified Data.Data as Data
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
@@ -75,8 +81,10 @@ import qualified SLIR.HelmSyntax.AST.Utils.Scope                         as Scop
 import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident               as ID
 import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI   as SudoFFI
 import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.Recursive as Rec
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Type                as T
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Type                as Type
 import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Binders             as Binder
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Expr                as Expr
+
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -96,22 +104,17 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
--- + Dev Utils
-import qualified SLIR.HelmSyntax.Module.Dev.Utils.Interface.ToProgram as DevUtil
-import qualified SLIR.HelmSyntax.Program.Dev.Utils.Interface.ToModule as DevUtil
-
 
 -- + HelmSyntax - Module Drivers
-import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver            as Driver
-import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver         as Driver
-
--- + HelmSyntax - Program Drivers
-import qualified SLIR.HelmSyntax.Program.Core.Uncurry.Driver   as Driver
-import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver as Driver'
-import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver as Driver
+import qualified SLIR.HelmSyntax.Module.Core.Ordering.Driver as Driver'
 
 -- + Local
+-- TODO: Maybe move out?...
+import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Interface.Conversion.ToProgram as Interface
+import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Interface.Conversion.ToModule  as Interface
 -- *
+
+
 
 
 
@@ -120,41 +123,26 @@ import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver as Driver
 
 
 
-
-inputFilePath = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
-
-
-
-
-
-upstream =
-    let filePath   = inputFilePath
-        sourceCode = SIO.readFile inputFilePath
-    in
-        sourceCode
-            |> Driver.runModuleParser filePath
-            |> Driver.typeCheck
-            |> DevUtil.toProgram
-            |> Driver.desugar
-
-
-
-run = do
+sortEvalOrder :: IO (Either Text I.Program) -> IO (Either Text I.Program)
+sortEvalOrder upstream = do
     result <- upstream
+    
     case result of
-        Left err ->
-            putStrLn $ Text.unpack err
+        Left err -> return $ Left err
         Right payload ->
-            run' payload
+            return
+                $ sortEvalOrder' payload
+
+
+sortEvalOrder' :: I.Program -> Either Text I.Program
+sortEvalOrder' (Interface.toModule' -> payload) =
+    case Driver'.sortEvalOrder' payload of
+        Left err -> Left err
+        Right payload' ->
+            Right $ Interface.toProgram' payload'
 
 
 
-run' payload = do
-    
-    
-    (TIO.putStrLn . Syntax.renderFunctions) fns
 
 
-    where
-        fns = I.getFunctions payload
 

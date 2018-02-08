@@ -72,7 +72,8 @@ import qualified SLIR.HelmSyntax.Module.Data.Interface as I
 import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
 
 -- + HelmSyntax AST Utils
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident as ID
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident             as ID
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI as SudoFFI
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -102,14 +103,21 @@ freeVars :: Decl.Function -> [ID.Ident]
 freeVars input =
     let
         binders = [ x | (Etc.Binder x ty) <- Uni.universeBi input]
-        vars    = [ x | (E.Var x meta) <- Uni.universeBi input]
+        vars1    = [ x | (E.Var x meta) <- Uni.universeBi input]
+        vars2    = [ x | (E.InfixApp x _ _ _) <- Uni.universeBi input]
+
     in
-        vars `without` binders
+        (vars1 ++ vars2) `without` binders
+            |> List.filter (not . sudoFFI)
 
     where
         without :: Eq a => [a] -> [a] -> [a]
         without =
             Fold.foldr (List.filter . (/=))
+        
+        
+        sudoFFI :: ID.Ident -> Bool
+        sudoFFI (ID.Ident _ ns _) = SudoFFI.isSudoNS ns
 
 
 
