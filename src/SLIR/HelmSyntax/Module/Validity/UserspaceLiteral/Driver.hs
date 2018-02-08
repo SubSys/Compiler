@@ -1,15 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-module SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident (
-    Identifiable(..)
-  , gets
-  , getText
-  , getTexts
-) where
-
+-- {-# LANGUAGE PatternGuards #-}
+module SLIR.HelmSyntax.Module.Validity.UserspaceLiteral.Driver where
 
 
 -- *
@@ -29,9 +20,9 @@ import Prelude
     , fromIntegral
     )
 
+
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
-
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -62,16 +53,25 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 
 -- + Recursion Schemes & Related
-import qualified Data.Functor.Foldable as F
+import qualified Data.Functor.Foldable       as F
+import qualified Data.Generics.Uniplate.Data as Uni
+
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 -- + HelmSyntax Module Interface
 import qualified SLIR.HelmSyntax.Module.Data.Interface as I
+
+-- + HelmSyntax AST Utils
+import qualified SLIR.HelmSyntax.AST.Utils.Scope                       as Scope
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident             as ID
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI as SudoFFI
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Unions            as Union
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -80,6 +80,7 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident    as ID
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Types    as T
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Values   as V
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Metadata as Meta
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Header   as Header
 
 -- ++ TermLevel
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Expr     as E
@@ -89,44 +90,55 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Patterns as P
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
+
+
+-- + Local
 -- *
 
 
-
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-
-
-class Identifiable a where
-    get :: a -> ID.Ident
-
-
-
-instance Identifiable Etc.Binder where
-    get (Etc.Binder name _) = name
-
-
-instance Identifiable Decl.Function where
-    get (Decl.Function (Etc.Binder name _) _ _ _ _) = name
-
-
-instance Identifiable Decl.Union where
-    get (Decl.Union name _ _ _) = name
-
-instance Identifiable Decl.Constructor where
-    get (Decl.Constructor name _ _) = name
-
-gets :: Identifiable a => [a] -> [ID.Ident]
-gets = map get
+userspaceLiteral' :: I.Module -> Either Text I.Module
+userspaceLiteral' payload
+    | Just ty <- List.find (`List.elem` literalTypes) (ID.getTexts $ ID.gets uns) =
+        Left $ Text.unlines
+            [ Text.pack "You’ve defined a type that I have already defined:"
+            , Text.pack $ PP.prettyShow ty 
+            , Text.pack "Rejecting due to possibility of weird interactions."
+            ]
+    | Just c <- List.find (`List.elem` literalConstrValues) (ID.getTexts $ ID.gets cons) =
+        Left $ Text.unlines
+            [ Text.pack "You’ve defined a value that I have already defined:"
+            , Text.pack $ PP.prettyShow c
+            , Text.pack "Rejecting due to possibility of weird interactions."
+            ]
+    | otherwise = Right payload
+    where
+        uns  = I.getUnions payload
+        cons = flatten $ map Union.getConstructors uns
 
 
 
-getText :: ID.Ident -> Text
-getText (ID.Ident txt _ _) = txt
+literalTypes =
+    [ Text.pack "String"
+    , Text.pack "Char"
+    , Text.pack "Bool"
+    , Text.pack "Int"
+    , Text.pack "Float"
+    , Text.pack "I8"
+    , Text.pack "I16"
+    , Text.pack "I32"
+    , Text.pack "I64"
+    , Text.pack "I128"
+    , Text.pack "U8"
+    , Text.pack "U16"
+    , Text.pack "U32"
+    , Text.pack "U64"
+    , Text.pack "U128"
+    , Text.pack "F32"
+    , Text.pack "F64"
+    ]
 
-getTexts :: [ID.Ident] -> [Text]
-getTexts  = map getText
-
-
+literalConstrValues =
+    [ Text.pack "True"
+    , Text.pack "False"
+    ]
 
