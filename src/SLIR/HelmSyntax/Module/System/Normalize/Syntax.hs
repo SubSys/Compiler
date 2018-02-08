@@ -1,5 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Module.System.Normalize.Syntax where
+{-# LANGUAGE PartialTypeSignatures #-}
+module SLIR.HelmSyntax.Module.System.Normalize.Syntax (
+    normalize
+) where
 
 
 -- *
@@ -97,8 +100,60 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
 
 
+normalize :: (Data.Data a, Data.Typeable a) => I.Module -> a -> a
+normalize payload = Uni.transformBi (normIdent payload)
 
 
+
+
+
+normIdent :: I.Module -> ID.Ident -> ID.Ident
+normIdent payload ident
+    | isLocal ident payload =
+        namespaceOverride (I.getModuleName payload) ident
+    | otherwise = error $ PP.prettyShow ident
+
+
+
+-- | Internal Helpers
+--
+
+
+isLocal :: ID.Ident -> I.Module -> Bool
+isLocal name payload
+    |  name `List.elem` ID.gets fns
+    || name `List.elem` ID.gets uns = True
+    | otherwise                     = False
+    where
+        uns = I.getFunctions payload
+        fns = I.getFunctions payload
+
+
+-- | 
+-- I.e. a dependency
+-- isExternal ID.Ident -> I.Module -> Bool
+-- isExternal name payload
+--     where
+--         unsDeps = I.getUnionDeps payload
+--         funDeps = I.getFunctionDeps payload
+-- 
+--         imports = I.getImports payload
+
+
+namespaceOverride :: (Data.Data a, Data.Typeable a) => ID.Namespace -> a -> a
+namespaceOverride ns = Uni.transformBi f
+    where
+        f :: Maybe ID.Namespace -> Maybe ID.Namespace
+        f _ = Just ns
+
+
+
+-- lookupImport :: ID.Ident -> [Header.ImportDecl] -> ID.Namespace
+-- lookupImport (ID.id) =
+--     List.find pred 
+--     where
+--         pred :: Header.ImportDecl -> Bool
+--         pred (Header.ImportDecl namespace Nothing)
 
 
 

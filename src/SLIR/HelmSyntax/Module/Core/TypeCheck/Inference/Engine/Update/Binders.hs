@@ -295,6 +295,7 @@ updateMeta subs x@Meta.Meta{}
             { Meta.span = Meta.span x
             , Meta.inferredType = Just (TySub.apply subs tv)
             , Meta.overloadedTargetType = Meta.overloadedTargetType x
+            , Meta.originalNamespace = Nothing
             }
 
 updateMeta subs x = x
@@ -308,6 +309,7 @@ updateMetaWithOLType subs x@Meta.Meta{}
             { Meta.span = Meta.span x
             , Meta.inferredType = Just (TySub.apply subs tv)
             , Meta.overloadedTargetType = Just (TySub.apply subs olTv)
+            , Meta.originalNamespace = Nothing
             }
 
 updateMetaWithOLType subs x = x

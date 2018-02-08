@@ -95,6 +95,8 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- + Local
 import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver    as Driver
 import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver as Driver
+
+import qualified SLIR.HelmSyntax.Module.System.Normalize.Syntax as Syntax
 -- *
 
 
@@ -138,7 +140,8 @@ run' payload = do
     (TIO.putStrLn . Syntax.renderFunctions) fns
     
   where
-    fns = I.getFunctions payload
-    uns = I.getUnions payload
+    payload' = Syntax.normalize payload payload
+    fns = I.getFunctions payload'
+    uns = I.getUnions payload'
 
 

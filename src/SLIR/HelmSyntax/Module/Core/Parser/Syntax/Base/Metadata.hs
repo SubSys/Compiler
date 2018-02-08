@@ -94,6 +94,7 @@ initMeta startingLocation endingLocation =
             Just $ Meta.Span startingLocation endingLocation
         , Meta.inferredType = Nothing
         , Meta.overloadedTargetType = Nothing
+        , Meta.originalNamespace = Nothing
         }
 
 

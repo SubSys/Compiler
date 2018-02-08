@@ -148,9 +148,13 @@ processImport _ (Header.ImportDecl (SudoFFI.isSudoNS' -> True) _ _) = Right ([],
 processImport mods (Header.ImportDecl name Nothing (Just Header.Everything))
     | Just payload <- getModule name mods =
         let
+            -- Finalize
             fns = I.getFunctions payload
+                |> recordOriginalDeclNS name
             uns = I.getUnions payload
+                |> recordOriginalUnionNS name
             fxs = I.getFixities payload
+                |> recordOriginalNamespace name
         in
             Right (fns, uns, fxs)
 
@@ -166,17 +170,21 @@ processImport mods (Header.ImportDecl name asName (Just entries))
                 |> declEntriesFilter exports
                 |> declEntriesFilter entries
                 |> initFuns namespace
+                |> recordOriginalDeclNS name
 
             uns = I.getUnions payload
                 |> unionEntriesFilter exports
                 |> unionEntriesFilter entries
                 |> initUnions namespace
+                |> recordOriginalUnionNS name
 
             fxs = I.getFixities payload
                 |> namespaceOverride namespace
+                |> recordOriginalNamespace name
 
         in
             Right (fns, uns, fxs)
+
 
 
 processImport _ (Header.ImportDecl name _ _) =
@@ -310,4 +318,58 @@ formatNSWithAsName ns Nothing = ns
 formatNSWithAsName _ (Just (ID.getText -> name)) =
     ID.Namespace [name]
 
+
+recordOriginalDeclNS :: ID.Namespace -> [Decl.Function] -> [Decl.Function]
+recordOriginalDeclNS ns = map f
+    where
+        f :: Decl.Function -> Decl.Function
+        f (Decl.Function name args expr sig meta) =
+            Decl.Function
+                (recordOriginalNamespace ns name)
+                args
+                expr
+                sig
+                (recordOriginalNamespace ns meta)
+
+
+recordOriginalUnionNS :: ID.Namespace -> [Decl.Union] -> [Decl.Union]
+recordOriginalUnionNS ns = map union
+    where
+        union :: Decl.Union -> Decl.Union
+        union (Decl.Union name as cs meta) =
+            Decl.Union
+                (recordOriginalNamespace ns name)
+                as
+                (map constr cs)
+                (recordOriginalNamespace ns meta)
+        
+        constr :: Decl.Constructor -> Decl.Constructor
+        constr (Decl.Constructor name args meta) =
+            Decl.Constructor
+                (recordOriginalNamespace ns name)
+                args
+                (recordOriginalNamespace ns meta)
+
+
+
+
+recordOriginalNamespace :: (Data.Data a, Data.Typeable a) => ID.Namespace -> a -> a
+recordOriginalNamespace ns = Uni.transformBi (f ns)
+    where
+        f :: ID.Namespace -> Meta.Meta -> Meta.Meta
+        f ns meta@Meta.Meta{} =
+            Meta.Meta
+                { Meta.span = Meta.span meta
+                , Meta.inferredType = Meta.inferredType meta
+                , Meta.overloadedTargetType = Meta.overloadedTargetType meta
+                , Meta.originalNamespace = Just ns
+                }
+
+        f ns meta@Meta.Empty{} =
+            Meta.Meta
+                { Meta.span = Nothing
+                , Meta.inferredType = Nothing
+                , Meta.overloadedTargetType = Nothing
+                , Meta.originalNamespace = Just ns
+                }
 

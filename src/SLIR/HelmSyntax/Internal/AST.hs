@@ -339,6 +339,7 @@ data Meta
         -- use this field to record, and resolve the overloaded decl...
         -- NOTE: (At the time of writing this) Currently this is set for all FunCall expressions…
         , overloadedTargetType :: Maybe Type
+        , originalNamespace :: Maybe Namespace
         }
     
     deriving (Data, Typeable)

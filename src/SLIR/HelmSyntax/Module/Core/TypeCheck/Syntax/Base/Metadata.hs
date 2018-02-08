@@ -107,6 +107,7 @@ setMeta ty meta =
         { Meta.span = Meta.span meta
         , Meta.inferredType = Just ty
         , Meta.overloadedTargetType = Meta.overloadedTargetType meta
+        , Meta.originalNamespace = Nothing
         }
 
 
@@ -120,6 +121,7 @@ recordType resTy x@Meta.Empty = do
             { Meta.span = Nothing
             , Meta.inferredType = Just resTy
             , Meta.overloadedTargetType = Nothing
+            , Meta.originalNamespace = Nothing
             }
     
     return meta
@@ -139,6 +141,7 @@ recordOverloadedTargetType resTy olType x@Meta.Meta{} =
             { Meta.span = Meta.span x
             , Meta.inferredType = Just resTy
             , Meta.overloadedTargetType = Just olType
+            , Meta.originalNamespace = Nothing
             }
 
 recordOverloadedTargetType resTy olType x@Meta.Empty =
@@ -146,5 +149,6 @@ recordOverloadedTargetType resTy olType x@Meta.Empty =
             { Meta.span = Nothing
             , Meta.inferredType = Just resTy
             , Meta.overloadedTargetType = Just olType
+            , Meta.originalNamespace = Nothing
             }
 
