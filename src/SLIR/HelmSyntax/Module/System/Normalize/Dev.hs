@@ -136,12 +136,12 @@ run = do
 
 run' payload = do
     
-    
+    (TIO.putStrLn . Syntax.renderUnions) uns
     (TIO.putStrLn . Syntax.renderFunctions) fns
     
-  where
-    payload' = Syntax.normalize payload payload
-    fns = I.getFunctions payload'
-    uns = I.getUnions payload'
+    where
+        payload' = Syntax.normalize payload payload
+        fns = I.getFunctions payload'
+        uns = I.getUnions payload'
 
 

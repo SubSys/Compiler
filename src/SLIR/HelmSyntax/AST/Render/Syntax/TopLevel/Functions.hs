@@ -105,10 +105,15 @@ import qualified SLIR.HelmSyntax.AST.Render.Syntax.TermLevel.Expr     as E
 
 renderFunction (Decl.Function name args expr sig meta) =
     let name' = case ID.get name of
-            (ID.OnSym txt _ _) -> Util.parens $ render txt
-            (ID.Ident txt _ _) -> render txt
+            (ID.OnSym txt Nothing _)   -> Util.parens $ render txt
+            (ID.Ident txt Nothing _)   -> render txt
+            (ID.OnSym txt (Just ns) _) -> renderNS ns <> Util.parens (render txt)
+            (ID.Ident txt (Just ns) _) -> renderNS ns <> render txt
     in
         renderFunction' name' args expr sig
+    
+    where
+        renderNS ns = ID.renderNamespace ns <> "."
 
 
 renderFunction' :: Doc -> [Etc.Binder] -> E.Expr -> Decl.Signature -> Doc

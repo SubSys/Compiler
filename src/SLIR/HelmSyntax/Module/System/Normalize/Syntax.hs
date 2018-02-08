@@ -1,5 +1,4 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE PartialTypeSignatures #-}
 module SLIR.HelmSyntax.Module.System.Normalize.Syntax (
     normalize
 ) where
@@ -73,6 +72,7 @@ import qualified SLIR.HelmSyntax.Module.Data.Interface as I
 import qualified SLIR.HelmSyntax.AST.Utils.Scope                       as Scope
 import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident             as ID
 import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI as SudoFFI
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Unions            as Union
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -111,7 +111,20 @@ normIdent :: I.Module -> ID.Ident -> ID.Ident
 normIdent payload ident
     | isLocal ident payload =
         namespaceOverride (I.getModuleName payload) ident
-    | otherwise = error $ PP.prettyShow ident
+    | isExternal ident payload =
+        case lookupOriginalNamespace ident of
+            Nothing -> error $ Text.unpack $ Text.unlines
+                [ Text.pack "Internal compiler failure!"
+                , Text.pack "Failed to find the original namespace for:"
+                , Text.pack $ PP.prettyShow ident
+                , Text.pack "During normalization."
+                ]
+            Just ns ->
+                namespaceOverride (I.getModuleName payload) ident
+    
+    | otherwise =
+        ident
+
 
 
 
@@ -122,22 +135,26 @@ normIdent payload ident
 isLocal :: ID.Ident -> I.Module -> Bool
 isLocal name payload
     |  name `List.elem` ID.gets fns
-    || name `List.elem` ID.gets uns = True
-    | otherwise                     = False
+    || name `List.elem` ID.gets cons
+    || name `List.elem` ID.gets uns  = True
+    | otherwise                      = False
     where
-        uns = I.getFunctions payload
+        uns = I.getUnions payload
         fns = I.getFunctions payload
-
+        cons = flatten $ map Union.getConstructors uns
 
 -- | 
 -- I.e. a dependency
--- isExternal ID.Ident -> I.Module -> Bool
--- isExternal name payload
---     where
---         unsDeps = I.getUnionDeps payload
---         funDeps = I.getFunctionDeps payload
--- 
---         imports = I.getImports payload
+isExternal :: ID.Ident -> I.Module -> Bool
+isExternal name payload
+    |  name `List.elem` ID.gets funDeps
+    || name `List.elem` ID.gets unsDeps 
+    || name `List.elem` ID.gets cons    = True
+    | otherwise                         = False
+    where
+        unsDeps = I.getUnionDeps payload
+        funDeps = I.getFunctionDeps payload
+        cons = flatten $ map Union.getConstructors unsDeps
 
 
 namespaceOverride :: (Data.Data a, Data.Typeable a) => ID.Namespace -> a -> a
@@ -148,14 +165,8 @@ namespaceOverride ns = Uni.transformBi f
 
 
 
--- lookupImport :: ID.Ident -> [Header.ImportDecl] -> ID.Namespace
--- lookupImport (ID.id) =
---     List.find pred 
---     where
---         pred :: Header.ImportDecl -> Bool
---         pred (Header.ImportDecl namespace Nothing)
-
-
+lookupOriginalNamespace :: ID.Ident -> Maybe ID.Namespace
+lookupOriginalNamespace (ID.Ident _ _ meta) = Meta.originalNamespace meta
 
 
 

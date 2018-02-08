@@ -1,5 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.AST.Utils.Auxiliary.Unions where
+module SLIR.HelmSyntax.AST.Utils.Auxiliary.Unions (
+    lookupUnion
+  , lookupConstructor
+  , lookupUnionConPair
+  , getConstructors
+) where
 
 
 -- *
@@ -123,6 +128,9 @@ lookupUnionConPair name unions =
             Just con ->
                 Just (union, con)
 
+
+getConstructors :: Decl.Union -> [Decl.Constructor]
+getConstructors (Decl.Union _ _ cs _) = cs
 
 
 
