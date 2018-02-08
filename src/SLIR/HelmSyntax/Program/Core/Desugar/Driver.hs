@@ -107,6 +107,7 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- + HelmSyntax - Program Drivers
 import qualified SLIR.HelmSyntax.Program.Core.Uncurry.Driver   as Driver
 import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Ordering.Driver  as Driver
 
 -- + Local
 import qualified SLIR.HelmSyntax.Program.Core.Desugar.P3.Pass as P3Pass
@@ -123,12 +124,16 @@ desugar :: IO (Either Text I.Program) -> IO (Either Text I.Program)
 desugar upstream = do
     result <- upstream
     
-    case result of
-        Left err -> return $ Left err
-        Right payload ->
-            return
-                $ Right
-                $ desugar' payload
+    let finish =
+            case result of
+                Left err -> return $ Left err
+                Right payload ->
+                    return
+                        $ Right
+                        $ desugar' payload
+    
+    
+    Driver.sortEvalOrder finish
 
 
 desugar' :: I.Program -> I.Program
