@@ -108,6 +108,7 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 import qualified SLIR.HelmSyntax.Program.Core.Uncurry.Driver   as Driver
 import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver as Driver
 import qualified SLIR.HelmSyntax.Program.Core.Ordering.Driver  as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Index.Driver     as Driver
 
 -- + Local
 import qualified SLIR.HelmSyntax.Program.Core.Desugar.P3.Pass as P3Pass
@@ -133,7 +134,9 @@ desugar upstream = do
                         $ desugar' payload
     
     
-    Driver.sortEvalOrder finish
+    finish
+        |> Driver.sortEvalOrder
+        |> Driver.index
 
 
 desugar' :: I.Program -> I.Program
