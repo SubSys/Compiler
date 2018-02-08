@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Module.System.Normalize.Driver (
-    normalize
-  , normalize'
+module SLIR.HelmSyntax.Pipeline.Interface.ToProgram (
+    toProgram
+  , toProgram'
 ) where
 
 
@@ -21,7 +21,6 @@ import Prelude
     , (>>)
     , fromIntegral
     )
-
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
@@ -55,13 +54,14 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-import qualified Data.Data                    as Data
 
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
 import qualified Data.Generics.Uniplate.Data as Uni
 
+-- + OS APIS & Related
+import qualified System.IO as SIO
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
@@ -69,10 +69,12 @@ import qualified Text.Show.Prettyprint as PP
 -- + HelmSyntax Module Interface
 import qualified SLIR.HelmSyntax.Module.Data.Interface as I
 
+-- + HelmSyntax AST Renderer
+import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
+
 -- + HelmSyntax AST Utils
-import qualified SLIR.HelmSyntax.AST.Utils.Scope                       as Scope
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident             as ID
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI as SudoFFI
+import qualified SLIR.HelmSyntax.AST.Utils.Scope           as Scope
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident as ID
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -92,31 +94,37 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
-
 -- + Local
-import qualified SLIR.HelmSyntax.Module.System.Normalize.Syntax as Syntax
+import qualified SLIR.HelmSyntax.Module.Data.Interface  as Module
+import qualified SLIR.HelmSyntax.Program.Data.Interface as Program
 -- *
 
 
 
-normalize :: IO (Either Text I.Module) -> IO (Either Text I.Module)
-normalize upstream = do
-    result <- upstream
+
+
+
+toProgram :: IO (Either Text Module.Module) -> IO (Either Text Program.Program)
+toProgram input = do
+    result <- input
     
     case result of
-        Left err      -> return $ Left err
+        Left err -> return $ Left err
         Right payload ->
             return
                 $ Right
-                $ normalize' payload
+                $ toProgram' payload
 
 
-
-normalize' :: I.Module -> I.Module
-normalize' payload =
-    Syntax.normalize payload payload
-
-
+toProgram' :: Module.Module -> Program.Program
+toProgram' payload =
+    Program.Program
+        { Program.unions = uns
+        , Program.functions = fns
+        }
+    where
+        fns = Module.getFunctions payload
+        uns = Module.getUnions payload
 
 
 

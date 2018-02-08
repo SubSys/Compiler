@@ -1,8 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Module.System.Normalize.Driver (
-    normalize
-  , normalize'
-) where
+module SLIR.HelmSyntax.Pipeline where
 
 
 -- *
@@ -21,7 +18,6 @@ import Prelude
     , (>>)
     , fromIntegral
     )
-
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
@@ -55,13 +51,14 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-import qualified Data.Data                    as Data
 
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
 import qualified Data.Generics.Uniplate.Data as Uni
 
+-- + OS APIS & Related
+import qualified System.IO as SIO
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
@@ -69,10 +66,12 @@ import qualified Text.Show.Prettyprint as PP
 -- + HelmSyntax Module Interface
 import qualified SLIR.HelmSyntax.Module.Data.Interface as I
 
+-- + HelmSyntax AST Renderer
+import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
+
 -- + HelmSyntax AST Utils
-import qualified SLIR.HelmSyntax.AST.Utils.Scope                       as Scope
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident             as ID
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI as SudoFFI
+import qualified SLIR.HelmSyntax.AST.Utils.Scope           as Scope
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident as ID
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -92,30 +91,20 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
-
 -- + Local
-import qualified SLIR.HelmSyntax.Module.System.Normalize.Syntax as Syntax
+import qualified SLIR.HelmSyntax.Pipeline.Interface.ToProgram as Interface
+
+
+-- ++ Module Pipeline
+import qualified SLIR.HelmSyntax.Module.Core.InfixResolve.Driver as Driver -- TODO
+import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver       as Driver
+import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver    as Driver
+-- +++ Toolchain Specific
+import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver   as Driver
+import qualified SLIR.HelmSyntax.Module.System.Normalize.Driver  as Driver
+-- ++ Program Pipeline
+import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver     as Driver
 -- *
-
-
-
-normalize :: IO (Either Text I.Module) -> IO (Either Text I.Module)
-normalize upstream = do
-    result <- upstream
-    
-    case result of
-        Left err      -> return $ Left err
-        Right payload ->
-            return
-                $ Right
-                $ normalize' payload
-
-
-
-normalize' :: I.Module -> I.Module
-normalize' payload =
-    Syntax.normalize payload payload
-
 
 
 
