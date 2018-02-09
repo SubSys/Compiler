@@ -1,4 +1,5 @@
 # Input File:
+
 ```elm
 module One exposing (..)
 
@@ -201,6 +202,7 @@ test2 = test 0
 
 # Parsed Source Code
 ## Pretty printed (Functions and Unions):
+
 ```
 type Maybe a
     = Nothing
@@ -862,6 +864,8 @@ Function (Binder (Ident "test2" Nothing)
 
 
 ## After desugaring:
+> Note: not yet fully implemented. Likewise, the special call syntax is a temporary, convenience medium for desugaring, lambda lifting and closure conversion; will be reverted back to traditional expression applications thereafter. 
+
 ```
 º0 : Int -> Int -> Int
 º0 º1 º2 =
