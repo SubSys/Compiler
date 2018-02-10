@@ -298,7 +298,9 @@ parseApp f =
         expr = choice
             [ parseVar f
             , parseCon f
+            , try (parseAbs f)
             , parseParens f
+            
             ]
         
         arg = choice
@@ -308,6 +310,7 @@ parseApp f =
             , try (parseList f)
             , try (parseVar f)
             , try (parseParens f)
+            , try (parseAbs f)
             , parseTuple f
             ]
 

@@ -59,9 +59,6 @@ type Visibility = All | Active | Completed
     Sudo.Helm.Native.isEqChar leftA rightA
 
 
-iota = (\x y -> x)
-
-
 plusA x y =
     x + y
 
@@ -199,6 +196,8 @@ test2 = test 0
 
 
 
+iota =
+    (\x -> x) 1
 
 
 
