@@ -1,6 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module SLIR.HelmSyntax.AST.Utils.Auxiliary.Expr (
-    getCallee
+    freeVars
+  , getCallee
   , getConstrCallee
   , flattenApps
   , freshVar
@@ -70,6 +71,10 @@ import qualified Text.Show.Prettyprint as PP
 -- + HelmSyntax Module Interface
 import qualified SLIR.HelmSyntax.Module.Data.Interface as I
 
+-- + HelmSyntax AST Utils
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident             as ID
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI as SudoFFI
+
 -- + HelmSyntax AST
 -- ++ Base
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc      as Etc
@@ -88,6 +93,29 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- *
 
+
+
+
+
+freeVars :: E.Expr -> [ID.Ident]
+freeVars input =
+    let
+        binders = [ x | (Etc.Binder x ty) <- Uni.universeBi input]
+        vars1    = [ x | (E.Var x meta) <- Uni.universe input]
+        vars2    = [ x | (E.InfixApp x _ _ _) <- Uni.universe input]
+
+    in
+        (vars1 ++ vars2) `without` binders
+            |> List.filter (not . sudoFFI)
+
+    where
+        without :: Eq a => [a] -> [a] -> [a]
+        without =
+            Fold.foldr (List.filter . (/=))
+        
+        
+        sudoFFI :: ID.Ident -> Bool
+        sudoFFI (ID.Ident _ ns _) = SudoFFI.isSudoNS ns
 
 
 

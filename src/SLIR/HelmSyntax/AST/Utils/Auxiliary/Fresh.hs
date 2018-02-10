@@ -1,5 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.AST.Utils.Auxiliary.Fresh where
+module SLIR.HelmSyntax.AST.Utils.Auxiliary.Fresh (
+    freshVar
+  , freshBinder
+  , freshIdent
+  , freshLabel
+) where
 
 
 -- *

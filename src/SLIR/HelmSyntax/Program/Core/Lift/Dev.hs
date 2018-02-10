@@ -77,6 +77,8 @@ import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI   as Sudo
 import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.Recursive as Rec
 import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Type                as T
 import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Binders             as Binder
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Fresh               as Fresh
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Expr                as Expr
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -108,9 +110,13 @@ import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver         as Driver
 -- + HelmSyntax - Program Drivers
 import qualified SLIR.HelmSyntax.Program.Core.Uncurry.Driver   as Driver
 import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver as Driver'
-import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver   as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Ordering.Driver  as Driver'
+import qualified SLIR.HelmSyntax.Program.Core.Index.Driver     as Driver
 
 -- + Local
+import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.System as Sys
+import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.Report as Report
 -- *
 
 
@@ -136,6 +142,13 @@ upstream =
             |> Driver.typeCheck
             |> DevUtil.toProgram
             |> Driver.desugar
+            -- |> Driver.index
+            |> Driver'.typeCheck
+            |> Driver.index
+            |> Driver'.typeCheck
+            |> lambdaLift
+            |> Driver'.sortEvalOrder
+            -- |> Driver'.typeCheck
 
 
 
@@ -157,4 +170,214 @@ run' payload = do
 
     where
         fns = I.getFunctions payload
+
+
+
+-- | Driver
+--
+
+lambdaLift :: IO (Either Text I.Program) -> IO (Either Text I.Program)
+lambdaLift upstream = do
+    result <- upstream
+    
+    case result of
+        Left err -> return $ Left err
+        Right payload ->
+            return $ lambdaLift' payload
+
+
+lambdaLift' :: I.Program -> Either Text I.Program
+lambdaLift' payload@(I.getFunctions -> decls) =
+    case runLifter decls of
+        Left err           -> Left $ Text.pack $ PP.prettyShow err
+        Right (fns1, fns2) ->
+            Right $ I.updateFunctions' payload (fns1 ++ fns2)
+
+
+runLifter :: [Decl.Function] -> Either Report.LiftError ([Decl.Function], [Decl.Function])
+runLifter decls = Sys.runLift Map.empty (M.mapM liftDecl decls)
+
+
+-- | Utils
+--
+
+freshIdent = do
+    idx <- Sys.incCounter
+    
+    return $ Fresh.freshIdent idx
+
+
+freshBinder = do
+    idx <- Sys.incCounter
+    
+    return $ Fresh.freshBinder idx
+
+
+newDecl :: ID.Ident -> [Etc.Binder] -> E.Expr -> Sys.Lift ()
+newDecl name args expr =
+    M.tell [fn]
+    where
+        fn = Decl.Function (Etc.Binder_ name) args expr Decl.Unknown Meta.Empty
+
+
+
+
+-- | Syntax Traversals
+--
+
+
+liftDecl :: Decl.Function -> Sys.Lift Decl.Function
+liftDecl (Decl.Function name args expr sig meta) = do
+    expr' <- liftExpr expr
+    
+    return (Decl.Function name args expr' sig meta)
+
+
+liftExpr :: E.Expr -> Sys.Lift E.Expr
+liftExpr var@(E.Var name meta) = do
+    return var
+
+liftExpr (E.Lit val meta) = do
+    return (E.Lit val meta)
+
+liftExpr (E.Tuple items meta) = do
+    items' <- M.mapM liftExpr items
+    
+    return (E.Tuple items' meta)
+
+liftExpr (E.List xs meta) = do
+    xs' <- M.mapM liftExpr xs
+    
+    return (E.List xs' meta)
+
+liftExpr (E.Constr ident meta) = do
+    return (E.Constr ident meta)
+
+liftExpr (E.InfixApp sym e1 e2 meta) = do
+    e1' <- liftExpr e1
+    e2' <- liftExpr e2
+    
+    return (E.InfixApp sym e1' e2' meta)
+
+liftExpr (E.If intros elseExpr meta) = do
+    intros' <- Core.mapPairsM liftExpr intros
+    elseExpr' <- liftExpr elseExpr
+    
+    return (E.If intros' elseExpr' meta)
+
+liftExpr (E.Let fns expr meta) = do
+    return (E.Let fns expr meta)
+
+liftExpr (E.Case con alts meta) = do
+    con' <- liftExpr con
+    alts' <- M.mapM liftCaseAlt alts
+    
+    return (E.Case con' alts' meta)
+
+liftExpr (E.Parens expr meta) = do
+    expr' <- liftExpr expr
+    
+    return (E.Parens expr' meta)
+
+liftExpr (E.App e1 e2 meta) = do
+    e1' <- liftExpr e1
+    e2' <- liftExpr e2
+    
+    return (E.App e1' e2' meta)
+
+
+liftExpr (E.FunCall name args ty meta) = do
+    return (E.FunCall name args ty meta)
+
+liftExpr (E.ConCall name args ty meta) = do
+    return (E.ConCall name args ty meta)
+
+
+liftExpr (E.Abs arg expr meta) = do
+    ident <- freshIdent
+    expr' <- liftExpr expr
+    -- *
+    
+    -- *
+    let freeVars = map Etc.Binder_ $ Expr.freeVars expr'
+    -- *
+    
+    -- *
+    let newArgs = Set.toList $ Set.fromList (Binder.voidBinderTypes arg : freeVars)
+    -- *
+    
+    -- *
+    newDecl ident newArgs expr'
+    -- *
+    
+    -- *
+    let newExpr = E.FunCall_ ident (map toVar newArgs)
+    -- *
+    
+    -- *
+    return (E.Var' ident)
+    
+    where
+        -- (args', expr1) = Expr.hoistLambdas expr
+        
+        toVar (Etc.Binder_ ident) = E.Var' ident
+
+
+-- | Case alternatives
+--
+liftCaseAlt :: P.CaseAlt -> Sys.Lift P.CaseAlt
+liftCaseAlt (P.CaseAlt patrn expr meta) = do
+    patrn' <- liftPattern patrn
+    expr' <- liftExpr expr
+    
+    return (P.CaseAlt patrn' expr' meta)
+
+
+
+
+
+-- | Patterns
+--
+liftPattern :: P.Pattern -> Sys.Lift P.Pattern
+liftPattern (P.Lit lit meta) = do
+    return (P.Lit lit meta)
+
+liftPattern (P.List xs meta) = do
+    xs' <- M.mapM liftPattern xs
+    
+    return (P.List xs' meta)
+
+liftPattern (P.ListCons xs Nothing meta) = do
+    xs' <- M.mapM liftPattern xs
+    
+    return (P.ListCons xs' Nothing meta)
+
+
+liftPattern (P.ListCons xs (Just end) meta) = do
+    xs' <- M.mapM liftPattern xs
+    end' <- liftPattern end
+    
+    return (P.ListCons xs' (Just end') meta)
+
+liftPattern (P.Tuple items meta) = do
+    items' <- M.mapM liftPattern items
+    
+    return (P.Tuple items' meta)
+
+liftPattern (P.Constr ident args meta) = do
+    args' <- M.mapM liftPattern args
+    
+    return (P.Constr ident args' meta)
+
+liftPattern (P.Var ident meta) = do
+    return (P.Var ident meta)
+
+liftPattern (P.Wildcard meta) = do
+    return (P.Wildcard meta)
+
+
+
+
+
+
 

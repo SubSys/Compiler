@@ -133,7 +133,12 @@ run = do
 
 run' payload = do
     
-    (TIO.putStrLn . Syntax.renderFunctions) fns
+    -- (TIO.putStrLn . Syntax.renderUnions) uns
+    -- (TIO.putStrLn . Syntax.renderFunctions) fns
+    
+    M.mapM_ PP.prettyPrint uns
+    M.mapM_ PP.prettyPrint fns
+    
 
     
     where

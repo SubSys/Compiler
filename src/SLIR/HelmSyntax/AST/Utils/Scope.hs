@@ -105,9 +105,10 @@ freeVars input =
         binders = [ x | (Etc.Binder x ty) <- Uni.universeBi input]
         vars1    = [ x | (E.Var x meta) <- Uni.universeBi input]
         vars2    = [ x | (E.InfixApp x _ _ _) <- Uni.universeBi input]
+        vars3    = [ x | (E.FunCall x _ _ _) <- Uni.universeBi input]
 
     in
-        (vars1 ++ vars2) `without` binders
+        (vars1 ++ vars2 ++ vars3) `without` binders
             |> List.filter (not . sudoFFI)
 
     where
