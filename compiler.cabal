@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ffd6e8822bbac07ea2caf1853d219d408307d4c1065d0c3834f60fb6acc10c6a
+-- hash: 06256bad454290efdf6f3a80b54f5fdda69d77aac8bbf6bbfe3d44504641beee
 
 name:           Compiler
 version:        0.1.0.0
@@ -217,6 +217,8 @@ library
       SLIR.HelmSyntax.Program.Core.Lift.Data.Report
       SLIR.HelmSyntax.Program.Core.Lift.Data.System
       SLIR.HelmSyntax.Program.Core.Lift.Dev
+      SLIR.HelmSyntax.Program.Core.Lift.Driver
+      SLIR.HelmSyntax.Program.Core.Lift.Syntax
       SLIR.HelmSyntax.Program.Core.Ordering.Driver
       SLIR.HelmSyntax.Program.Core.TypeCheck.Dev
       SLIR.HelmSyntax.Program.Core.TypeCheck.Driver

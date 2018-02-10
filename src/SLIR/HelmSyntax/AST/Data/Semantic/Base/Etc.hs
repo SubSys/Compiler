@@ -20,6 +20,8 @@ pattern Binder ident optType = IR.Binder ident optType
 
 
 pattern Binder_ :: IR.Ident -> IR.Binder
-pattern Binder_ ident = IR.Binder ident Nothing
+pattern Binder_ ident <- IR.Binder ident _
+    where
+        Binder_ ident = IR.Binder ident Nothing
 
 

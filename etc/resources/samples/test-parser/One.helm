@@ -59,6 +59,7 @@ type Visibility = All | Active | Completed
     Sudo.Helm.Native.isEqChar leftA rightA
 
 
+
 plusA x y =
     x + y
 
@@ -77,33 +78,6 @@ alpha4 x y =
 
 alpha5 x =
     alpha4 x 1
-
-
-alpha6 x =
-    x - 1.0
-
-testEqualA x y =
-    x == y
-
-
-testEqualB x =
-    testEqualA x 1
-
-testEqualC x =
-    testEqualA 1 x
-
-testEqualD x =
-    testEqualA 1 x
-
-testEqualE x =
-    1 == x
-
-
-testEqualF x =
-    x == 1
-
-testEqualG =
-    1 == 1
 
 
 plusInt : Int -> Int -> Int
@@ -194,10 +168,6 @@ test = phi id
 
 test2 = test 0
 
-
-
-iota =
-    (\x -> x) 1
 
 
 

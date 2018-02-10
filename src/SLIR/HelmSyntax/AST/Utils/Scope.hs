@@ -1,6 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module SLIR.HelmSyntax.AST.Utils.Scope (
     freeVars
+  , without
 ) where
 
 
@@ -112,14 +113,13 @@ freeVars input =
             |> List.filter (not . sudoFFI)
 
     where
-        without :: Eq a => [a] -> [a] -> [a]
-        without =
-            Fold.foldr (List.filter . (/=))
-        
-        
         sudoFFI :: ID.Ident -> Bool
         sudoFFI (ID.Ident _ ns _) = SudoFFI.isSudoNS ns
 
+
+without :: Eq a => [a] -> [a] -> [a]
+without =
+    Fold.foldr (List.filter . (/=))
 
 
 

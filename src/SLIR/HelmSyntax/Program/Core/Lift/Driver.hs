@@ -1,6 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ViewPatterns #-}
-module SLIR.HelmSyntax.Program.Core.Lift.Dev where
+module SLIR.HelmSyntax.Program.Core.Lift.Driver (
+    lambdaLift
+  , lambdaLift'
+) where
+
 
 -- *
 import Core
@@ -60,9 +64,11 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
+
+
+
 
 -- + HelmSyntax Module Interface
 import qualified SLIR.HelmSyntax.Program.Data.Interface as I
@@ -98,76 +104,54 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
--- + Dev Utils
-import qualified SLIR.HelmSyntax.Module.Dev.Utils.Interface.ToProgram as DevUtil
-import qualified SLIR.HelmSyntax.Program.Dev.Utils.Interface.ToModule as DevUtil
-
-
--- + HelmSyntax - Module Drivers
-import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver            as Driver
-import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver         as Driver
-
 -- + HelmSyntax - Program Drivers
-import qualified SLIR.HelmSyntax.Program.Core.Uncurry.Driver   as Driver
-import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver as Driver'
-import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver   as Driver
-import qualified SLIR.HelmSyntax.Program.Core.Ordering.Driver  as Driver'
-import qualified SLIR.HelmSyntax.Program.Core.Index.Driver     as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Ordering.Driver  as Driver
 
 -- + Local
 import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.System as Sys
 import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.Report as Report
-import qualified SLIR.HelmSyntax.Program.Core.Lift.Driver      as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Lift.Syntax      as Syntax
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
 
 
+-- | Driver
+--
 
-
-
-inputFilePath = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
-
-
-
-
-
-upstream =
-    let filePath   = inputFilePath
-        sourceCode = SIO.readFile inputFilePath
-    in
-        sourceCode
-            |> Driver.runModuleParser filePath
-            |> Driver.typeCheck
-            |> DevUtil.toProgram
-            |> Driver.desugar
-            -- |> Driver.index
-            |> Driver'.typeCheck
-            |> Driver.index
-            |> Driver'.typeCheck
-            |> Driver.lambdaLift
-            |> Driver'.typeCheck
-
-
-
-run = do
+lambdaLift :: IO (Either Text I.Program) -> IO (Either Text I.Program)
+lambdaLift upstream = do
     result <- upstream
-    case result of
-        Left err ->
-            putStrLn $ Text.unpack err
-        Right payload ->
-            run' payload
-
-
-
-run' payload = do
+    
+    let finish =
+            case result of
+                Left err -> return $ Left err
+                Right payload ->
+                    return $ lambdaLift' payload
     
     
-    (TIO.putStrLn . Syntax.renderFunctions) fns
+    Driver.sortEvalOrder finish
 
 
-    where
-        fns = I.getFunctions payload
+lambdaLift' :: I.Program -> Either Text I.Program
+lambdaLift' payload@(I.getFunctions -> decls) =
+    case runLifter decls of
+        Left err           -> Left $ Text.pack $ PP.prettyShow err
+        Right (fns1, fns2) ->
+            Right $ I.updateFunctions' payload (fns1 ++ fns2)
+
+
+runLifter :: [Decl.Function] -> Either Report.LiftError ([Decl.Function], [Decl.Function])
+runLifter decls = Sys.runLift Map.empty (Syntax.liftDecls decls)
+
+
+
+
+
+
+
+
+
+
 
