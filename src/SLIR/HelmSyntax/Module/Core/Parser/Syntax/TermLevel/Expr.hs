@@ -111,6 +111,7 @@ parseExpr f =
         , try (parseCon f)    -- <?> "expression"
         , try (parseLet f)    -- <?> "expression"
         , try (parseCase f)   -- <?> "expression"
+        , try (parseAbs f)    -- <?> "expression"
         , try (parseParens f) -- <?> "expression"
         , parseVar f          -- <?> "expression"
         ]
@@ -311,8 +312,18 @@ parseApp f =
             ]
 
 
-
-
+-- TODO: Record Metadata...
+parseAbs :: Parser Decl.Function -> Parser E.Expr
+parseAbs f = go
+    where
+        go = do
+            reservedOp "(\\"
+            args <- some (ID.parseLow <**> return Etc.Binder_)
+            reservedOp "->"
+            body <- parseExpr f
+            reservedOp ")"
+            
+            return $ Fold.foldr E.Abs' body args
 
 
 
