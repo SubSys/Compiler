@@ -109,7 +109,7 @@ import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver         as Driver
 -- + HelmSyntax - Program Drivers
 -- import qualified SLIR.HelmSyntax.Program.Core.Uncurry.Driver   as Driver
 -- import qualified SLIR.HelmSyntax.Program.Core.DesugarP1.Driver as Driver
--- import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver as Driver'
+import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver as Driver'
 
 -- + Local
 import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver as Driver
@@ -138,10 +138,7 @@ upstream =
             |> Driver.typeCheck
             |> DevUtil.toProgram
             |> Driver.desugar
-            -- |> Driver.desugarP1
-            -- |> Driver.uncurryTerms
-            -- |> Driver'.typeCheckDebug
-
+            |> Driver'.typeCheck
 
 
 run = do

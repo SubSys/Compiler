@@ -168,7 +168,7 @@ traverseExpr subs (E.Let fns expr meta) =
 
 traverseExpr subs (E.Case con alts meta) =
     E.Case
-        con
+        (traverseExpr subs con)
         (map (traverseCaseAlt subs) alts)
         (updateMeta subs meta)
 

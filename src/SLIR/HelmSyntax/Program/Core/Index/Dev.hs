@@ -106,6 +106,7 @@ import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver            as Driver
 import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver         as Driver
 -- + HelmSyntax - Program Drivers
 -- ...
+import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver         as Driver'
 
 -- + Local
 import qualified SLIR.HelmSyntax.Program.Core.Index.Driver as Driver
@@ -134,6 +135,7 @@ upstream =
             |> Driver.typeCheck
             |> DevUtil.toProgram
             |> Driver.index
+            |> Driver'.typeCheck
 
 
 

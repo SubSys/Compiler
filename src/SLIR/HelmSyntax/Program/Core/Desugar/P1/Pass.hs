@@ -110,7 +110,7 @@ import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Interface.Conversion.ToM
 
 
 
-
+{-# ANN module ("HLint: ignore" :: String) #-}
 
 
 desugarP1 :: I.Program -> I.Program
@@ -124,6 +124,8 @@ desugarP1 payload@(I.getFunctions -> decls) =
 p1DesugarPipeline :: [Decl.Function] -> [Decl.Function]
 p1DesugarPipeline input =
     input |> desugarInfixApps
+          |> desugarIfs
+          |> desugarFnArgs
 
 
 
@@ -142,9 +144,48 @@ desugarInfixApps = Uni.transformBi f
 
 
 
+desugarIfs :: [Decl.Function] -> [Decl.Function]
+desugarIfs decls =
+    decls |> Uni.transformBi init
+          |> Uni.transformBi f
+    
+    
+    where
+        init :: E.Expr -> E.Expr
+        init (E.If' intros elseExpr) =
+            Fold.foldr init' elseExpr intros
+        init x = x
+        
+        init' (con, body) def = E.If' [(con, body)] def
+        
+        f :: E.Expr -> E.Expr
+        f (E.If' [(con, trueExpr)] falseExpr) =
+            E.Case' con
+                [ trueBranch trueExpr
+                , falseBranch falseExpr
+                ]
+        
+        f x = x
+        
+        
+        trueBranch :: E.Expr -> P.CaseAlt
+        trueBranch e = P.CaseAlt (P.Lit' (V.Bool' True)) e Meta.Empty
+        
+        falseBranch :: E.Expr -> P.CaseAlt
+        falseBranch e = P.CaseAlt (P.Lit' (V.Bool' False)) e Meta.Empty
 
 
 
+
+desugarFnArgs :: [Decl.Function] -> [Decl.Function]
+desugarFnArgs = Uni.transformBi f
+    where
+        f :: Decl.Function -> Decl.Function
+        f (Decl.Function name args expr sig meta) =
+            let
+                expr' = Fold.foldr E.Abs' expr args
+            in
+                Decl.Function name [] expr' sig meta
 
 
 
