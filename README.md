@@ -21,6 +21,16 @@ Note that, at this stage, there are a multitude of missing features.
 
 ## General new ideas regarding development
 - Lambda lifting at the end of the frontend IR (HelmSyntax). The thinking is that this will yet further simplify the subsequent IR, and therefore compiler passes.
+
+- So for context, I’ve been wondering: Regarding an AST implementation of lambda calculus. Why are nested sequences of expression applications so prevalent over conveying the equivalent information in one constructor?
+
+    E.g. `(App (App (Var +) 1) 2)` Vs. `(Call + 1 2)`
+
+    Since, while the former would be convent for parser output. Transforming such into the latter would seem to be a simpler medium for AST traversals, given the extra context we get. E.g. `f (Call + [1, 2]) = …`, over `f (App x y) = …`.
+
+    Such that I’m considering dropping the former, in favor of the latter, for the first *core* IR.
+
+
 - Regarding the frontend, before desugaring. After type inference resolving, don’t just propagate the types of function declarations, but for all binders, and therefore, every value can easily have it’s type looked up.
     - Essential for:
         - Replacing the syntax directed desugarer (called SDD) component, with a simpler, and saner alternative. I.e. For resolving overloaded, and therefore superposed*(need to document) functions.
