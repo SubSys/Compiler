@@ -64,7 +64,8 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 -- + HelmSyntax Module Interface
-import qualified SLIR.HelmSyntax.Module.Data.Interface as I
+import qualified SLIR.HelmSyntax.Module.Data.Interface as Module
+import qualified SLIR.HelmSyntax.Program.Data.Interface as Program
 
 -- + HelmSyntax AST Renderer
 import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
@@ -94,6 +95,7 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- + Local
 import qualified SLIR.HelmSyntax.Pipeline.Interface.ToProgram as Interface
 
+import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver as InitDeps
 
 -- ++ Module Pipeline
 import qualified SLIR.HelmSyntax.Module.Core.InfixResolve.Driver as Driver -- TODO
@@ -102,12 +104,23 @@ import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver    as Driver
 -- +++ Toolchain Specific
 import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver   as Driver
 import qualified SLIR.HelmSyntax.Module.System.Normalize.Driver  as Driver
+
 -- ++ Program Pipeline
 import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver     as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Lift.Driver        as Driver
+import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver   as Driver'
 -- *
 
 
-
+pipeline :: [InitDeps.ForeignModule] -> Pre.FilePath -> IO String -> IO (Either Text Program.Program)
+pipeline dependencies filePathInfo sourceCode =
+    sourceCode
+        |> Driver.runModuleParser filePathInfo
+        |> Driver.typeCheck
+        |> Interface.toProgram
+        |> Driver.desugar
+        |> Driver.lambdaLift
+        |> Driver'.typeCheck
 
 
 

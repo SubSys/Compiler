@@ -5,6 +5,7 @@
 module SLIR.HelmSyntax.Module.System.InitDeps.Driver (
     initDeps
   , initDeps'
+  , Import.ForeignModule
 ) where
 
 
