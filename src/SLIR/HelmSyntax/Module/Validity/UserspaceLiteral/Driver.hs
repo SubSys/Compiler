@@ -1,6 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 -- {-# LANGUAGE PatternGuards #-}
-module SLIR.HelmSyntax.Module.Validity.UserspaceLiteral.Driver where
+module SLIR.HelmSyntax.Module.Validity.UserspaceLiteral.Driver (
+    userspaceLiteral
+  , userspaceLiteral'
+) where
 
 
 -- *
@@ -95,6 +98,17 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- + Local
 -- *
 
+
+userspaceLiteral :: IO (Either Text I.Module) -> IO (Either Text I.Module)
+userspaceLiteral upstream = do
+    result <- upstream
+    
+    case result of
+        Left err -> return $ Left err
+        Right payload ->
+            return
+                $ userspaceLiteral' payload
+    
 
 userspaceLiteral' :: I.Module -> Either Text I.Module
 userspaceLiteral' payload

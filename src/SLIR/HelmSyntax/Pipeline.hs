@@ -98,17 +98,18 @@ import qualified SLIR.HelmSyntax.Pipeline.Interface.ToProgram as Interface
 import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver as InitDeps
 
 -- ++ Module Pipeline
-import qualified SLIR.HelmSyntax.Module.Core.InfixResolve.Driver as Driver -- TODO
-import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver       as Driver
-import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver    as Driver
+import qualified SLIR.HelmSyntax.Module.Core.InfixResolve.Driver         as Driver -- TODO
+import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver               as Driver
+import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver            as Driver
 -- +++ Toolchain Specific
-import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver   as Driver
-import qualified SLIR.HelmSyntax.Module.System.Normalize.Driver  as Driver
-
+import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver           as Driver
+import qualified SLIR.HelmSyntax.Module.System.Normalize.Driver          as Driver
+-- +++ Per-Module Validations
+import qualified SLIR.HelmSyntax.Module.Validity.UserspaceLiteral.Driver as Validate
 -- ++ Program Pipeline
-import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver     as Driver
-import qualified SLIR.HelmSyntax.Program.Core.Lift.Driver        as Driver
-import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver   as Driver'
+import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver             as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Lift.Driver                as Driver
+import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver           as Driver'
 -- *
 
 
@@ -116,6 +117,7 @@ pipeline :: [InitDeps.ForeignModule] -> Pre.FilePath -> IO String -> IO (Either 
 pipeline dependencies filePathInfo sourceCode =
     sourceCode
         |> Driver.runModuleParser filePathInfo
+        |> Validate.userspaceLiteral
         |> Driver.typeCheck
         |> Interface.toProgram
         |> Driver.desugar
