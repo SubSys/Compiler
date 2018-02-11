@@ -106,6 +106,7 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
 -- + HelmSyntax - Program Drivers
 import qualified SLIR.HelmSyntax.Program.Core.Ordering.Driver  as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Index.Driver     as Driver
 
 -- + Local
 import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.System as Sys
@@ -131,7 +132,8 @@ lambdaLift upstream = do
                     return $ lambdaLift' payload
     
     
-    Driver.sortEvalOrder finish
+    finish |> Driver.sortEvalOrder
+           |> Driver.index
 
 
 lambdaLift' :: I.Program -> Either Text I.Program
