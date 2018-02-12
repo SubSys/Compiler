@@ -1,5 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Module.Core.Parser.Dev where
+{-# LANGUAGE ViewPatterns #-}
+module HLIR.HelmFlat.Core.Ordering.Dev where
 
 
 -- *
@@ -8,7 +9,7 @@ import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Data.Monoid ((<>))
 import Prelude
-    (return
+    ( return
     , String
     , IO
     , show
@@ -19,8 +20,8 @@ import Prelude
     , fromIntegral
     )
 
-import qualified Prelude as Pre
-
+import qualified Prelude    as Pre
+import qualified Core.Utils as Core
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -52,50 +53,57 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 
-
 -- + Recursion Schemes & Related
-import qualified Data.Functor.Foldable as F
+import qualified Data.Functor.Foldable       as F
+import qualified Data.Generics.Uniplate.Data as Uni
 
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Megaparsec & Related
-import qualified Text.Megaparsec.Char       as C
-import qualified Text.Megaparsec.Char.Lexer as L
-import qualified Text.Megaparsec            as MP
-
--- + Frameworks
-import Framework.Text.Parser
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
--- + HelmSyntax Module Interface
-import qualified SLIR.HelmSyntax.Module.Data.Interface as I
+-- + Graphing & Related
+import qualified Algebra.Graph              as G
+import qualified Algebra.Graph.Export.Dot   as Dot
+import qualified Algebra.Graph.AdjacencyMap as AM
 
--- + HelmSyntax AST Renderer
-import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
 
--- + HelmSyntax AST
+
+-- + HelmFlat Module Interface
+import qualified HLIR.HelmFlat.Module.Data.Interface as I
+
+-- + HelmFlat AST Renderer
+import qualified HLIR.HelmFlat.AST.Render.Syntax.Driver as Syntax
+
+-- + HelmFlat AST Utils
+import qualified HLIR.HelmFlat.AST.Utils.Scope           as Scope
+import qualified HLIR.HelmFlat.AST.Utils.Auxiliary.Ident as ID
+
+-- + HelmFlat AST
 -- ++ Base
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc      as Etc
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident    as ID
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Types    as T
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Values   as V
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Metadata as Meta
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Header   as Header
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc      as Etc
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident    as ID
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types    as T
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values   as V
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Metadata as Meta
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Header   as Header
 
 -- ++ TermLevel
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Expr     as E
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Patterns as P
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
 
 -- ++ TopLevel
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Fixities  as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
+
+-- + HelmFlat - Module Drivers
+import qualified HLIR.HelmFlat.Core.Parser.Driver    as Driver
+import qualified HLIR.HelmFlat.Core.TypeCheck.Driver as Driver
 
 -- + Local
-import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver as Driver
+import qualified HLIR.HelmFlat.Core.Ordering.Driver as Driver
 -- *
 
 
@@ -106,45 +114,41 @@ import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver as Driver
 
 
 
-inputFilePath = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
+
+inputFilePath
+    = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
 
 
 
 
 
 upstream =
-    let filePath   = inputFilePath
+    let
+        filePath   = inputFilePath
         sourceCode = SIO.readFile inputFilePath
     in
         sourceCode
             |> Driver.runModuleParser filePath
+            |> Driver.typeCheck
+            |> Driver.sortEvalOrder
 
 
 
 run = do
     result <- upstream
     case result of
-        Left err ->
-            putStrLn $ Text.unpack err
-        Right payload ->
-            run' payload
+        Left  err     -> putStrLn $ Text.unpack err
+        Right payload -> run' payload
 
 
 
 run' payload = do
-    
-    -- (TIO.putStrLn . Syntax.renderUnions) uns
-    -- (TIO.putStrLn . Syntax.renderFunctions) fns
-    
-    -- M.mapM_ PP.prettyPrint uns
-    M.mapM_ PP.prettyPrint fns
+    (TIO.putStrLn . Syntax.renderFunctions) fns
     
 
-    
     where
         fns = I.getFunctions payload
         uns = I.getUnions payload
-
 
 
 

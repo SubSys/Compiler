@@ -1,5 +1,13 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Module.Core.Parser.Dev where
+{-# LANGUAGE DeriveDataTypeable #-}
+module HLIR.HelmFlat.Program.Data.Interface (
+    Program(..)
+  , getFunctions
+  , getUnions
+  , updateFunctions
+  , updateFunctions'
+  , updateUnions
+) where
 
 
 -- *
@@ -18,6 +26,8 @@ import Prelude
     , (>>)
     , fromIntegral
     )
+
+import Data.Data (Data, Typeable)
 
 import qualified Prelude as Pre
 
@@ -56,13 +66,10 @@ import qualified Data.Functor                 as Fun
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable as F
 
--- + OS APIS & Related
-import qualified System.IO as SIO
 
 -- + Megaparsec & Related
 import qualified Text.Megaparsec.Char       as C
 import qualified Text.Megaparsec.Char.Lexer as L
-import qualified Text.Megaparsec            as MP
 
 -- + Frameworks
 import Framework.Text.Parser
@@ -70,81 +77,70 @@ import Framework.Text.Parser
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
--- + HelmSyntax Module Interface
-import qualified SLIR.HelmSyntax.Module.Data.Interface as I
-
--- + HelmSyntax AST Renderer
-import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
-
--- + HelmSyntax AST
+-- + HelmFlat AST
 -- ++ Base
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc      as Etc
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident    as ID
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Types    as T
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Values   as V
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Metadata as Meta
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Header   as Header
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc      as Etc
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident    as ID
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types    as T
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values   as V
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Metadata as Meta
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Header   as Header
 
 -- ++ TermLevel
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Expr     as E
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Patterns as P
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
 
 -- ++ TopLevel
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
-
--- + Local
-import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver as Driver
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Fixities  as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+
+data Program = Program
+    { unions    :: [Decl.Union]
+    , functions :: [Decl.Function]
+    }
+    deriving (Show, Data, Typeable)
 
 
 
 
 
-inputFilePath = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
+getFunctions :: Program -> [Decl.Function]
+getFunctions =
+    functions
+
+getUnions :: Program -> [Decl.Union]
+getUnions =
+    unions
+
+
+updateFunctions :: [Decl.Function] -> Program -> Program
+updateFunctions fns datum =
+    Program
+        { functions = fns
+        , unions = unions datum
+        }
+
+updateUnions :: [Decl.Union] -> Program -> Program
+updateUnions uns datum =
+    Program
+        { functions = functions datum
+        , unions = uns
+        }
 
 
 
 
 
-upstream =
-    let filePath   = inputFilePath
-        sourceCode = SIO.readFile inputFilePath
-    in
-        sourceCode
-            |> Driver.runModuleParser filePath
+-- | Pipelining Style
+--
 
-
-
-run = do
-    result <- upstream
-    case result of
-        Left err ->
-            putStrLn $ Text.unpack err
-        Right payload ->
-            run' payload
-
-
-
-run' payload = do
-    
-    -- (TIO.putStrLn . Syntax.renderUnions) uns
-    -- (TIO.putStrLn . Syntax.renderFunctions) fns
-    
-    -- M.mapM_ PP.prettyPrint uns
-    M.mapM_ PP.prettyPrint fns
-    
-
-    
-    where
-        fns = I.getFunctions payload
-        uns = I.getUnions payload
-
+updateFunctions' :: Program -> [Decl.Function] -> Program
+updateFunctions' program decls = updateFunctions decls program
 
 
 

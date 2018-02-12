@@ -1,6 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns #-}
-module SLIR.HelmSyntax.Program.Core.Index.Scope.Bindable (
+module HLIR.HelmFlat.Core.Index.Scope.Bindable (
     bindable
 ) where
 
@@ -67,36 +66,36 @@ import qualified System.IO as SIO
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
--- + HelmSyntax Module Interface
-import qualified SLIR.HelmSyntax.Program.Data.Interface as I
+-- + HelmFlat Module Interface
+import qualified HLIR.HelmFlat.Program.Data.Interface as I
 
--- + HelmSyntax AST Renderer
-import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
+-- + HelmFlat AST Renderer
+import qualified HLIR.HelmFlat.AST.Render.Syntax.Driver as Syntax
 
--- + HelmSyntax AST Utils
-import qualified SLIR.HelmSyntax.AST.Utils.Scope           as Scope
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident as ID
+-- + HelmFlat AST Utils
+import qualified HLIR.HelmFlat.AST.Utils.Scope           as Scope
+import qualified HLIR.HelmFlat.AST.Utils.Auxiliary.Ident as ID
 
--- + HelmSyntax AST
+-- + HelmFlat AST
 -- ++ Base
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc      as Etc
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident    as ID
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Types    as T
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Values   as V
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Metadata as Meta
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Header   as Header
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc      as Etc
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident    as ID
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types    as T
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values   as V
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Metadata as Meta
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Header   as Header
 
 -- ++ TermLevel
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Expr     as E
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Patterns as P
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
 
 -- ++ TopLevel
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
-import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Fixities  as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
 
 -- + Local
-import qualified SLIR.HelmSyntax.Program.Core.Index.Data as Index
+import qualified HLIR.HelmFlat.Core.Index.Data as Index
 -- *
 
 
@@ -135,20 +134,8 @@ newSubst (Etc.Binder ident ty) idx =
 
 
 
-freshIdent :: Int -> ID.Ident
-freshIdent i =
-    let
-        idx = Text.pack $ show i
-    in
-        ID.Ident_ $ globalPrefix `Text.append` idx
-
-
-
 freshIdentDebug :: Int -> ID.Ident -> ID.Ident
-freshIdentDebug i (ID.Ident suffix@(isTmp -> True) _ _) =
-    freshIdent i
-
-freshIdentDebug i (ID.Ident suffix@(isTmp -> False) _ _) =
+freshIdentDebug i (ID.Ident suffix _ _) =
     let
         idx = Text.pack $ show i
     in
@@ -162,6 +149,13 @@ freshIdentDebug i (ID.Ident suffix@(isTmp -> False) _ _) =
         -- suffix' = fromMaybe suffix_ $ Text.stripPrefix (Text.pack "@") suffix_
 
 
-isTmp :: Text -> Bool
-isTmp = Text.isPrefixOf (Text.pack "!")
+freshIdent :: Int -> ID.Ident
+freshIdent i =
+    let
+        idx = Text.pack $ show i
+    in
+        ID.Ident_ $ globalPrefix `Text.append` idx
+
+
+
 
