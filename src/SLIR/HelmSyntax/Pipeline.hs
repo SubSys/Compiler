@@ -1,5 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.Pipeline where
+module SLIR.HelmSyntax.Pipeline (
+    pipeline
+  , Feed.toHelmFlat
+  , Feed.toHelmFlat'
+) where
 
 
 -- *
@@ -92,6 +96,13 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
+-- + HelmSyntax & HelmFlat Interfaces
+import qualified SLIR.HelmSyntax.Program.Data.Interface as HelmSyntax
+import qualified HLIR.HelmFlat.Data.Interface           as HelmFlat
+
+-- + IR Feed
+import qualified SLIR.HelmSyntax.Program.Feed.HelmFlat.Driver as Feed
+
 -- + Local
 import qualified SLIR.HelmSyntax.Pipeline.Interface.ToProgram as Interface
 
@@ -110,6 +121,7 @@ import qualified SLIR.HelmSyntax.Module.Validity.UserspaceLiteral.Driver as Vali
 import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver             as Driver
 import qualified SLIR.HelmSyntax.Program.Core.Lift.Driver                as Driver
 import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver           as Driver'
+import qualified SLIR.HelmSyntax.Program.Core.Uncurry.Driver             as Driver
 -- *
 
 
@@ -122,6 +134,7 @@ pipeline dependencies filePathInfo sourceCode =
         |> Interface.toProgram
         |> Driver.desugar
         |> Driver.lambdaLift
+        |> Driver.uncurryTerms
         |> Driver'.typeCheck
 
 
