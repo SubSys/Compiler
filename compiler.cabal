@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4cf6a06cb81963da7f40f99ed55da392eec4b9574ff6af11708d7b8a6211e011
+-- hash: 6e3f8e5cd6bcf1eb421a906edff531d057c0e737218829b9e720390ef0f671d8
 
 name:           Compiler
 version:        0.1.0.0
@@ -41,6 +41,7 @@ library
     , mtl
     , path
     , path-io
+    , process
     , recursion-schemes
     , show-prettyprint
     , stm
@@ -268,6 +269,7 @@ executable app
     , mtl
     , path
     , path-io
+    , process
     , recursion-schemes
     , show-prettyprint
     , stm
@@ -302,6 +304,7 @@ test-suite Compiler-test
     , mtl
     , path
     , path-io
+    , process
     , recursion-schemes
     , show-prettyprint
     , stm

@@ -51,13 +51,15 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
 import qualified Data.Generics.Uniplate.Data as Uni
 
 -- + OS APIS & Related
-import qualified System.IO as SIO
+import qualified System.IO      as SIO
+import qualified System.Process as SP
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
@@ -118,19 +120,31 @@ import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
 
 
 
+getProjectRoot :: IO String
+getProjectRoot = do
+    SP.readCreateProcess (SP.shell "stack path --project-root" ) ""
 
 
-inputFilePath = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
+inputFilePath =
+    let
+        filePath = "/etc/resources/samples/test-parser/One.helm"
+    in do
+        projectDir <- getProjectRoot
+        
+        return $ trim projectDir ++ trim filePath
+    
+    where
+        trim = List.filter (/= '\n')
 
 
 
-
-
-upstream =
-    let filePath   = inputFilePath
-        sourceCode = SIO.readFile inputFilePath
-    in
-        HelmSyntax.pipeline [] filePath sourceCode
+upstream = do
+    -- Setup
+    filePath <- inputFilePath
+    let sourceCode = SIO.readFile filePath
+    
+    -- Run
+    HelmSyntax.pipeline [] filePath sourceCode
 
 
 
