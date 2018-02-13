@@ -1,12 +1,13 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Dev.DryRun where
+{-# LANGUAGE OverloadedStrings #-}
+module HLIR.HelmFlat.AST.Render.Syntax.Base.Types where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
+-- import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -19,8 +20,8 @@ import Prelude
     , fromIntegral
     )
 
-import qualified Prelude    as Pre
-import qualified Core.Utils as Core
+import qualified Prelude as Pre
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -52,25 +53,22 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 
--- + Recursion Schemes & Related
-import qualified Data.Functor.Foldable       as F
-import qualified Data.Generics.Uniplate.Data as Uni
 
--- + OS APIS & Related
-import qualified System.IO as SIO
+-- + Recursion Schemes & Related
+import qualified Data.Functor.Foldable as F
+
+-- + Frameworks
+import Framework.Text.Renderer
+import qualified Framework.Text.Renderer.Utils as Util
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
--- + Upstream IRs
-import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
 
--- + HelmFlat Interface
+
+-- + HelmFlat Module Interface
 import qualified HLIR.HelmFlat.Data.Interface as I
-
--- + HelmFlat Renderer
-import qualified HLIR.HelmFlat.AST.Render.Syntax.Driver as Syntax
 
 -- + HelmFlat AST
 -- ++ Base
@@ -86,9 +84,10 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
 -- ++ TopLevel
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
+
+-- + Local
+import qualified HLIR.HelmFlat.AST.Render.Syntax.Base.Ident as ID
 -- *
-
-
 
 
 
@@ -99,47 +98,67 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
 
 
 
-inputFilePath
-    = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
+-- *
+-- | # Types
+-- *
+
+renderType :: T.Type -> Doc
+
+renderType T.String = "String"
+renderType T.Char = "Char"
+renderType T.Int = "Int"
+renderType T.Float = "Float"
+renderType T.Bool = "Bool"
 
 
+renderType (T.Tuple ts) =
+    map renderType ts
+        |> Util.punctuate ","
+        |> Util.hcat
+        |> Util.parens
 
+renderType (T.List ty) =
+    "List" <+> renderType ty
 
-
-upstream =
-    let
-        filePath   = inputFilePath
-        sourceCode = SIO.readFile inputFilePath
+renderType (T.Union name args) =
+    let args' = map renderType args
+         |> Util.punctuate Util.space
+         |> Util.hcat
     in
-        sourceCode
-            |> HelmSyntax.pipeline [] filePath
-            |> HelmSyntax.toHelmFlat
+        ID.renderIdent name <+> args'
 
+renderType (T.Var name) =
+    ID.renderIdent name
 
-
-run = do
-    result <- upstream
-    case result of
-        Left  err     -> putStrLn $ Text.unpack err
-        Right payload -> run' payload
-
-
-
-run' payload = do
-    
-    
-    (TIO.putStrLn . Syntax.renderFunctions) fns
-
-    where
-        fns = I.getFunctions payload
-        uns = I.getUnions payload
+renderType (T.Arr t1 t2) =
+    let t1' = renderType t1
+        t2' = renderType t2
+    in
+        Util.parens (t1' <+> "->" <+> t2')
 
 
 
 
 
+-- *
+-- | # Type Schemes
+-- *
+renderScheme :: T.Scheme -> Doc
+renderScheme (T.Forall [] ty) = renderToplevelType ty
+renderScheme (T.Forall vars ty) =
+    let ty'   = renderToplevelType ty
+        vars' = map ID.renderIdent vars
+          |> Util.punctuate Util.space
+          |> Util.hcat
+    in
+        "forall" <+> vars' <> "." <+> ty'
 
 
+renderToplevelType :: T.Type -> Doc
+renderToplevelType (T.Arr t1 t2) =
+    renderType t1 <+> "->" <+> renderToplevelType t2
+
+renderToplevelType x = renderType x
 
 
 
