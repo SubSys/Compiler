@@ -1,21 +1,19 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module SLIR.HelmSyntax.AST.Utils.Auxiliary.Expr (
-    freeVars
-  , getCallee
-  , getConstrCallee
-  , flattenApps
-  , freshVar
-  , hoistLambdas
+{-# LANGUAGE ViewPatterns #-}
+module SLIR.HelmSyntax.Program.Core.Lift.Utils.Scope (
+    withLocalBinder
+  , withLocalBinders
+  , overrideEnv
 ) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
-import Core.List.Util (flatten, singleton)
+import Core.List.Util    (flatten, singleton)
 import Data.Monoid ((<>))
 import Prelude
-    ( return
+    (return
     , String
     , IO
     , show
@@ -58,22 +56,34 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
 import qualified Data.Generics.Uniplate.Data as Uni
 
+-- + OS APIS & Related
+import qualified System.IO as SIO
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
+
+
+
 -- + HelmSyntax Module Interface
-import qualified SLIR.HelmSyntax.Module.Data.Interface as I
+import qualified SLIR.HelmSyntax.Program.Data.Interface as I
+
+-- + HelmSyntax AST Renderer
+import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
 
 -- + HelmSyntax AST Utils
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident             as ID
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI as SudoFFI
+import qualified SLIR.HelmSyntax.AST.Utils.Scope                         as Scope
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident               as ID
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI   as SudoFFI
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.Recursive as Rec
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Type                as T
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Binders             as Binder
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -82,6 +92,7 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident    as ID
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Types    as T
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Values   as V
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Metadata as Meta
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Header   as Header
 
 -- ++ TermLevel
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Expr     as E
@@ -91,101 +102,40 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Patterns as P
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
+
+
+-- + Local
+import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.Report as Report
+import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.System as Sys
 -- *
 
 
 
+{-# ANN module ("HLint: ignore" :: String) #-}
 
 
-freeVars :: E.Expr -> [ID.Ident]
-freeVars input =
-    let
-        binders = [ x | (Etc.Binder x ty) <- Uni.universeBi input]
-        vars1    = [ x | (E.Var x meta) <- Uni.universe input]
-        vars2    = [ x | (E.InfixApp x _ _ _) <- Uni.universe input]
-        vars3    = [ x | (E.FunCall x _ _ _) <- Uni.universeBi input]
 
-    in
-        (vars1 ++ vars2 ++ vars3) `without` binders
-            |> List.filter (not . sudoFFI)
-
+withLocalBinder :: Etc.Binder -> Sys.Lift a -> Sys.Lift a
+withLocalBinder (ID.get -> name) = M.local updateEnv
     where
-        without :: Eq a => [a] -> [a] -> [a]
-        without =
-            Fold.foldr (List.filter . (/=))
-        
-        
-        sudoFFI :: ID.Ident -> Bool
-        sudoFFI (ID.Ident _ ns _) = SudoFFI.isSudoNS ns
+        updateEnv es = Map.insert name [] es
 
 
-
--- getCallee :: E.Expr -> E.Expr
--- getCallee (E.App' e1 e2) = getCallee e1
--- getCallee x = x
-
-
-getCallee :: E.Expr -> Maybe ID.Ident
-getCallee (E.App' e1 _) = getCallee e1
-
-getCallee (E.Var' ident) = Just ident
-
-getCallee _ = Nothing
-
-
-
-getConstrCallee :: E.Expr -> Maybe ID.Ident
-getConstrCallee (E.App' e1 _) = getConstrCallee e1
-
-getConstrCallee (E.Constr' ident) = Just ident
-
-getConstrCallee _ = Nothing
-
-
-
-flattenApps :: E.Expr -> [E.Expr]
-flattenApps (E.App' e1 e2) =
-    flattenApps e1 ++ flattenApps e2
-
-flattenApps x = [x]
-
-
-
-
-
-freshVar :: Int -> E.Expr
-freshVar idx =
-    newVar
+withLocalBinders :: [Etc.Binder] -> Sys.Lift a -> Sys.Lift a
+withLocalBinders (ID.gets -> names) = M.local updateEnv
     where
-        prefix :: Text
-        prefix = Text.pack "!"
+        initName :: ID.Ident -> Sys.Env
+        initName x = Map.singleton x []
+        initNames xs = Map.unions (map initName xs)
         
-        name :: Text
-        name = 
-            prefix `Text.append` Text.pack (Pre.show idx)
-
-        newVar :: E.Expr
-        newVar =
-            E.Var' $ ID.Ident_ name
+        updateEnv es = Map.union (initNames names) es
 
 
 
--- | Hoist (immediate) repeated sequences of nested abstractions
---
--- Continually build up a list of nested function abstractions,
--- or lambdas until another expression constructor is encountered.
---
-hoistLambdas :: E.Expr -> ([Etc.Binder], E.Expr)
-hoistLambdas (E.Abs' b e) =
-    let (bs', e') = hoistLambdas e
-    in
-        (b : bs', e')
-
-hoistLambdas x = ([], x)
-
-
-
-
+overrideEnv :: Sys.Env -> Sys.Lift a -> Sys.Lift a
+overrideEnv env = M.local updateEnv
+    where
+        updateEnv _ = env
 
 
 

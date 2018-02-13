@@ -134,7 +134,6 @@ type Lift a = M.RWST Env [Decl.Function] Counter (M.Except Report.LiftError) a
 
 
 
-
 -- | Lifter - Utils
 ---
 

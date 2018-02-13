@@ -103,9 +103,13 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
+-- + Local Prelude
+-- import SLIR.HelmSyntax.Program.Core.Lift.Syntax.Helpers (enter)
+
 -- + Local
 import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.System as Sys
 import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.Report as Report
+import qualified SLIR.HelmSyntax.Program.Core.Lift.Utils.Scope as Scope
 -- *
 
 
@@ -113,7 +117,9 @@ import qualified SLIR.HelmSyntax.Program.Core.Lift.Data.Report as Report
 {-# ANN module ("HLint: ignore" :: String) #-}
 
 
-
+-- External API
+liftDecls :: [Decl.Function] -> Sys.Lift [Decl.Function]
+liftDecls decls =  M.mapM liftDecl decls
 
 
 
@@ -142,20 +148,61 @@ newDecl name args expr =
 
 
 
+
 -- | Syntax Traversals
 --
-liftDecls :: [Decl.Function] -> Sys.Lift [Decl.Function]
-liftDecls decls = M.mapM liftDecl decls
 
 liftDecl :: Decl.Function -> Sys.Lift Decl.Function
-liftDecl fn@(SudoFFI.isSuperFFI -> True) = return fn
+liftDecl fn@(SudoFFI.isSuperFFI -> True) = liftFFIDecl fn
+liftDecl fn@(Rec.isRecDecl -> True)      = liftRecDecl fn
+
+
 liftDecl (Decl.Function name args expr sig meta) = do
-    expr' <- liftExpr expr
+    expr' <- Scope.withLocalBinders args (liftExpr expr)
     
     return (Decl.Function name args expr' sig meta)
 
 
+
+
+
+
+
 liftExpr :: E.Expr -> Sys.Lift E.Expr
+
+liftExpr (E.Abs arg expr meta) = liftAbs arg expr
+    
+
+liftExpr (E.Let fns@(ID.gets -> fnNames) expr meta) = do
+    (fns', env) <- List.unzip <$> M.mapM liftLetFn fns
+    expr' <- Scope.overrideEnv (Map.unions env) (liftExpr expr)
+    
+    M.tell fns'
+    
+    return expr'
+
+liftExpr (E.FunCall name args ty meta) = do
+    env <- M.ask
+    -- *
+    
+    case Map.lookup name env of
+        Nothing -> do    
+            args' <- M.mapM liftExpr args
+            -- *
+            
+            -- *
+            return (E.FunCall name args' ty meta)
+        
+        Just rest -> do
+            args' <- M.mapM liftExpr args
+            -- *
+            
+            -- *
+            return (E.FunCall name (args' ++ toVars' rest) ty meta)
+
+
+-- | Boilerplate Traversals
+--
 liftExpr var@(E.Var name meta) = do
     return var
 
@@ -187,9 +234,6 @@ liftExpr (E.If intros elseExpr meta) = do
     
     return (E.If intros' elseExpr' meta)
 
-liftExpr (E.Let fns expr meta) = do
-    return (E.Let fns expr meta)
-
 liftExpr (E.Case con alts meta) = do
     con' <- liftExpr con
     alts' <- M.mapM liftCaseAlt alts
@@ -208,74 +252,11 @@ liftExpr (E.App e1 e2 meta) = do
     return (E.App e1' e2' meta)
 
 
-liftExpr (E.FunCall name args ty meta) = do
-    return (E.FunCall name args ty meta)
-
 liftExpr (E.ConCall name args ty meta) = do
-    return (E.ConCall name args ty meta)
+    args' <- M.mapM liftExpr args
+    
+    return (E.ConCall name args' ty meta)
 
-liftExpr (E.Abs arg expr meta) = do
-    ident <- freshIdent
-    expr' <- liftExpr expr
-    -- *
-    
-    -- *
-    let freeVars = map Etc.Binder_ $ Expr.freeVars expr'
-    -- *
-    
-    -- *
-    -- let args = Binder.voidBinderTypes $ Set.toList $ Set.fromList $ map Etc.Binder_ freeVars
-    let args = Set.toList
-             $ Set.fromList
-             $ Binder.voidBinderTypes
-             $ (arg : freeVars)
-    -- *
-    
-    -- *
-    newDecl ident args expr'
-    -- *
-    
-    -- *
-    let exprArgs = (Binder.voidBinderTypes freeVars) `Scope.without` [(Binder.voidBinderTypes arg)]
-    -- *
-    
-    -- *
-    let newExpr = Fold.foldl E.App' (E.Var' ident) (toVars exprArgs)
-    -- *
-    
-    -- *
-    -- return (E.Var' ident)
-    return newExpr
-
-
--- liftExpr (E.Abs arg expr meta) = do
---     ident <- freshIdent
---     expr' <- liftExpr expr
---     -- *
--- 
---     -- *
---     let freeVars = map Etc.Binder_ $ Expr.freeVars expr'
---     -- *
--- 
---     -- *
---     let newArgs = Set.toList $ Set.fromList (Binder.voidBinderTypes arg : freeVars)
---     -- *
--- 
---     -- *
---     newDecl ident newArgs expr'
---     -- *
--- 
---     -- *
---     let newExpr = E.FunCall_ ident (map toVar newArgs)
---     -- *
--- 
---     -- *
---     return (E.Var' ident)
--- 
---     where
---         -- (args', expr1) = Expr.hoistLambdas expr
--- 
---         toVar (Etc.Binder_ ident) = E.Var' ident
 
 
 -- | Case alternatives
@@ -309,7 +290,7 @@ liftPattern (P.ListCons xs Nothing meta) = do
 
 
 liftPattern (P.ListCons xs (Just end) meta) = do
-    xs' <- M.mapM liftPattern xs
+    xs' <-  M.mapM liftPattern xs
     end' <- liftPattern end
     
     return (P.ListCons xs' (Just end') meta)
@@ -341,5 +322,71 @@ toVar (Etc.Binder_ ident) = E.Var' ident
 
 toVars :: [Etc.Binder] -> [E.Expr]
 toVars = map toVar
+
+
+toVars' :: [ID.Ident] -> [E.Expr]
+toVars' xs = toVars $ map Etc.Binder_ xs
+
+
+liftRecDecl :: Decl.Function -> Sys.Lift Decl.Function
+liftRecDecl (Decl.Function name@(ID.get -> ident) args expr sig meta) = do
+    -- (expr', _) <- Scope.withLocalBinders (name : args) (liftExpr expr)
+    
+    return (Decl.Function name args expr sig meta)
+
+liftFFIDecl :: Decl.Function -> Sys.Lift Decl.Function
+liftFFIDecl fn@(ID.get -> ident) = return fn
+
+
+
+liftAbs :: Etc.Binder -> E.Expr -> Sys.Lift E.Expr
+liftAbs arg body = do
+    scope <- M.ask
+    -- *
+    
+    -- *
+    let upstreamVars = Map.keys scope
+    let downstreamVars = Expr.freeVars body
+    let restArgs = List.filter (`List.elem` (upstreamVars)) downstreamVars 
+    -- *
+    
+    -- *
+    ident <- freshIdent
+    -- *
+    
+    -- *
+    body' <- liftExpr body
+    -- *
+    
+    -- *
+    newDecl ident (map Etc.Binder_ restArgs ++ [arg]) body'
+    -- *
+    
+    -- *
+    -- return (E.FunCall' ident (toVars' restArgs) Nothing)
+    return $ Fold.foldl E.App' (E.Var' ident) (toVars' restArgs)
+
+
+liftLetFn :: Decl.Function -> Sys.Lift (Decl.Function, Sys.Env)
+liftLetFn fn@(Decl.Function name@(ID.get -> ident) args expr sig meta) = do
+    scope <- M.ask
+    -- *
+    
+    -- *
+    let upstreamVars = Map.keys scope
+    let downstreamVars = Scope.freeVars fn
+    let restArgs = List.filter (`List.elem` upstreamVars) downstreamVars 
+    -- *
+    
+    -- *
+    (expr') <- liftExpr expr
+    -- *
+    
+    
+    -- *
+    return
+        ( Decl.Function name (args ++ map Etc.Binder_ restArgs) expr Decl.Unknown meta
+        , Map.insert ident restArgs scope
+        )
 
 

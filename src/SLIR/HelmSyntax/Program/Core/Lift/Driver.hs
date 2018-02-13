@@ -145,7 +145,7 @@ lambdaLift' payload@(I.getFunctions -> decls) =
 
 
 runLifter :: [Decl.Function] -> Either Report.LiftError ([Decl.Function], [Decl.Function])
-runLifter decls = Sys.runLift Map.empty (Syntax.liftDecls decls)
+runLifter decls = Sys.runLift Sys.emptyEnv (Syntax.liftDecls decls)
 
 
 
