@@ -16,7 +16,9 @@
 
 Note that, at this stage, there are a multitude of missing features.
 
+## Development
 
+The initial compiler frontend (HelmSyntax IR) infrastructure is pretty much finished. To perform a dry-run of the initial compilation pipeline, open `SLIR.HelmSyntax.Dev.DryRun` in `stack ghci` and type `run`. You should see the parsed, processed and rendered syntax printed.
 
 
 ## General new ideas regarding development
