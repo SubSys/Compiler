@@ -143,7 +143,7 @@ inputFilePath =
 
 
 -- NOTE:
--- * You may use the below snippet to experiment with turning off/on various core passes (Or plug-in new passes):
+-- * You may use the below snippet to experiment with turning off/on various core passes (or plug-in new ones):
 -- 
 -- sourceCode
 --     |> Driver.runModuleParser filePathInfo
