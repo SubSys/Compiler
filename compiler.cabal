@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4aff7f503605abed95e349d72097cd1c8f510c1e19391d015ed65a21af207453
+-- hash: 4cf6a06cb81963da7f40f99ed55da392eec4b9574ff6af11708d7b8a6211e011
 
 name:           Compiler
 version:        0.1.0.0
@@ -94,6 +94,17 @@ library
       Helm.Toolchain.Frontend.Ordering.Driver
       Helm.Toolchain.Frontend.Ordering.Validations
       Helm.Toolchain.Frontend.Ordering.Validations.Utils
+      HLIR.HelmFlat.AST.Data.Semantic.Base.Etc
+      HLIR.HelmFlat.AST.Data.Semantic.Base.Ident
+      HLIR.HelmFlat.AST.Data.Semantic.Base.Types
+      HLIR.HelmFlat.AST.Data.Semantic.Base.Values
+      HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr
+      HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns
+      HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions
+      HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions
+      HLIR.HelmFlat.Data.Interface
+      HLIR.HelmFlat.Dev.DryRun
+      HLIR.HelmFlat.Internal.AST
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Header
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident
@@ -127,6 +138,7 @@ library
       SLIR.HelmSyntax.AST.Utils.Auxiliary.Type
       SLIR.HelmSyntax.AST.Utils.Auxiliary.Unions
       SLIR.HelmSyntax.AST.Utils.Scope
+      SLIR.HelmSyntax.Dev.DryRun
       SLIR.HelmSyntax.Internal.AST
       SLIR.HelmSyntax.Module.Core.InfixResolve.Driver
       SLIR.HelmSyntax.Module.Core.Ordering.Data.Node
@@ -232,6 +244,8 @@ library
       SLIR.HelmSyntax.Program.Core.Uncurry.Syntax
       SLIR.HelmSyntax.Program.Data.Interface
       SLIR.HelmSyntax.Program.Dev.Utils.Interface.ToModule
+      SLIR.HelmSyntax.Program.Feed.HelmFlat.Driver
+      SLIR.HelmSyntax.Program.Feed.HelmFlat.Syntax
   other-modules:
       Paths_Compiler
   default-language: Haskell2010

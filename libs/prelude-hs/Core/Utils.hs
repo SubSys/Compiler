@@ -4,12 +4,13 @@ module Core.Utils (
   , mapPairs
   , mapPairM
   , mapPairsM
+  , applyMaybe
 ) where
 
 
 
 -- ~
-import Prelude (return)
+import Prelude (return, Maybe(..), ($))
 import qualified Control.Monad as M
 import qualified Prelude as Pre
 -- ~
@@ -29,8 +30,13 @@ mapPairM f (x, y) = do
     
     return (x', y')
 
-
 mapPairsM :: (M.Monad m) => (a -> m b) -> [(a, a)] -> m [(b, b)]
 mapPairsM f = M.mapM (mapPairM f)
+
+
+applyMaybe :: (a -> b) -> Maybe a -> Maybe b
+applyMaybe _ Nothing = Nothing
+applyMaybe f (Just x) = Just $ f x
+
     
 
