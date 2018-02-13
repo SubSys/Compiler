@@ -23,40 +23,40 @@ type Visibility = All | Active | Completed
 
 (+) : Int -> Int -> Int
 (+) leftA rightA =
-    Sudo.Helm.Native.plus leftA rightA
+    Helm.Compiler.Sudo.Native.plus leftA rightA
 
 
 (+) : Float -> Float -> Float
 (+) leftA rightA =
-    Sudo.Helm.Native.plus leftA rightA
+    Helm.Compiler.Sudo.Native.plus leftA rightA
 
 
 (-) : Int -> Int -> Int
 (-) leftA rightA =
-    Sudo.Helm.Native.sub leftA rightA
+    Helm.Compiler.Sudo.Native.sub leftA rightA
 
 
 (-) : Float -> Float -> Float
 (-) leftA rightA =
-    Sudo.Helm.Native.sub leftA rightA
+    Helm.Compiler.Sudo.Native.sub leftA rightA
 
 
 
 (==) : Int -> Int -> Bool
 (==) leftA rightA =
-    Sudo.Helm.Native.isEqInt leftA rightA
+    Helm.Compiler.Sudo.Native.isEqInt leftA rightA
 
 (==) : Float -> Float -> Bool
 (==) leftA rightA =
-    Sudo.Helm.Native.isEqFloat leftA rightA
+    Helm.Compiler.Sudo.Native.isEqFloat leftA rightA
 
 (==) : String -> String -> Bool
 (==) leftA rightA =
-    Sudo.Helm.Native.isEqString leftA rightA
+    Helm.Compiler.Sudo.Native.isEqString leftA rightA
 
 (==) : Char -> Char -> Bool
 (==) leftA rightA =
-    Sudo.Helm.Native.isEqChar leftA rightA
+    Helm.Compiler.Sudo.Native.isEqChar leftA rightA
 
 
 
