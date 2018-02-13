@@ -1,5 +1,5 @@
 .stack-work/
 Compiler.cabal
 *~
-dev/
+./dev/
 .DS_Store
