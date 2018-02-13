@@ -119,6 +119,11 @@ import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
 {-# ANN module ("HLint: ignore" :: String) #-}
 
 
+-- | If this module is broken, please let me know!
+--
+
+
+
 
 getProjectRoot :: IO String
 getProjectRoot = do
@@ -136,6 +141,19 @@ inputFilePath =
     where
         trim = List.filter (/= '\n')
 
+
+-- NOTE:
+-- * You may use the below snippet to experiment with turning off/on various core passes:
+-- 
+-- sourceCode
+--     |> Driver.runModuleParser filePathInfo
+--     |> Validate.userspaceLiteral
+--     |> Driver.typeCheck
+--     |> Interface.toProgram
+--     |> Driver.desugar
+--     |> Driver.lambdaLift
+--     |> Driver.uncurryTerms
+--     |> Driver'.typeCheck
 
 
 upstream = do
