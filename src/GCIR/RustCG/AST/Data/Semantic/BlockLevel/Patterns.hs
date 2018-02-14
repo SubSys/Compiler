@@ -7,7 +7,7 @@ module GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns (
   , pattern List
   , pattern ListCons
   , pattern Tuple
-  , pattern Constr
+  , pattern Variant
   , pattern Wildcard
 ) where
 
@@ -36,8 +36,8 @@ pattern ListCons xs end = IR.ListConsPattern xs end
 pattern Tuple :: [IR.Pattern] -> IR.Pattern
 pattern Tuple items = IR.TuplePattern items
 
-pattern Constr :: IR.Path -> [IR.Pattern] -> IR.Pattern
-pattern Constr path args = IR.ConstrPattern path args
+pattern Variant :: IR.Path -> [IR.Pattern] -> IR.Pattern
+pattern Variant path args = IR.VariantPattern path args
 
 pattern Wildcard :: IR.Pattern
 pattern Wildcard = IR.WildcardPattern

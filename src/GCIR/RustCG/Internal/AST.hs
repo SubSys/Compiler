@@ -171,7 +171,7 @@ data Pattern
     -- ** Nothing == `[]`/Nil -i.e, end of the list pattern.
     | ListConsPattern [Pattern] (Maybe Pattern)
     | TuplePattern [Pattern]
-    | ConstrPattern Path [Pattern]
+    | VariantPattern Path [Pattern]
     | WildcardPattern
 
 
