@@ -2,6 +2,7 @@
 {-# LANGUAGE PatternSynonyms #-}
 module GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns (
     IR.Pattern
+  , IR.Arm(..)
   , pattern Var
   , pattern Lit
   , pattern List
