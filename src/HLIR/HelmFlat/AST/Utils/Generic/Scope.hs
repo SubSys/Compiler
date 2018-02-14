@@ -115,6 +115,9 @@ freeVars input =
         sudoFFI = SudoFFI.isSudoFFI
 
 
+-- | Convenient helpers
+--
+
 without :: Eq a => [a] -> [a] -> [a]
 without =
     Fold.foldr (List.filter . (/=))
