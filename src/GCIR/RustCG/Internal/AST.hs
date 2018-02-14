@@ -196,7 +196,7 @@ data Type
     = LiteralType LiteralType
     | FnType [Type] Output
     | GenericType Ident
-    | UnionType Path
+    | UnionType Path [Type]
     
     | BoxType Type
     
