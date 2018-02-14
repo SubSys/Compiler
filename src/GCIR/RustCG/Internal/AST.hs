@@ -75,7 +75,7 @@ import qualified Text.Show.Prettyprint as PP
 
 
 {-
-    # Unions
+    # Enum Declarations
 -}
 
 -- data Union = Union Ident [Ident] [Constructor]
@@ -85,6 +85,15 @@ import qualified Text.Show.Prettyprint as PP
 --     deriving (Show, Eq, Ord, Data, Typeable)
 
 
+data Enum = Enum Ident [Generic] [Variant]
+
+
+data Variant
+    = TupleVariant Ident [Type]
+    | UnitVariant Ident
+    
+    -- TODO: Struct Variants...
+    -- | StructVariant
 
 
 
@@ -93,7 +102,7 @@ import qualified Text.Show.Prettyprint as PP
 -}
 
 
-data Function = Function Ident [Generic] [Input] Output Block
+data Function = Function Binder [Generic] [Input] Output Block
 
 -- data Function = Function Binder [Binder] Expr (Maybe Scheme)
 --     deriving (Show, Eq, Ord, Data, Typeable)
@@ -110,10 +119,10 @@ newtype Block = Block [Stmt]
 
 
 data Stmt
-    = BoxStmt
+    = BoxStmt Stmt
     | LitStmt LiteralValue
     
-    | RefStmt Ident
+    | RefStmt Path
     
     | FunCallStmt Path [Stmt]
     | ConCallStmt Path [Stmt]
@@ -124,23 +133,10 @@ data Stmt
     | IfStmt [(Stmt, Stmt)] Stmt
     | MatchStmt Stmt [Arm]
     
-    -- | Collection Stmts
+    -- | Collection Constructs
     --
     | ListStmt [Stmt]
     | TupleStmt [Stmt]
-
-
-
-
--- data Expr
---     = LitExpr LiteralValue
---     | CaseExpr Expr [CaseAlt]
---     | ConstrExpr Ident
---     | ListExpr [Expr]
---     | TupleExpr [Expr]
---     | FunCallExpr Ref [Expr]
---     | ConCallExpr Ident [Expr]
---     deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -155,7 +151,7 @@ data Arm = Arm Pattern Stmt
 
 
 data Pattern
-    = VarPattern Ident
+    = VarPattern Binder
     | LitPattern LiteralValue
     | ListPattern [Pattern]
 
@@ -171,9 +167,8 @@ data Pattern
     -- ** Nothing == `[]`/Nil -i.e, end of the list pattern.
     | ListConsPattern [Pattern] (Maybe Pattern)
     | TuplePattern [Pattern]
-    | ConstrPattern Ident [Pattern]
+    | ConstrPattern Path [Pattern]
     | WildcardPattern
-    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -211,6 +206,8 @@ data Type
     | GenericType Generic
     | UnionType Ident
     
+    | BoxType Type
+    
     -- | Collection Types
     -- 
     | ListType Type
@@ -244,7 +241,6 @@ data LiteralValue
     # Identifiers
 -}
 
-data Path = Path
 
 data Ident = Ident Text 
     deriving (Show, Eq, Ord, Data, Typeable)
@@ -252,15 +248,31 @@ data Ident = Ident Text
 
 newtype Namespace = Namespace [Text]
 
+
+data Path = Path PathPrefix Ref (Maybe Namespace)
+
+data PathPrefix = PathPrefix
+
+
+
+
+
 {-
     # Uncategorized - Etc.
 -}
 
+-- | Identifiers classified by their scoping nature
+-- NOTE:
+-- * Contrary to the upstream IRs, this is used internally.
 
-data Input = Input Ident Type
+data Binder = Binder Ident
+data Ref = Ref Ident
 
+
+-- | Function Header
+--
+data Input = Input Binder Type
 newtype Output = Output Type
-
 newtype Generic = Generic Ident
 
 
