@@ -22,7 +22,7 @@ import qualified GCIR.RustCG.Internal.AST as IR
 
 
 pattern Var :: IR.Ident -> IR.Pattern
-pattern Var ident = IR.VarPattern (IR.Binder ident)
+pattern Var ident = IR.VarPattern ident
 
 pattern Lit :: IR.LiteralValue -> IR.Pattern
 pattern Lit val = IR.LitPattern val

@@ -102,12 +102,16 @@ data Variant
 -}
 
 
-data Function = Function Binder [Generic] [Input] Output Block
-
--- data Function = Function Binder [Binder] Expr (Maybe Scheme)
---     deriving (Show, Eq, Ord, Data, Typeable)
+data Function = Function Ident [Generic] [Input] Output Block
 
 
+
+{-
+    ## Function Header
+-}
+data Input = Input Ident Type
+newtype Output = Output Type
+newtype Generic = Generic Ident
 
 
 
@@ -151,7 +155,7 @@ data Arm = Arm Pattern Stmt
 
 
 data Pattern
-    = VarPattern Binder
+    = VarPattern Ident
     | LitPattern LiteralValue
     | ListPattern [Pattern]
 
@@ -186,25 +190,13 @@ data Pattern
     # Type Nodes
 -}
 
--- data Type
---     = TupleType  [Type]
---     | ListType   Type
---     | UnionType Ident [Type]
---     | VarType Ident
---     | ArrType Type Type
---     | StringType
---     | CharType
---     | IntType
---     | FloatType
---     | BoolType
---     deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data Type
     = LiteralType LiteralType
     | FnType [Type] Output
-    | GenericType Generic
-    | UnionType Ident
+    | GenericType Ident
+    | UnionType Path
     
     | BoxType Type
     
@@ -246,34 +238,13 @@ data Ident = Ident Text
     deriving (Show, Eq, Ord, Data, Typeable)
 
 
-newtype Namespace = Namespace [Text]
+data Path = Path [Seg]
+
+data Seg = Seg (Maybe Prefix) Text
+
+data Prefix = Prefix
 
 
-data Path = Path PathPrefix Ref (Maybe Namespace)
-
-data PathPrefix = PathPrefix
-
-
-
-
-
-{-
-    # Uncategorized - Etc.
--}
-
--- | Identifiers classified by their scoping nature
--- NOTE:
--- * Contrary to the upstream IRs, this is used internally.
-
-data Binder = Binder Ident
-data Ref = Ref Ident
-
-
--- | Function Header
---
-data Input = Input Binder Type
-newtype Output = Output Type
-newtype Generic = Generic Ident
 
 
 
