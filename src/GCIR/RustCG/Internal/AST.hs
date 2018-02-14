@@ -55,6 +55,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 
 -- + Recursion Schemes & Related
@@ -86,6 +87,7 @@ import qualified Text.Show.Prettyprint as PP
 
 
 data Enum = Enum Ident [Generic] [Variant]
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data Variant
@@ -94,6 +96,8 @@ data Variant
     
     -- TODO: Struct Variants...
     -- | StructVariant
+    
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -103,6 +107,7 @@ data Variant
 
 
 data Function = Function Ident [Generic] [Input] Output Block
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -110,8 +115,14 @@ data Function = Function Ident [Generic] [Input] Output Block
     ## Function Header
 -}
 data Input = Input Ident Type
+    deriving (Show, Eq, Ord, Data, Typeable)
+
 newtype Output = Output Type
+    deriving (Show, Eq, Ord, Data, Typeable)
+
 newtype Generic = Generic Ident
+    deriving (Show, Eq, Ord, Data, Typeable)
+
 
 
 
@@ -120,6 +131,7 @@ newtype Generic = Generic Ident
 -}
 
 newtype Block = Block [Stmt]
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data Stmt
@@ -141,6 +153,7 @@ data Stmt
     --
     | ListStmt [Stmt]
     | TupleStmt [Stmt]
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -152,6 +165,7 @@ data Stmt
 
 
 data Arm = Arm Pattern Stmt
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data Pattern
@@ -173,6 +187,7 @@ data Pattern
     | TuplePattern [Pattern]
     | VariantPattern Path [Pattern]
     | WildcardPattern
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -204,6 +219,7 @@ data Type
     -- 
     | ListType Type
     | TupleType [Type]
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data LiteralType
@@ -212,6 +228,7 @@ data LiteralType
     | IntType
     | FloatType
     | BoolType
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 {-
@@ -239,10 +256,13 @@ data Ident = Ident Text
 
 
 data Path = Path [Seg]
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 data Seg = Seg (Maybe Prefix) Text
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 data Prefix = Prefix
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
