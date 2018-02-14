@@ -14,6 +14,8 @@ module GCIR.RustCG.AST.Data.Semantic.Base.Types (
   , pattern Int
   , pattern Float
   , pattern Bool
+  
+  , pattern Fn_
 ) where
 
 
@@ -32,8 +34,8 @@ pattern Fn inTypes outType = IR.FnType inTypes outType
 pattern Generic :: IR.Ident -> IR.Type
 pattern Generic ident = IR.GenericType ident
 
-pattern Union :: IR.Path -> IR.Type
-pattern Union path = IR.UnionType path
+pattern Union :: IR.Path -> [IR.Type] -> IR.Type
+pattern Union path args = IR.UnionType path args
 
 pattern Box :: IR.Type -> IR.Type
 pattern Box ty = IR.BoxType ty
@@ -70,4 +72,10 @@ pattern Bool = IR.LiteralType IR.BoolType
 
 -- | Alternate variations - convenience helpers
 --
+
+pattern Fn_ :: [IR.Type] -> IR.Type -> IR.Type
+pattern Fn_ inTypes outType = IR.FnType inTypes (IR.Output outType)
+
+
+
 
