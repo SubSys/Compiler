@@ -11,8 +11,9 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    (return
+    ( return
     , String
+    , Char
     , IO
     , show
     , error
@@ -97,7 +98,7 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Dec
 
 
 renderIdent :: ID.Ident -> Doc
-renderIdent (ID.Ident txt) = render txt
+renderIdent (ID.Ident txt) = render (normalize txt)
 
 renderPath :: ID.Path -> Doc
 renderPath (ID.Path segs) =
@@ -106,10 +107,21 @@ renderPath (ID.Path segs) =
         |> Util.hcat
 
 renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render txt
+renderSeg (ID.Seg prefix txt) = render (normalize txt)
 
 
+-- | Internal Helpers
+--
 
-
+normalize :: Text -> Text
+normalize x =
+    prefix `Text.append` Text.filter pred x
+    where
+        prefix = "x"
+        pred :: Char -> Bool
+        pred '!' = False
+        pred 'º' = False
+        pred '@' = False
+        pred x   = True
 
 
