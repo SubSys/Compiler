@@ -1,7 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.Base.Literals (
-    renderLiteral
+module GCIR.RustCG.Core.Render.Syntax (
+    renderFunctions
+  , renderEnums
+  , packDoc
 ) where
 
 
@@ -66,6 +67,7 @@ import qualified System.IO as SIO
 -- + Frameworks
 import Framework.Text.Renderer
 import qualified Framework.Text.Renderer.Utils as Util
+import qualified Text.PrettyPrint.Leijen.Text  as P
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
@@ -88,6 +90,10 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions.Header as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local
+import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Enums     as Decl
+import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Functions as Decl
 -- *
 
 
@@ -96,15 +102,25 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Dec
 
 
 
-renderLiteral :: Lit.LiteralValue -> Doc
-renderLiteral (Lit.Int val) = render val
-renderLiteral (Lit.Float val) = render val
+renderFunctions :: [Decl.Function] -> Text
+renderFunctions xs =
+    map (packDoc Decl.renderFunction) xs
+        |> Text.unlines
 
-renderLiteral (Lit.Bool True) = "true"
-renderLiteral (Lit.Bool False) = "false"
 
-renderLiteral (Lit.Char val) = "\'"   <> render val <> "\'"
-renderLiteral (Lit.String val) = "\"" <> render val <> "\""
+renderEnums :: [Decl.Enum] -> Text
+renderEnums xs =
+    map (packDoc Decl.renderEnum) xs
+        |> Text.unlines
+
+
+
+packDoc :: (a -> Doc) -> a -> Text
+packDoc f doc =
+    P.displayTStrict toSimpleDoc
+    where
+        toSimpleDoc = P.renderPretty 0.4 400 (f doc)
+
 
 
 

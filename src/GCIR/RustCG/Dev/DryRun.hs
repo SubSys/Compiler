@@ -79,6 +79,9 @@ import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
 -- + RustCG AST Interface
 import qualified GCIR.RustCG.Data.Interface as I
 
+-- + RustCG AST Renderer
+import qualified GCIR.RustCG.Core.Render.Syntax as Syntax
+
 -- + RustCG AST
 -- ++ Base
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
@@ -134,8 +137,8 @@ run = do
 run' payload = do
     
     
-    -- (TIO.putStrLn . Syntax.renderFunctions) fns
-    M.mapM_ PP.prettyPrint fns
+    (TIO.putStrLn . Syntax.renderFunctions) fns
+    -- M.mapM_ PP.prettyPrint fns
 
     where
         fns = I.getFunctions payload

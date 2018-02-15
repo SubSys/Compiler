@@ -1,7 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.Base.Literals (
-    renderLiteral
+module GCIR.RustCG.Core.Render.Syntax.DeclLevel.Functions.Header (
+    renderOutput
+  , renderInput
+  , renderGeneric
 ) where
 
 
@@ -88,6 +90,12 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions.Header as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident          as ID
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Literals       as Lit
+import qualified GCIR.RustCG.Core.Render.Syntax.BlockLevel.Stmt     as S
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types          as T
 -- *
 
 
@@ -96,16 +104,23 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Dec
 
 
 
-renderLiteral :: Lit.LiteralValue -> Doc
-renderLiteral (Lit.Int val) = render val
-renderLiteral (Lit.Float val) = render val
-
-renderLiteral (Lit.Bool True) = "true"
-renderLiteral (Lit.Bool False) = "false"
-
-renderLiteral (Lit.Char val) = "\'"   <> render val <> "\'"
-renderLiteral (Lit.String val) = "\"" <> render val <> "\""
+renderOutput :: Decl.Output -> Doc
+renderOutput (Decl.Output ty) =
+    let ty' = T.renderType ty
+    in
+        "->" <+> ty'
 
 
+renderInput :: Decl.Input -> Doc
+renderInput (Decl.Input ident ty) =
+    let ident' = ID.renderIdent ident
+        ty'    = T.renderType ty
+    in
+        ident' <> ":" <+> ty'
+
+
+renderGeneric :: Decl.Generic -> Doc
+renderGeneric (Decl.Generic ident) =
+    ID.renderIdent ident
 
 
