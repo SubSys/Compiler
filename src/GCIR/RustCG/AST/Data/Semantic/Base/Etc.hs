@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions.Header (
+module GCIR.RustCG.AST.Data.Semantic.Base.Etc (
     IR.Input
   , IR.Output
   , IR.Generic
@@ -28,6 +28,3 @@ pattern Output ty = IR.Output ty
 
 pattern Generic :: IR.Ident -> IR.Generic
 pattern Generic ident = IR.Generic ident
-
-
-

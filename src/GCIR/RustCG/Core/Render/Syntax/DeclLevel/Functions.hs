@@ -80,21 +80,21 @@ import qualified GCIR.RustCG.Data.Interface as I
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Literals              as Lit
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Types                 as T
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Etc                   as Etc
 -- ++ Block Level
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as S
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 -- ++ Decl/Top Level
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
-import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions.Header as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident                 as ID
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Literals              as Lit
-import qualified GCIR.RustCG.Core.Render.Syntax.BlockLevel.Stmt            as S
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types                 as T
-import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Functions.Header as Decl
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident      as ID
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Literals   as Lit
+import qualified GCIR.RustCG.Core.Render.Syntax.BlockLevel.Stmt as S
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types      as T
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Etc        as Etc
 -- *
 
 
@@ -106,17 +106,17 @@ import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Functions.Header as De
 renderFunction :: Decl.Function -> Doc
 renderFunction (Decl.Function name generics inputs output body) =
     let name'     = ID.renderIdent name
-        generics' = map Decl.renderGeneric generics
+        generics' = Etc.renderGenerics generics
             |> Util.punctuate ","
             |> Util.punctuate Util.space
             |> Util.hcat
             |> Util.angles
-        inputs'   = map Decl.renderInput inputs
+        inputs'   = map Etc.renderInput inputs
             |> Util.punctuate ","
             |> Util.punctuate Util.space
             |> Util.hcat
             |> Util.parens
-        output'   = Decl.renderOutput output
+        output'   = Etc.renderOutput output
         body'     = S.renderBlock body
     in
             "fn"

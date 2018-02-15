@@ -80,20 +80,20 @@ import qualified GCIR.RustCG.Data.Interface as I
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Literals              as Lit
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Types                 as T
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Etc                   as Etc
 -- ++ Block Level
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as S
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 -- ++ Decl/Top Level
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
-import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions.Header as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident                 as ID
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types                 as T
-import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Enums.Variants   as Decl
-import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Functions.Header as Decl
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident               as ID
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types               as T
+import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Enums.Variants as Decl
+import qualified GCIR.RustCG.Core.Render.Syntax.Base.Etc                 as Etc
 -- *
 
 
@@ -107,11 +107,7 @@ import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Functions.Header as De
 renderEnum :: Decl.Enum -> Doc
 renderEnum (Decl.Enum name generics variants) =
     let name'     = ID.renderIdent name
-        generics' = map Decl.renderGeneric generics
-            |> Util.punctuate ","
-            |> Util.punctuate Util.space
-            |> Util.hcat
-            |> Util.angles
+        generics' = Etc.renderGenerics generics
         variants' = map Decl.renderVariant  variants
             |> Util.punctuate ","
             |> Util.vcat

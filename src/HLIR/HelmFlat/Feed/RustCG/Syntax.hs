@@ -90,12 +90,12 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as H.Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as R.ID
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Literals              as R.Lit
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Types                 as R.T
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Etc                   as R.Etc
 -- ++ Block Level
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as R.S
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as R.P
 -- ++ Decl/Top Level
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as R.Decl
-import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions.Header as R.Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as R.Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as R.Decl
 -- *
@@ -254,7 +254,7 @@ dropFunction (H.Decl.Function name args body (Just scheme@(H.T.Forall gs ty))) =
         (binder2Ident name)
         (map toGeneric gs)
         (map binder2Input args)
-        (R.Decl.Output (dropType output))
+        (R.Etc.Output (dropType output))
         (R.S.Block [dropExpr body])
     
     where
@@ -279,15 +279,15 @@ binder2Ident (H.Etc.Binder_ ident) = dropIdent ident
 
 
 
-toGeneric :: H.ID.Ident -> R.Decl.Generic
+toGeneric :: H.ID.Ident -> R.Etc.Generic
 toGeneric (H.ID.Ident_ txt) =
-    R.Decl.Generic (R.ID.Ident txt)
+    R.Etc.Generic (R.ID.Ident txt)
 
 
 
-binder2Input :: H.Etc.Binder -> R.Decl.Input
+binder2Input :: H.Etc.Binder -> R.Etc.Input
 binder2Input (H.Etc.Binder ident (Just ty)) =
-    R.Decl.Input
+    R.Etc.Input
         (dropIdent ident)
         (dropType ty)
 

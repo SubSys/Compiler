@@ -87,12 +87,12 @@ import qualified GCIR.RustCG.Core.Render.Syntax as Syntax
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Literals              as Lit
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Types                 as T
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Etc                   as Etc
 -- ++ Block Level
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as S
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 -- ++ Decl/Top Level
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
-import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions.Header as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 -- *
