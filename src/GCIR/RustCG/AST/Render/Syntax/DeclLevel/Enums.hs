@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.DeclLevel.Enums (
+module GCIR.RustCG.AST.Render.Syntax.DeclLevel.Enums (
     renderEnum
 ) where
 
@@ -90,10 +90,10 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident               as ID
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types               as T
-import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Enums.Variants as Decl
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Etc                 as Etc
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Ident               as ID
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Types               as T
+import qualified GCIR.RustCG.AST.Render.Syntax.DeclLevel.Enums.Variants as Decl
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Etc                 as Etc
 -- *
 
 

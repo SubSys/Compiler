@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.DeclLevel.Enums.Variants (
-    renderVariant
+module GCIR.RustCG.AST.Render.Syntax.Base.Literals (
+    renderLiteral
 ) where
 
 
@@ -88,10 +88,6 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
-
--- + Local
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident                 as ID
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types                 as T
 -- *
 
 
@@ -100,22 +96,15 @@ import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types                 as T
 
 
 
-renderVariant :: Decl.Variant -> Doc
-renderVariant (Decl.TupleVariant name args) =
-    let name' = ID.renderIdent name
-        args' = map T.renderType args
-            |> Util.punctuate ","
-            |> Util.punctuate Util.space
-            |> Util.hcat
-            |> Util.parens
-    in
-        name' <+> args'
+renderLiteral :: Lit.LiteralValue -> Doc
+renderLiteral (Lit.Int val) = render val
+renderLiteral (Lit.Float val) = render val
 
-renderVariant (Decl.UnitVariant name) =
-    ID.renderIdent name
+renderLiteral (Lit.Bool True) = "true"
+renderLiteral (Lit.Bool False) = "false"
 
-
-
+renderLiteral (Lit.Char val) = "\'"   <> render val <> "\'"
+renderLiteral (Lit.String val) = "\"" <> render val <> "\""
 
 
 

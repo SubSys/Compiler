@@ -1,10 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.Base.Etc (
-    renderOutput
-  , renderInput
-  , renderGeneric
-  , renderGenerics
+module GCIR.RustCG.AST.Render.Syntax (
+    renderFunctions
+  , renderEnums
+  , packDoc
 ) where
 
 
@@ -69,6 +67,7 @@ import qualified System.IO as SIO
 -- + Frameworks
 import Framework.Text.Renderer
 import qualified Framework.Text.Renderer.Utils as Util
+import qualified Text.PrettyPrint.Leijen.Text  as P
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
@@ -84,7 +83,6 @@ import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Literals              as Lit
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Types                 as T
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Etc                   as Etc
-
 -- ++ Block Level
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as S
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
@@ -94,10 +92,9 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident          as ID
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types          as T
+import qualified GCIR.RustCG.AST.Render.Syntax.DeclLevel.Enums     as Decl
+import qualified GCIR.RustCG.AST.Render.Syntax.DeclLevel.Functions as Decl
 -- *
-
 
 
 
@@ -105,34 +102,26 @@ import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types          as T
 
 
 
-renderOutput :: Etc.Output -> Doc
-renderOutput (Etc.Output ty) =
-    let ty' = T.renderType ty
-    in
-        "->" <+> ty'
+renderFunctions :: [Decl.Function] -> Text
+renderFunctions xs =
+    map (packDoc Decl.renderFunction) xs
+        |> Text.unlines
 
 
-renderInput :: Etc.Input -> Doc
-renderInput (Etc.Input ident ty) =
-    let ident' = ID.renderIdent ident
-        ty'    = T.renderType ty
-    in
-        ident' <> ":" <+> ty'
-
-
-renderGeneric :: Etc.Generic -> Doc
-renderGeneric (Etc.Generic ident) =
-    ID.renderIdent ident
+renderEnums :: [Decl.Enum] -> Text
+renderEnums xs =
+    map (packDoc Decl.renderEnum) xs
+        |> Text.unlines
 
 
 
-renderGenerics :: [Etc.Generic] -> Doc
-renderGenerics [] = Util.empty
-renderGenerics gs =
-    map renderGeneric gs
-        |> Util.punctuate ","
-        |> Util.punctuate Util.space
-        |> Util.hcat
-        |> Util.angles
+packDoc :: (a -> Doc) -> a -> Text
+packDoc f doc =
+    P.displayTStrict toSimpleDoc
+    where
+        toSimpleDoc = P.renderPretty 0.4 400 (f doc)
+
+
+
 
 

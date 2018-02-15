@@ -80,7 +80,7 @@ import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
 import qualified GCIR.RustCG.Data.Interface as I
 
 -- + RustCG AST Renderer
-import qualified GCIR.RustCG.Core.Render.Syntax as Syntax
+import qualified GCIR.RustCG.AST.Render.Syntax as Syntax
 
 -- + RustCG AST
 -- ++ Base

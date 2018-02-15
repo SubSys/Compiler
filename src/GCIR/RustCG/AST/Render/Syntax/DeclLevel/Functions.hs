@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.Base.Types (
-    renderType
+module GCIR.RustCG.AST.Render.Syntax.DeclLevel.Functions (
+    renderFunction
 ) where
 
 
@@ -90,7 +90,11 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident as ID
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Ident      as ID
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Literals   as Lit
+import qualified GCIR.RustCG.AST.Render.Syntax.BlockLevel.Stmt as S
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Types      as T
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Etc        as Etc
 -- *
 
 
@@ -98,48 +102,27 @@ import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident as ID
 {-# ANN module ("HLint: ignore" :: String) #-}
 
 
-renderType :: T.Type -> Doc
-renderType T.String = "&'static str"
-renderType T.Char   = "char"
-renderType T.Int    = "u32"
-renderType T.Float  = "f32"
-renderType T.Bool   = "bool"
 
-renderType (T.Fn_ inTypes outType) =
-    let inTypes' = map renderType inTypes
+renderFunction :: Decl.Function -> Doc
+renderFunction (Decl.Function name generics inputs output body) =
+    let name'     = ID.renderIdent name
+        generics' = Etc.renderGenerics generics
+        inputs'   = map Etc.renderInput inputs
             |> Util.punctuate ","
             |> Util.punctuate Util.space
             |> Util.hcat
             |> Util.parens
-        outType' = renderType outType
+        output'   = Etc.renderOutput output
+        body'     = S.renderBlock body
     in
-        "&Fn" <> inTypes' <+> "->" <+> outType'
+            "fn"
+        <+> name'
+        <+> generics'
+        <+> inputs'
+        <+> output'
 
-renderType (T.Union path args) =
-    let path' = ID.renderPath path
-        args' = map renderType args
-            |> Util.punctuate ","
-            |> Util.punctuate Util.space
-            |> Util.hcat
-            |> Util.angles
-    in
-        path' <+> args'
-
-renderType (T.Generic ident) =
-    ID.renderIdent ident
-
-renderType (T.Box ty) =
-    "box" <+> renderType ty
-
-renderType (T.List ty) =
-    "List" <+> renderType ty
-
-renderType (T.Tuple types) =
-    map renderType types
-        |> Util.punctuate ","
-        |> Util.punctuate Util.space
-        |> Util.hcat
-        |> Util.parens
+        <+> body'
+        <> Util.linebreak
 
 
 

@@ -1,7 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.DeclLevel.Functions (
-    renderFunction
+module GCIR.RustCG.AST.Render.Syntax.Base.Etc (
+    renderOutput
+  , renderInput
+  , renderGeneric
+  , renderGenerics
 ) where
 
 
@@ -81,6 +84,7 @@ import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Literals              as Lit
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Types                 as T
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Etc                   as Etc
+
 -- ++ Block Level
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as S
 import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
@@ -90,12 +94,10 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident      as ID
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Literals   as Lit
-import qualified GCIR.RustCG.Core.Render.Syntax.BlockLevel.Stmt as S
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Types      as T
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Etc        as Etc
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Ident          as ID
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Types          as T
 -- *
+
 
 
 
@@ -103,29 +105,34 @@ import qualified GCIR.RustCG.Core.Render.Syntax.Base.Etc        as Etc
 
 
 
-renderFunction :: Decl.Function -> Doc
-renderFunction (Decl.Function name generics inputs output body) =
-    let name'     = ID.renderIdent name
-        generics' = Etc.renderGenerics generics
-        inputs'   = map Etc.renderInput inputs
-            |> Util.punctuate ","
-            |> Util.punctuate Util.space
-            |> Util.hcat
-            |> Util.parens
-        output'   = Etc.renderOutput output
-        body'     = S.renderBlock body
+renderOutput :: Etc.Output -> Doc
+renderOutput (Etc.Output ty) =
+    let ty' = T.renderType ty
     in
-            "fn"
-        <+> name'
-        <+> generics'
-        <+> inputs'
-        <+> output'
-
-        <+> body'
-        <> Util.linebreak
+        "->" <+> ty'
 
 
+renderInput :: Etc.Input -> Doc
+renderInput (Etc.Input ident ty) =
+    let ident' = ID.renderIdent ident
+        ty'    = T.renderType ty
+    in
+        ident' <> ":" <+> ty'
 
 
+renderGeneric :: Etc.Generic -> Doc
+renderGeneric (Etc.Generic ident) =
+    ID.renderIdent ident
+
+
+
+renderGenerics :: [Etc.Generic] -> Doc
+renderGenerics [] = Util.empty
+renderGenerics gs =
+    map renderGeneric gs
+        |> Util.punctuate ","
+        |> Util.punctuate Util.space
+        |> Util.hcat
+        |> Util.angles
 
 

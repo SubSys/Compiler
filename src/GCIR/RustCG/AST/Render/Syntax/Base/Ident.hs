@@ -1,8 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module GCIR.RustCG.Core.Render.Syntax (
-    renderFunctions
-  , renderEnums
-  , packDoc
+{-# LANGUAGE OverloadedStrings #-}
+module GCIR.RustCG.AST.Render.Syntax.Base.Ident (
+    renderIdent
+  , renderPath
 ) where
 
 
@@ -11,8 +11,9 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    (return
+    ( return
     , String
+    , Char
     , IO
     , show
     , error
@@ -67,7 +68,6 @@ import qualified System.IO as SIO
 -- + Frameworks
 import Framework.Text.Renderer
 import qualified Framework.Text.Renderer.Utils as Util
-import qualified Text.PrettyPrint.Leijen.Text  as P
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
@@ -90,10 +90,6 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
-
--- + Local
-import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Enums     as Decl
-import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Functions as Decl
 -- *
 
 
@@ -101,27 +97,31 @@ import qualified GCIR.RustCG.Core.Render.Syntax.DeclLevel.Functions as Decl
 {-# ANN module ("HLint: ignore" :: String) #-}
 
 
+renderIdent :: ID.Ident -> Doc
+renderIdent (ID.Ident txt) = render (normalize txt)
 
-renderFunctions :: [Decl.Function] -> Text
-renderFunctions xs =
-    map (packDoc Decl.renderFunction) xs
-        |> Text.unlines
+renderPath :: ID.Path -> Doc
+renderPath (ID.Path segs) =
+    map renderSeg segs
+        |> Util.punctuate "::"
+        |> Util.hcat
+
+renderSeg :: ID.Seg -> Doc
+renderSeg (ID.Seg prefix txt) = render (normalize txt)
 
 
-renderEnums :: [Decl.Enum] -> Text
-renderEnums xs =
-    map (packDoc Decl.renderEnum) xs
-        |> Text.unlines
+-- | Internal Helpers
+--
 
-
-
-packDoc :: (a -> Doc) -> a -> Text
-packDoc f doc =
-    P.displayTStrict toSimpleDoc
+normalize :: Text -> Text
+normalize x =
+    prefix `Text.append` Text.filter pred x
     where
-        toSimpleDoc = P.renderPretty 0.4 400 (f doc)
-
-
-
+        prefix = "x"
+        pred :: Char -> Bool
+        pred '!' = False
+        pred 'º' = False
+        pred '@' = False
+        pred x   = True
 
 

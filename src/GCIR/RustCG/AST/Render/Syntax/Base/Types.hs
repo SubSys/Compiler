@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.Base.Literals (
-    renderLiteral
+module GCIR.RustCG.AST.Render.Syntax.Base.Types (
+    renderType
 ) where
 
 
@@ -88,6 +88,9 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Ident as ID
 -- *
 
 
@@ -95,16 +98,50 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Dec
 {-# ANN module ("HLint: ignore" :: String) #-}
 
 
+renderType :: T.Type -> Doc
+renderType T.String = "&'static str"
+renderType T.Char   = "char"
+renderType T.Int    = "u32"
+renderType T.Float  = "f32"
+renderType T.Bool   = "bool"
 
-renderLiteral :: Lit.LiteralValue -> Doc
-renderLiteral (Lit.Int val) = render val
-renderLiteral (Lit.Float val) = render val
+renderType (T.Fn_ inTypes outType) =
+    let inTypes' = map renderType inTypes
+            |> Util.punctuate ","
+            |> Util.punctuate Util.space
+            |> Util.hcat
+            |> Util.parens
+        outType' = renderType outType
+    in
+        "&Fn" <> inTypes' <+> "->" <+> outType'
 
-renderLiteral (Lit.Bool True) = "true"
-renderLiteral (Lit.Bool False) = "false"
+renderType (T.Union path args) =
+    let path' = ID.renderPath path
+        args' = map renderType args
+            |> Util.punctuate ","
+            |> Util.punctuate Util.space
+            |> Util.hcat
+            |> Util.angles
+    in
+        path' <+> args'
 
-renderLiteral (Lit.Char val) = "\'"   <> render val <> "\'"
-renderLiteral (Lit.String val) = "\"" <> render val <> "\""
+renderType (T.Generic ident) =
+    ID.renderIdent ident
+
+renderType (T.Box ty) =
+    "box" <+> renderType ty
+
+renderType (T.List ty) =
+    "List" <+> renderType ty
+
+renderType (T.Tuple types) =
+    map renderType types
+        |> Util.punctuate ","
+        |> Util.punctuate Util.space
+        |> Util.hcat
+        |> Util.parens
+
+
 
 
 

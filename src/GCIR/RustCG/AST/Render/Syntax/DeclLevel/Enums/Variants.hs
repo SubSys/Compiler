@@ -1,8 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderPath
+module GCIR.RustCG.AST.Render.Syntax.DeclLevel.Enums.Variants (
+    renderVariant
 ) where
 
 
@@ -11,9 +10,8 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    ( return
+    (return
     , String
-    , Char
     , IO
     , show
     , error
@@ -90,6 +88,10 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Ident                 as ID
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Types                 as T
 -- *
 
 
@@ -97,31 +99,24 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Dec
 {-# ANN module ("HLint: ignore" :: String) #-}
 
 
-renderIdent :: ID.Ident -> Doc
-renderIdent (ID.Ident txt) = render (normalize txt)
 
-renderPath :: ID.Path -> Doc
-renderPath (ID.Path segs) =
-    map renderSeg segs
-        |> Util.punctuate "::"
-        |> Util.hcat
+renderVariant :: Decl.Variant -> Doc
+renderVariant (Decl.TupleVariant name args) =
+    let name' = ID.renderIdent name
+        args' = map T.renderType args
+            |> Util.punctuate ","
+            |> Util.punctuate Util.space
+            |> Util.hcat
+            |> Util.parens
+    in
+        name' <+> args'
 
-renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render (normalize txt)
+renderVariant (Decl.UnitVariant name) =
+    ID.renderIdent name
 
 
--- | Internal Helpers
---
 
-normalize :: Text -> Text
-normalize x =
-    prefix `Text.append` Text.filter pred x
-    where
-        prefix = "x"
-        pred :: Char -> Bool
-        pred '!' = False
-        pred 'º' = False
-        pred '@' = False
-        pred x   = True
+
+
 
 

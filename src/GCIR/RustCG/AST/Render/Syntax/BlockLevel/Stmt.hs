@@ -1,7 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.Core.Render.Syntax.BlockLevel.Patterns (
-    renderArm
+module GCIR.RustCG.AST.Render.Syntax.BlockLevel.Stmt (
+    renderBlock
+  , renderStmt
 ) where
 
 
@@ -90,8 +91,9 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Ident    as ID
-import qualified GCIR.RustCG.Core.Render.Syntax.Base.Literals as Lit
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Ident          as ID
+import qualified GCIR.RustCG.AST.Render.Syntax.Base.Literals       as Lit
+import qualified GCIR.RustCG.AST.Render.Syntax.BlockLevel.Patterns as P
 -- *
 
 
@@ -100,59 +102,70 @@ import qualified GCIR.RustCG.Core.Render.Syntax.Base.Literals as Lit
 
 
 
--- | Render Arm branch (or Case Alt.)
---
-
-renderArm :: (S.Stmt -> Doc) -> P.Arm -> Doc
-renderArm f (P.Arm patrn stmt) =
-    let patrn' = renderPattern patrn
-        stmt'  = f stmt
+renderBlock :: S.Block -> Doc
+renderBlock (S.Block stmts) =
+    let stmts' = map renderStmt stmts
+            |> Util.punctuate ";"
+            |> Util.vcat
     in
-        patrn' <+> "=>" <$$> Util.indent 4 stmt'
+        "{" <$$> Util.indent 4 stmts' <$$> "}"
 
 
+renderStmt :: S.Stmt -> Doc
+renderStmt (S.Lit val) =
+    Lit.renderLiteral val
+
+renderStmt (S.Ref path) =
+    ID.renderPath path
+
+renderStmt (S.FunCall path args) =
+    let path' = ID.renderPath path
+        args' = map renderStmt args
+            |> Util.punctuate ","
+            |> Util.punctuate Util.softline
+            |> Util.hcat
+            |> Util.parens
+    in
+        path' <> args'
+
+renderStmt (S.ConCall path args) =
+    let path' = ID.renderPath path
+        args' = map renderStmt args
+            |> Util.punctuate ","
+            |> Util.punctuate Util.softline
+            |> Util.hcat
+            |> Util.parens
+    in
+        path' <> args'
+
+renderStmt (S.Match con arms) =
+    let con' = renderStmt con
+        arms' = map (P.renderArm renderStmt) arms
+            |> Util.punctuate ","
+            |> Util.punctuate Util.linebreak
+            |> Util.hcat
+            |> Util.indent 4
+    in
+        "match" <+> con' <+> "{" <$$> arms' <$$> "}"
 
 
--- | Render Patterns
---
-renderPattern :: P.Pattern -> Doc
-renderPattern P.Wildcard    = "_"
-renderPattern (P.Var ident) = ID.renderIdent ident
-renderPattern (P.Lit val)   = Lit.renderLiteral val
-
-renderPattern (P.List xs) =
-    map renderPattern xs
+renderStmt (S.List xs) =
+    map renderStmt xs
         |> Util.punctuate ","
-        |> Util.punctuate Util.space
         |> Util.hcat
         |> Util.brackets
 
-renderPattern (P.ListCons xs rest) =
-    let xs' = map renderPattern xs
-            |> Util.punctuate "::"
-            |> Util.hcat
-        rest' = Maybe.maybe ("::" <> "[]") (\end -> "::" <> renderPattern end) rest
-    in
-        Util.parens $ xs' <> rest'
-
-renderPattern (P.Tuple items) =
-    map renderPattern items
+renderStmt (S.Tuple items) =
+    map renderStmt items
         |> Util.punctuate ","
         |> Util.hcat
         |> Util.parens
 
-renderPattern (P.Variant path []) =
-    ID.renderPath path
 
-renderPattern (P.Variant path args) =
-    let path' = ID.renderPath path
-        args' = map renderPattern args
-            |> Util.punctuate ","
-            |> Util.punctuate Util.space
-            |> Util.hcat
-            |> Util.parens
-    in
-        path' <+> args'
+-- TODO:
+-- renderStmt (S.Box value) = error "TODO"
+-- renderStmt (S.If intros elseStmt) = error "TODO"
+
 
 
 
