@@ -45,7 +45,7 @@ pattern If :: [(IR.Stmt, IR.Stmt)] -> IR.Stmt -> IR.Stmt
 pattern If intros elseStmt = IR.IfStmt intros elseStmt
 
 pattern Match :: IR.Stmt -> [IR.Arm] -> IR.Stmt
-pattern Match con args = IR.MatchStmt con args
+pattern Match con arms = IR.MatchStmt con arms
 
 pattern List :: [IR.Stmt] -> IR.Stmt
 pattern List xs = IR.ListStmt xs
