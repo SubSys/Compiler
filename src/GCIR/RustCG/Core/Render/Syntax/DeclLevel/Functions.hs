@@ -107,10 +107,6 @@ renderFunction :: Decl.Function -> Doc
 renderFunction (Decl.Function name generics inputs output body) =
     let name'     = ID.renderIdent name
         generics' = Etc.renderGenerics generics
-            |> Util.punctuate ","
-            |> Util.punctuate Util.space
-            |> Util.hcat
-            |> Util.angles
         inputs'   = map Etc.renderInput inputs
             |> Util.punctuate ","
             |> Util.punctuate Util.space
