@@ -9,6 +9,7 @@ module HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr (
   , pattern Case
   , pattern FunCall
   , pattern ConCall
+  , pattern Ref
 ) where
 
 
@@ -48,8 +49,8 @@ pattern Case con alts = IR.CaseExpr con alts
 
 -- | Uncurried version of expression application.
 --
-pattern FunCall :: IR.Ref -> [IR.Expr] -> IR.Expr
-pattern FunCall name args = IR.FunCallExpr name args
+pattern FunCall :: IR.Ident -> [IR.Expr] -> IR.Expr
+pattern FunCall name args = IR.FunCallExpr (IR.Ref name) args
 
 
 -- | Uncurried version of value constructor (I.e. `E.Constr`) application
@@ -57,5 +58,10 @@ pattern FunCall name args = IR.FunCallExpr name args
 pattern ConCall :: IR.Ident -> [IR.Expr] -> IR.Expr
 pattern ConCall name args = IR.ConCallExpr name args
 
+
+-- | This constructor is for base values.
+--
+pattern Ref :: IR.Ident -> IR.Expr
+pattern Ref name = IR.RefExpr (IR.Ref name)
 
 

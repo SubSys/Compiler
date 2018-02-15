@@ -1,14 +1,15 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.RustCG.Driver (
-    toRustCG
-  , toRustCG'
+{-# LANGUAGE PatternGuards #-}
+{-# LANGUAGE ViewPatterns #-}
+module HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers (
+    isBaseType
 ) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
-import Core.List.Util    (flatten, singleton)
+import Core.List.Util    (singleton)
 import Data.Monoid ((<>))
 import Prelude
     ( return
@@ -54,6 +55,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -65,49 +67,41 @@ import qualified System.IO as SIO
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
--- + HelmFlat AST Interface
-import qualified HLIR.HelmFlat.Data.Interface as HelmFlat
--- + RustCG AST Interface
-import qualified GCIR.RustCG.Data.Interface   as RustCG
 
--- + Local
-import qualified HLIR.HelmFlat.Feed.RustCG.Syntax     as Syntax
-import qualified HLIR.HelmFlat.Feed.RustCG.Init.Exprs as Init
-import qualified HLIR.HelmFlat.Feed.RustCG.Init.Decls as Init
+
+-- + HelmFlat Renderer
+import qualified HLIR.HelmFlat.AST.Render.Syntax.Driver as Syntax
+
+-- + HelmFlat AST
+-- ++ Base
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc      as Etc
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident    as ID
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types    as T
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values   as V
+
+-- ++ TermLevel
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
+
+-- ++ TopLevel
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- *
 
 
-toRustCG :: IO (Either Text HelmFlat.Program) -> IO (Either Text RustCG.Program)
-toRustCG upstream = do
-    result <- upstream
-    
-    case result of
-        Left err -> return $ Left err
-        Right payload ->
-            return
-                $ Right
-                $ toRustCG' payload
 
 
 
 
-toRustCG' :: HelmFlat.Program -> RustCG.Program
-toRustCG' payload =
-    let
-        fns = HelmFlat.getFunctions payload
-            |> Init.updateSudoFFIBinders
-            |> Init.deFunBaseValues
-            |> map Syntax.dropFunction
-        uns = HelmFlat.getUnions payload
-            |> map Syntax.dropUnion
-    in
-        RustCG.Program
-            { RustCG.enums = uns
-            , RustCG.functions =fns
-            }
+isBaseType :: ID.Ident -> Map.Map ID.Ident T.Type -> Bool
+isBaseType name env
+    | Just (checkBaseType -> True) <- Map.lookup name env = True
+    | otherwise = False
 
 
-
+checkBaseType :: T.Type -> Bool
+checkBaseType T.Arr{} = False
+checkBaseType _       = True
 
 
 

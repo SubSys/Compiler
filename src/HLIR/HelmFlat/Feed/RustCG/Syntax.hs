@@ -67,7 +67,10 @@ import qualified Text.Show.Prettyprint as PP
 
 
 -- + HelmFlat AST Utils
-import qualified HLIR.HelmFlat.AST.Utils.Types as Type
+import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
+import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
+import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
+import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
 
 -- + HelmFlat AST
 -- ++ Base
@@ -216,7 +219,7 @@ dropExpr (H.E.Case con alts) =
 
 dropExpr (H.E.FunCall name args) =
     R.S.FunCall
-        (ref2Path name)
+        (toPath name)
         (map dropExpr args)
 
 dropExpr (H.E.ConCall name args) =
@@ -224,6 +227,9 @@ dropExpr (H.E.ConCall name args) =
         (toPath name)
         (map dropExpr args)
 
+dropExpr (H.E.Ref name) =
+    R.S.Ref
+        (toPath name)
 
 
 dropUnion :: H.Decl.Union -> R.Decl.Enum
@@ -241,6 +247,7 @@ dropConstructor (H.Decl.Constructor name args) =
 
 
 
+
 dropFunction :: H.Decl.Function -> R.Decl.Function
 dropFunction (H.Decl.Function name args body (Just scheme@(H.T.Forall gs ty))) =
     R.Decl.Function
@@ -252,7 +259,7 @@ dropFunction (H.Decl.Function name args body (Just scheme@(H.T.Forall gs ty))) =
     
     where
         output = Type.getReturnType ty
-    
+
 
 
 -- | Helpers
@@ -267,8 +274,8 @@ binder2Ident :: H.Etc.Binder -> R.ID.Ident
 binder2Ident (H.Etc.Binder_ ident) = dropIdent ident
 
 
-ref2Path :: H.Etc.Ref -> R.ID.Path
-ref2Path (H.Etc.Ref ident) = toPath ident
+-- ref2Path :: H.Etc.Ref -> R.ID.Path
+-- ref2Path (H.Etc.Ref ident) = toPath ident
 
 
 

@@ -4,8 +4,8 @@ module HLIR.HelmFlat.AST.Data.Semantic.Base.Etc (
     IR.Binder
   , pattern Binder
   , pattern Binder_
-  , IR.Ref
-  , pattern Ref
+  -- , IR.Ref
+  -- , pattern Ref
 ) where
 
 

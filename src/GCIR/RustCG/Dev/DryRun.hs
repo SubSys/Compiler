@@ -1,8 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.RustCG.Driver (
-    toRustCG
-  , toRustCG'
-) where
+module GCIR.RustCG.Dev.DryRun where
 
 
 -- *
@@ -11,7 +8,7 @@ import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Data.Monoid ((<>))
 import Prelude
-    ( return
+    (return
     , String
     , IO
     , show
@@ -24,6 +21,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -54,6 +52,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -62,55 +61,83 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
+-- + Megaparsec & Related
+import qualified Text.Megaparsec.Char       as C
+import qualified Text.Megaparsec.Char.Lexer as L
+
+-- + Frameworks
+import Framework.Text.Parser
+
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
--- + HelmFlat AST Interface
-import qualified HLIR.HelmFlat.Data.Interface as HelmFlat
--- + RustCG AST Interface
-import qualified GCIR.RustCG.Data.Interface   as RustCG
 
--- + Local
-import qualified HLIR.HelmFlat.Feed.RustCG.Syntax     as Syntax
-import qualified HLIR.HelmFlat.Feed.RustCG.Init.Exprs as Init
-import qualified HLIR.HelmFlat.Feed.RustCG.Init.Decls as Init
+-- + Upstream IRs
+import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
+import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
+
+-- + RustCG AST Interface
+import qualified GCIR.RustCG.Data.Interface as I
+
+-- + RustCG AST
+-- ++ Base
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Literals              as Lit
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Types                 as T
+-- ++ Block Level
+import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as S
+import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
+-- ++ Decl/Top Level
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions.Header as Decl
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 -- *
 
 
-toRustCG :: IO (Either Text HelmFlat.Program) -> IO (Either Text RustCG.Program)
-toRustCG upstream = do
-    result <- upstream
-    
-    case result of
-        Left err -> return $ Left err
-        Right payload ->
-            return
-                $ Right
-                $ toRustCG' payload
+
+
+{-# ANN module ("HLint: ignore" :: String) #-}
 
 
 
 
-toRustCG' :: HelmFlat.Program -> RustCG.Program
-toRustCG' payload =
+
+inputFilePath
+    = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
+
+
+
+
+
+upstream =
     let
-        fns = HelmFlat.getFunctions payload
-            |> Init.updateSudoFFIBinders
-            |> Init.deFunBaseValues
-            |> map Syntax.dropFunction
-        uns = HelmFlat.getUnions payload
-            |> map Syntax.dropUnion
+        filePath   = inputFilePath
+        sourceCode = SIO.readFile inputFilePath
     in
-        RustCG.Program
-            { RustCG.enums = uns
-            , RustCG.functions =fns
-            }
+        sourceCode
+            |> HelmSyntax.pipeline [] filePath
+            |> HelmSyntax.toHelmFlat
+            |> HelmFlat.pipeline
+            |> HelmFlat.toRustCG
 
 
 
+run = do
+    result <- upstream
+    case result of
+        Left  err     -> putStrLn $ Text.unpack err
+        Right payload -> run' payload
 
 
 
+run' payload = do
+    
+    
+    -- (TIO.putStrLn . Syntax.renderFunctions) fns
+    M.mapM_ PP.prettyPrint fns
 
-
+    where
+        fns = I.getFunctions payload
+        ens = I.getEnums payload
 

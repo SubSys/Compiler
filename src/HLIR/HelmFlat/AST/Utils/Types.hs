@@ -4,6 +4,7 @@ module HLIR.HelmFlat.AST.Utils.Types (
     getReturnType
   , getInputTypes
   , flatten
+  , synthSudoFFIBinderTs
 ) where
 
 
@@ -118,6 +119,26 @@ flatten (T.Arr t1 t2) =
 flatten x = [x]
 
 
+
+
+
+synthSudoFFIBinderTs :: Decl.Function -> Decl.Function
+synthSudoFFIBinderTs (Decl.Function name args expr scheme@(Just (T.Forall _ ty)))
+    | List.length inTs /= List.length args =
+        error "`synthSudoFFIBinderTs`: invalid type signature, or declaration."
+    
+    | otherwise =
+        Decl.Function name args' expr scheme
+    
+    where
+        inTs = getInputTypes ty
+        args' = List.zipWith f args inTs
+        
+        f :: Etc.Binder -> T.Type -> Etc.Binder
+        f (Etc.Binder ident Nothing) ty =
+            Etc.Binder ident (Just ty)
+        
+        f binder@(Etc.Binder ident Just{}) _ = binder
 
 
 

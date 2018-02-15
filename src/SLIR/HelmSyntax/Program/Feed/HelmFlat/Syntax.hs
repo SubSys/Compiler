@@ -115,9 +115,9 @@ dropIdent :: HS.ID.Ident -> HF.ID.Ident
 dropIdent (HS.ID.Ident' txt ns) =
     HF.ID.Ident txt (namespace ns)
 
-toRef :: HS.ID.Ident -> HF.Etc.Ref
-toRef ident =
-    HF.Etc.Ref (dropIdent ident)
+-- toRef :: HS.ID.Ident -> HF.Etc.Ref
+-- toRef ident =
+--     HF.Etc.Ref (dropIdent ident)
 
 dropType :: HS.T.Type -> HF.T.Type
 
@@ -243,7 +243,7 @@ dropExpr (HS.E.Case con alts _) =
 
 dropExpr (HS.E.FunCall name args ty _) =
     HF.E.FunCall
-        (toRef name)
+        (dropIdent name)
         (map dropExpr args)
 
 dropExpr (HS.E.ConCall name args ty _) =
@@ -256,7 +256,7 @@ dropExpr (HS.E.Parens expr _) = dropExpr expr
 
 dropExpr (HS.E.Var name _) =
     HF.E.FunCall
-        (toRef name)
+        (dropIdent name)
         []
 
 -- | Should be removed after desugaring.

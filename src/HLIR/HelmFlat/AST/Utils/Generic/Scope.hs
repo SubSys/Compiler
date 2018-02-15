@@ -93,6 +93,9 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
 -- ++ TopLevel
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
+
+-- + Internal!
+import qualified HLIR.HelmFlat.Internal.AST as IR
 -- *
 
 
@@ -104,7 +107,7 @@ freeVars :: (Data.Data a, Data.Typeable a) => a -> [ID.Ident]
 freeVars input =
     let
         binders = [ x | (Etc.Binder x ty) <- Uni.universeBi input]
-        vars    = [ x | (Etc.Ref x) <- Uni.universeBi input]
+        vars    = [ x | (IR.Ref x) <- Uni.universeBi input]
 
     in
         vars `without` binders

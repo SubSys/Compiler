@@ -1,7 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.RustCG.Driver (
-    toRustCG
-  , toRustCG'
+module HLIR.HelmFlat.Feed.RustCG.Init.Exprs (
+    deFunBaseValues
 ) where
 
 
@@ -65,52 +64,52 @@ import qualified System.IO as SIO
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
--- + HelmFlat AST Interface
-import qualified HLIR.HelmFlat.Data.Interface as HelmFlat
--- + RustCG AST Interface
-import qualified GCIR.RustCG.Data.Interface   as RustCG
 
--- + Local
-import qualified HLIR.HelmFlat.Feed.RustCG.Syntax     as Syntax
-import qualified HLIR.HelmFlat.Feed.RustCG.Init.Exprs as Init
-import qualified HLIR.HelmFlat.Feed.RustCG.Init.Decls as Init
+
+-- + HelmFlat AST Utils
+import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
+import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
+import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
+import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
+
+-- + HelmFlat AST
+-- ++ Base
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc           as Etc
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident         as ID
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types         as T
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values        as V
+-- ++ TermLevel
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
+-- ++ TopLevel
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- *
 
 
-toRustCG :: IO (Either Text HelmFlat.Program) -> IO (Either Text RustCG.Program)
-toRustCG upstream = do
-    result <- upstream
-    
-    case result of
-        Left err -> return $ Left err
-        Right payload ->
-            return
-                $ Right
-                $ toRustCG' payload
 
-
-
-
-toRustCG' :: HelmFlat.Program -> RustCG.Program
-toRustCG' payload =
+deFunBaseValues :: [Decl.Function] -> [Decl.Function]
+deFunBaseValues decls =
     let
-        fns = HelmFlat.getFunctions payload
-            |> Init.updateSudoFFIBinders
-            |> Init.deFunBaseValues
-            |> map Syntax.dropFunction
-        uns = HelmFlat.getUnions payload
-            |> map Syntax.dropUnion
+        env = TyEnv.genTypesEnv decls
     in
-        RustCG.Program
-            { RustCG.enums = uns
-            , RustCG.functions =fns
-            }
+        Uni.transformBi (deFunBaseValues' env) decls
 
+deFunBaseValues' :: Map.Map ID.Ident T.Type -> E.Expr -> E.Expr
+deFunBaseValues' env expr@(E.FunCall ident [])
+    | Nothing <- Map.lookup ident env =
+        error $ Text.unpack $ Text.unlines
+            [ Text.pack "Unknown base-type: "
+            , Text.pack $ PP.prettyShow ident
+            ]
 
+deFunBaseValues' env expr@(E.FunCall ident [])
+    | True <- TyEnv.isBaseType ident env =
+        E.Ref ident
+    | otherwise =
+        expr
 
-
-
-
+deFunBaseValues' _ x = x
 
 
 

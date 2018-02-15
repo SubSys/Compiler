@@ -138,7 +138,7 @@ renderExpr f (E.Case expr caseAlts) =
 
 renderExpr f (E.FunCall name []) =
     let
-        name' = Etc.renderRef name
+        name' = ID.renderIdent name
     in
         name'
 
@@ -154,7 +154,7 @@ renderExpr f (E.ConCall name []) =
 
 renderExpr f (E.FunCall name args) =
     let
-        name' = Etc.renderRef name
+        name' = ID.renderIdent name
         args' = map (renderExpr f) args
             |> Util.punctuate ","
             |> Util.hcat

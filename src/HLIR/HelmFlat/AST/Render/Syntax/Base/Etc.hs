@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module HLIR.HelmFlat.AST.Render.Syntax.Base.Etc (
     renderBinder
-  , renderRef
+  -- , renderRef
 ) where
 
 
@@ -108,8 +108,8 @@ renderBinder (Etc.Binder ident Nothing) =
     ID.renderIdent ident
 
 
-renderRef :: Etc.Ref -> Doc
-renderRef (Etc.Ref ident) = ID.renderIdent ident
+-- renderRef :: Etc.Ref -> Doc
+-- renderRef (Etc.Ref ident) = ID.renderIdent ident
 
 
 

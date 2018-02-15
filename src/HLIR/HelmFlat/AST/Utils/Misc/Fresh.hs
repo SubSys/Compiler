@@ -1,7 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module HLIR.HelmFlat.AST.Utils.Misc.Fresh (
     freshBinder
-  , freshRef
   , freshIdent
   , freshLabel
 ) where
@@ -114,10 +113,6 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
 freshBinder :: Int -> Etc.Binder
 freshBinder idx =
     Etc.Binder_ (freshIdent idx)
-
-freshRef :: Int -> Etc.Ref
-freshRef idx =
-    Etc.Ref $ freshIdent idx
 
 
 freshIdent :: Int -> ID.Ident
