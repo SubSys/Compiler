@@ -4,6 +4,7 @@
 module GCIR.RustCG.AST.Data.Semantic.Base.Ident (
     IR.Ident
   , IR.Path
+  , IR.Seg
 
   , pattern Ident
   , pattern Path
