@@ -5,6 +5,7 @@ module GCIR.RustCG.AST.Data.Semantic.Base.Ident (
     IR.Ident
   , IR.Path
   , IR.Seg
+  , IR.Prefix
 
   , pattern Ident
   , pattern Path
@@ -33,6 +34,11 @@ pattern Path segments = IR.Path segments
 
 pattern Seg :: Maybe IR.Prefix -> Text -> IR.Seg
 pattern Seg prefix text = IR.Seg prefix text
+
+-- | Segment Prefixes & Postfixes
+-- 
+
+-- TODO: ...
 
 
 -- | Alternate variations - convenience helpers
