@@ -8,7 +8,7 @@ import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Data.Monoid ((<>))
 import Prelude
-    (return
+    ( return
     , String
     , IO
     , show
@@ -95,6 +95,9 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + RustCG Drivers
+import qualified GCIR.RustCG.Core.Index.Driver as Driver
 -- *
 
 
@@ -123,6 +126,7 @@ upstream =
             |> HelmSyntax.toHelmFlat
             |> HelmFlat.pipeline
             |> HelmFlat.toRustCG
+            |> Driver.index
 
 
 

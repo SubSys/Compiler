@@ -1,8 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderPath
+{-# LANGUAGE ViewPatterns #-}
+module GCIR.RustCG.Core.Index.Driver (
+    index
+  , index'
+  , globalize
 ) where
 
 
@@ -11,9 +12,8 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    ( return
+    (return
     , String
-    , Char
     , IO
     , show
     , error
@@ -65,10 +65,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -76,6 +72,9 @@ import qualified Text.Show.Prettyprint as PP
 
 -- + RustCG AST Interface
 import qualified GCIR.RustCG.Data.Interface as I
+
+-- + RustCG AST Utils
+import qualified GCIR.RustCG.AST.Utils.Functions as Decl
 
 -- + RustCG AST
 -- ++ Base
@@ -90,38 +89,49 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local Prelude
+import GCIR.RustCG.Core.Index.Data.System (enter, binder)
+
+-- + Local
+import qualified GCIR.RustCG.Core.Index.Data.System                as Sys
+import qualified GCIR.RustCG.Core.Index.Syntax.DeclLevel.Functions as Decl
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+index :: IO (Either Text I.Program) -> IO (Either Text I.Program)
+index upstream = do
+    result <- upstream
+    
+    case result of
+        Left err      -> return $ Left err
+        Right payload ->
+            return
+                $ Right
+                $ index' payload
 
 
-renderIdent :: ID.Ident -> Doc
-renderIdent (ID.Ident txt) = render txt
 
-renderPath :: ID.Path -> Doc
-renderPath (ID.Path segs) =
-    map renderSeg segs
-        |> Util.punctuate "::"
-        |> Util.hcat
-
-renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render txt
+index' :: I.Program -> I.Program
+index' payload@(I.getFunctions -> decls) =
+    I.updateFunctions (globalize decls) payload
 
 
--- | Internal Helpers
---
 
--- normalize :: Text -> Text
--- normalize x =
---     prefix `Text.append` Text.filter pred x
---     where
---         prefix = "x"
---         pred :: Char -> Bool
---         pred '!' = False
---         pred 'º' = False
---         pred '@' = False
---         pred x   = True
+
+-- *
+-- | Indexers
+-- *
+
+globalize :: [Decl.Function] -> [Decl.Function]
+globalize decls =
+    fst $ Sys.runState (Decl.traverseDecls decls) 0 Map.empty
+
+
+
+
+
+
 
 

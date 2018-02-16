@@ -1,8 +1,16 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderPath
+module GCIR.RustCG.Core.Index.Data.System (
+    OldName
+  , NewName
+  , Subst
+  , State
+  , Index
+  , enter
+  , binder
+  , initCounter
+  , incCounter
+  , decCounter
+  , runState
 ) where
 
 
@@ -11,9 +19,8 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    ( return
+    (return
     , String
-    , Char
     , IO
     , show
     , error
@@ -65,10 +72,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -94,34 +97,72 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Dec
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+
+{-
+    # Substitutions
+-}
+type OldName = ID.Ident
+type NewName = ID.Ident
+
+type Subst = Map.Map OldName NewName
 
 
-renderIdent :: ID.Ident -> Doc
-renderIdent (ID.Ident txt) = render txt
 
-renderPath :: ID.Path -> Doc
-renderPath (ID.Path segs) =
-    map renderSeg segs
-        |> Util.punctuate "::"
-        |> Util.hcat
+{-
+    # State Stuff
+-}
+newtype Counter = Counter Int
 
-renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render txt
+type State a = M.StateT Counter (M.Reader Subst) a
 
 
--- | Internal Helpers
+type Index a = State (a, Subst)
+
+
+{-
+    ## Helpers
+-}
+
+enter :: a -> Index a
+enter x = return (x, Map.empty)
+
+binder :: a -> Subst -> Index a
+binder x subs = return (x, subs)
+
+
+initCounter = Counter 0
+
+
+-- | Get & Increment/Decrement Counter
 --
+incCounter :: State Int
+incCounter = do
+    (Counter c) <- M.get
+    
+    
+    M.put (Counter $ c + 1)
+    
+    return c
 
--- normalize :: Text -> Text
--- normalize x =
---     prefix `Text.append` Text.filter pred x
---     where
---         prefix = "x"
---         pred :: Char -> Bool
---         pred '!' = False
---         pred 'º' = False
---         pred '@' = False
---         pred x   = True
+
+decCounter :: State Int
+decCounter = do
+    (Counter c) <- M.get
+    
+    M.put (Counter $ c - 1)
+    
+    return c
+
+
+
+
+-- | Run State at specified counter (`Int`).
+--
+runState :: State a -> Int -> Subst -> a
+runState m c s =
+    fst $ M.runReader (M.runStateT m (Counter c)) s
+
+
+
 
 

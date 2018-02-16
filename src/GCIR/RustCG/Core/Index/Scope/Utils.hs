@@ -1,8 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderPath
+module GCIR.RustCG.Core.Index.Scope.Utils (
+    withLocalSubst
 ) where
 
 
@@ -11,9 +9,8 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    ( return
+    (return
     , String
-    , Char
     , IO
     , show
     , error
@@ -65,10 +62,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -90,38 +83,18 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local
+import qualified GCIR.RustCG.Core.Index.Data.System as Sys
 -- *
 
 
-
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-renderIdent :: ID.Ident -> Doc
-renderIdent (ID.Ident txt) = render txt
-
-renderPath :: ID.Path -> Doc
-renderPath (ID.Path segs) =
-    map renderSeg segs
-        |> Util.punctuate "::"
-        |> Util.hcat
-
-renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render txt
-
-
--- | Internal Helpers
---
-
--- normalize :: Text -> Text
--- normalize x =
---     prefix `Text.append` Text.filter pred x
---     where
---         prefix = "x"
---         pred :: Char -> Bool
---         pred '!' = False
---         pred 'º' = False
---         pred '@' = False
---         pred x   = True
+withLocalSubst :: Sys.Subst -> Sys.State a -> Sys.State a
+withLocalSubst s1 =
+    M.local modEnv
+    
+    where
+        
+        modEnv = Map.union s1
 
 

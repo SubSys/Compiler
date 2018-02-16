@@ -1,8 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderPath
+module GCIR.RustCG.Core.Index.Syntax.BlockLevel.Patterns (
+    indexArm
 ) where
 
 
@@ -11,9 +9,8 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    ( return
+    (return
     , String
-    , Char
     , IO
     , show
     , error
@@ -65,10 +62,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -90,38 +83,78 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local Prelude
+import GCIR.RustCG.Core.Index.Data.System (enter, binder)
+
+-- + Local
+import qualified GCIR.RustCG.Core.Index.Data.System     as Sys
+import qualified GCIR.RustCG.Core.Index.Scope.Bindable  as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Referable as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Utils     as Scope
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+indexArm :: (S.Stmt -> Sys.Index S.Stmt) -> P.Arm -> Sys.Index P.Arm
+indexArm f (P.Arm patrn stmts) = do
+    (patrn', subs) <- indexPattern patrn
+    (stmts', _)    <- Scope.withLocalSubst subs (f stmts)
+    
+    enter (P.Arm patrn stmts)
+
+indexPattern :: P.Pattern -> Sys.Index P.Pattern
+indexPattern (P.Var ident) = do
+    (ident', subs) <- Scope.bindable ident
+    
+    binder
+        (P.Var ident')
+        subs
+    
+indexPattern (P.Lit val) =
+    binder
+        (P.Lit val)
+        Map.empty
+
+indexPattern (P.List xs) = do
+    (xs', subs) <- List.unzip <$> M.mapM indexPattern xs
+    
+    binder
+        (P.List xs')
+        (Map.unions subs)
+
+indexPattern (P.ListCons xs (Just rest)) = do
+    (xs', subs1) <- List.unzip <$> M.mapM indexPattern xs
+    (rest', subs2) <- indexPattern rest
+    
+    binder
+        (P.ListCons xs' (Just rest'))
+        (Map.union (Map.unions subs1) subs2)
+
+indexPattern (P.ListCons xs Nothing) = do
+    (xs', subs) <- List.unzip <$> M.mapM indexPattern xs
+    
+    binder
+        (P.ListCons xs' Nothing)
+        (Map.unions subs)
+
+indexPattern (P.Tuple items) = do
+    (items', subs) <- List.unzip <$> M.mapM indexPattern items
+    
+    binder
+        (P.Tuple items')
+        (Map.unions subs)
+
+indexPattern (P.Variant path args) = do
+    (args', subs) <- List.unzip <$> M.mapM indexPattern args
+    
+    binder
+        (P.Variant path args')
+        (Map.unions subs)
 
 
-renderIdent :: ID.Ident -> Doc
-renderIdent (ID.Ident txt) = render txt
+indexPattern P.Wildcard =
+    binder P.Wildcard Map.empty
 
-renderPath :: ID.Path -> Doc
-renderPath (ID.Path segs) =
-    map renderSeg segs
-        |> Util.punctuate "::"
-        |> Util.hcat
-
-renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render txt
-
-
--- | Internal Helpers
---
-
--- normalize :: Text -> Text
--- normalize x =
---     prefix `Text.append` Text.filter pred x
---     where
---         prefix = "x"
---         pred :: Char -> Bool
---         pred '!' = False
---         pred 'º' = False
---         pred '@' = False
---         pred x   = True
 
 

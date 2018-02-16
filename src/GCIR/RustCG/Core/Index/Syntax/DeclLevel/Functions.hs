@@ -1,8 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderPath
+{-# LANGUAGE ViewPatterns #-}
+module GCIR.RustCG.Core.Index.Syntax.DeclLevel.Functions (
+    traverseDecls
 ) where
 
 
@@ -11,9 +10,8 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    ( return
+    (return
     , String
-    , Char
     , IO
     , show
     , error
@@ -65,10 +63,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -76,6 +70,9 @@ import qualified Text.Show.Prettyprint as PP
 
 -- + RustCG AST Interface
 import qualified GCIR.RustCG.Data.Interface as I
+
+-- + RustCG AST Utils
+import qualified GCIR.RustCG.AST.Utils.Functions as Decl
 
 -- + RustCG AST
 -- ++ Base
@@ -90,38 +87,64 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local Prelude
+import GCIR.RustCG.Core.Index.Data.System (enter, binder)
+
+-- + Local
+import qualified GCIR.RustCG.Core.Index.Data.System            as Sys
+import qualified GCIR.RustCG.Core.Index.Scope.Bindable         as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Referable        as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Utils            as Scope
+import qualified GCIR.RustCG.Core.Index.Syntax.BlockLevel.Stmt as S
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+traverseDecls :: [Decl.Function] -> Sys.Index [Decl.Function]
+traverseDecls []  = return ([], Map.empty)
+
+traverseDecls (fn:fns) = do
+    (fn', s1) <- indexFunction fn
+    (fns', s2) <- Scope.withLocalSubst s1 (traverseDecls fns)
+    
+    return
+        (fn' : fns', Map.union s2 s1)
 
 
-renderIdent :: ID.Ident -> Doc
-renderIdent (ID.Ident txt) = render txt
-
-renderPath :: ID.Path -> Doc
-renderPath (ID.Path segs) =
-    map renderSeg segs
-        |> Util.punctuate "::"
-        |> Util.hcat
-
-renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render txt
 
 
--- | Internal Helpers
---
+indexFunction :: Decl.Function -> Sys.Index Decl.Function
+indexFunction (Decl.isRecFunction' -> (Just (Decl.Function name gs args out body))) = do
+    (name', s1) <- Scope.bindable name
+    (args', ss) <- List.unzip <$> M.mapM indexInput args
+    
+    (body', _) <- Scope.withLocalSubst (Map.union s1 (Map.unions ss)) (S.indexBlock body)
+    
+    binder
+        (Decl.Function name' gs args' out body')
+        s1
+    
+indexFunction (Decl.Function name gs args out body) = do
+    (name', s1) <- Scope.bindable name
+    (args', ss) <- List.unzip <$> M.mapM indexInput args
+    
+    (body', _) <- Scope.withLocalSubst (Map.unions ss) (S.indexBlock body)
+    
+    binder
+        (Decl.Function name' gs args' out body')
+        s1
 
--- normalize :: Text -> Text
--- normalize x =
---     prefix `Text.append` Text.filter pred x
---     where
---         prefix = "x"
---         pred :: Char -> Bool
---         pred '!' = False
---         pred 'º' = False
---         pred '@' = False
---         pred x   = True
+
+
+
+indexInput :: Etc.Input -> Sys.Index Etc.Input
+indexInput (Etc.Input ident ty) = do
+    (ident', subs) <- Scope.bindable ident
+    
+    binder
+        (Etc.Input ident' ty)
+        subs
+
 
 

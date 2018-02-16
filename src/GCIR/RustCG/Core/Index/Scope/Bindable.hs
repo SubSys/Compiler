@@ -1,8 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderPath
+module GCIR.RustCG.Core.Index.Scope.Bindable (
+    bindable
 ) where
 
 
@@ -11,9 +9,8 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    ( return
+    (return
     , String
-    , Char
     , IO
     , show
     , error
@@ -65,10 +62,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -90,38 +83,55 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local
+import qualified GCIR.RustCG.Core.Index.Data.System as Sys
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
 
 
-renderIdent :: ID.Ident -> Doc
-renderIdent (ID.Ident txt) = render txt
+bindable :: ID.Ident -> Sys.State (ID.Ident, Sys.Subst)
+bindable binder = do
+    idx <- Sys.incCounter
+    -- *
 
-renderPath :: ID.Path -> Doc
-renderPath (ID.Path segs) =
-    map renderSeg segs
-        |> Util.punctuate "::"
-        |> Util.hcat
+    -- *
+    let (binder', subs) = newSubst binder idx
+    -- *
 
-renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render txt
+    -- *
+    return (binder', subs)
+    
 
 
--- | Internal Helpers
---
+-- *
+-- |  Internal
+-- *
 
--- normalize :: Text -> Text
--- normalize x =
---     prefix `Text.append` Text.filter pred x
---     where
---         prefix = "x"
---         pred :: Char -> Bool
---         pred '!' = False
---         pred 'º' = False
---         pred '@' = False
---         pred x   = True
+
+globalPrefix :: Text
+globalPrefix = Text.pack "º"
+
+
+newSubst :: ID.Ident -> Int -> (ID.Ident, Sys.Subst)
+newSubst ident idx =
+    let
+        -- Finish
+        newBinder = freshIdent idx
+        subs'     = Map.singleton ident newBinder
+
+    in
+        (newBinder, subs')
+
+
+
+freshIdent :: Int -> ID.Ident
+freshIdent i =
+    let
+        idx = Text.pack $ show i
+    in
+        ID.Ident $ globalPrefix `Text.append` idx
 
 

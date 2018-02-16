@@ -1,8 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module GCIR.RustCG.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderPath
+module GCIR.RustCG.Core.Index.Syntax.BlockLevel.Stmt (
+    indexStmt
+  , indexBlock
 ) where
 
 
@@ -11,9 +10,8 @@ import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Prelude
-    ( return
+    (return
     , String
-    , Char
     , IO
     , show
     , error
@@ -65,10 +63,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -90,38 +84,94 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local Prelude
+import GCIR.RustCG.Core.Index.Data.System (enter, binder)
+
+-- + Local
+import qualified GCIR.RustCG.Core.Index.Data.System                as Sys
+import qualified GCIR.RustCG.Core.Index.Scope.Bindable             as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Referable            as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Utils                as Scope
+import qualified GCIR.RustCG.Core.Index.Syntax.BlockLevel.Patterns as P
 -- *
 
+-- TODO: multi-line stmts
+--
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+indexBlock :: S.Block -> Sys.Index S.Block
+indexBlock (S.Block [stmt]) = do
+    (stmt', _) <- indexStmt stmt
+    
+    enter (S.Block [stmt'])
 
 
-renderIdent :: ID.Ident -> Doc
-renderIdent (ID.Ident txt) = render txt
+indexStmt :: S.Stmt -> Sys.Index S.Stmt
+indexStmt (S.Box value) = do
+    (value', _) <- indexStmt value
+    
+    enter (S.Box value')
+    
+indexStmt (S.Lit val) =
+    enter (S.Lit val)
+    
+indexStmt (S.Ref path) = do
+    (path', _) <- Scope.referable path
+    
+    enter (S.Ref path')
+    
+indexStmt (S.FunCall path args) = do
+    (path', _) <- Scope.referable path
+    (args', _) <- List.unzip <$> M.mapM indexStmt args
+    
+    enter (S.FunCall path' args')
 
-renderPath :: ID.Path -> Doc
-renderPath (ID.Path segs) =
-    map renderSeg segs
-        |> Util.punctuate "::"
-        |> Util.hcat
+indexStmt (S.ConCall path args) = do
+    (args', _) <- List.unzip <$> M.mapM indexStmt args
+    
+    enter (S.ConCall path args)
 
-renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render txt
+indexStmt (S.If intros elseStmt) = do
+    (intros', _) <- indexIfIntros intros
+    (elseStmt', _) <- indexStmt elseStmt
+    
+    enter (S.If intros' elseStmt')
+    
+indexStmt (S.Match con arms) = do
+    (con', _) <- indexStmt con
+    (arms', _) <- List.unzip <$> M.mapM (P.indexArm indexStmt) arms
+    
+    enter (S.Match con' arms')
+    
+indexStmt (S.List xs) = do
+    (xs', _) <- List.unzip <$> M.mapM indexStmt xs
+    
+    enter (S.List xs')
+    
+indexStmt (S.Tuple items) = do
+    (items', _) <- List.unzip <$> M.mapM indexStmt items
+    
+    enter (S.List items')
+    
+
 
 
 -- | Internal Helpers
 --
 
--- normalize :: Text -> Text
--- normalize x =
---     prefix `Text.append` Text.filter pred x
---     where
---         prefix = "x"
---         pred :: Char -> Bool
---         pred '!' = False
---         pred 'º' = False
---         pred '@' = False
---         pred x   = True
+indexIfIntros :: [(S.Stmt, S.Stmt)] -> Sys.Index [(S.Stmt, S.Stmt)]
+indexIfIntros intros = do
+    intros' <- M.mapM indexIfIntro intros
+    
+    enter intros'
+    
+    where
+        indexIfIntro :: (S.Stmt, S.Stmt) -> Sys.State (S.Stmt, S.Stmt)
+        indexIfIntro (con, body) = do
+            (con', _) <- indexStmt con
+            (body', _) <- indexStmt body
+            
+            return (con', body')
 
 
