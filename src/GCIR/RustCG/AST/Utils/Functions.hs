@@ -1,11 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ViewPatterns #-}
-module GCIR.RustCG.AST.Utils.Ident (
-    getRefSeg
-  , getRef
-  , ident2Seg
-  , updatePathRef
-) where
+module GCIR.RustCG.AST.Utils.Functions where
 
 
 -- *
@@ -93,38 +88,3 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 -- *
-
-
-
--- | Get Path Referrer - Raw Seg
---
-getRefSeg :: ID.Path -> ID.Seg
-getRefSeg (ID.Path segs) = List.last segs
-
-
--- | Get Path Referrer - As Ident
---
-
-
-getRef :: ID.Path -> ID.Ident
-getRef (getRefSeg -> (ID.Seg _ txt)) = ID.Ident txt
-
-
-ident2Seg :: ID.Ident -> ID.Seg
-ident2Seg (ID.Ident txt) =
-    ID.Seg Nothing txt
-
-updatePathRef :: ID.Ident -> ID.Path -> ID.Path
-updatePathRef ident (ID.Path segs)
-    | List.length segs >= 2 =
-        let inits = List.init segs
-        in
-            ID.Path (inits ++ [ident2Seg ident])
-    | otherwise =
-        ID.Path [ident2Seg ident]
-    
-
-
-
-
-
