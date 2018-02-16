@@ -122,12 +122,6 @@ traverseDecls (fn:fns) = do
 
 
 traverseDecl :: Decl.Function -> Index.Index Decl.Function
-traverseDecl fn@(Decl.Function name args expr sig meta)
-    | True <- SudoFFI.isSuperFFI fn = do
-        (name', s1) <- Bindable.bindable name
-        return (Decl.Function name' args expr sig meta, s1)
-
-
 traverseDecl (Decl.Function name args expr sig meta) = do
     (name', s1) <- Bindable.bindable name
     (args', s2) <- List.unzip <$> M.mapM Bindable.bindable args

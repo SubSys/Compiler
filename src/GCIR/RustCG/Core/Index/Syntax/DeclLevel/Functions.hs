@@ -121,14 +121,6 @@ traverseDecls (fn:fns) = do
 
 
 indexFunction :: Decl.Function -> Sys.Index Decl.Function
-indexFunction fn@(Decl.Function name gs args out body)
-    | True <- SudoFFI.isSudoFFI fn = do
-        (name', s1) <- Scope.bindable name
-        
-        binder
-            (Decl.Function name' gs args out body)
-            s1
-    
 indexFunction (Decl.isRecFunction' -> (Just (Decl.Function name gs args out body))) = do
     (name', s1) <- Scope.bindable name
     (gs',   gs) <- List.unzip <$> M.mapM indexGeneric gs
