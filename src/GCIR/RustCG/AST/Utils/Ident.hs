@@ -5,6 +5,7 @@ module GCIR.RustCG.AST.Utils.Ident (
   , getRef
   , ident2Seg
   , updatePathRef
+  , ident2Path
 ) where
 
 
@@ -122,7 +123,11 @@ updatePathRef ident (ID.Path segs)
             ID.Path (inits ++ [ident2Seg ident])
     | otherwise =
         ID.Path [ident2Seg ident]
-    
+
+
+ident2Path :: ID.Ident -> ID.Path
+ident2Path (ID.Ident txt) =
+    ID.Path [ID.Seg Nothing txt]
 
 
 
