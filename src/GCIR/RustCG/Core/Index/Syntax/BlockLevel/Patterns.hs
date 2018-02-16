@@ -101,7 +101,7 @@ indexArm f (P.Arm patrn stmts) = do
     (patrn', subs) <- indexPattern patrn
     (stmts', _)    <- Scope.withLocalSubst subs (f stmts)
     
-    enter (P.Arm patrn stmts)
+    enter (P.Arm patrn' stmts')
 
 indexPattern :: P.Pattern -> Sys.Index P.Pattern
 indexPattern (P.Var ident) = do
