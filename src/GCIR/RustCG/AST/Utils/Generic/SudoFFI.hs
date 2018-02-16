@@ -1,8 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE PatternGuards #-}
-module GCIR.RustCG.Core.Index.Syntax.DeclLevel.Functions (
-    traverseDecls
+module GCIR.RustCG.AST.Utils.Generic.SudoFFI (
+    isSudoFFI
 ) where
 
 
@@ -64,6 +62,11 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
+-- + Frameworks
+import Framework.Text.Renderer
+import qualified Framework.Text.Renderer.Utils as Util
+import qualified Text.PrettyPrint.Leijen.Text  as P
+
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -71,10 +74,6 @@ import qualified Text.Show.Prettyprint as PP
 
 -- + RustCG AST Interface
 import qualified GCIR.RustCG.Data.Interface as I
-
--- + RustCG AST Utils
-import qualified GCIR.RustCG.AST.Utils.Functions       as Decl
-import qualified GCIR.RustCG.AST.Utils.Generic.SudoFFI as SudoFFI
 
 -- + RustCG AST
 -- ++ Base
@@ -90,95 +89,42 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
--- + Local Prelude
-import GCIR.RustCG.Core.Index.Data.System (enter, binder)
-
 -- + Local
-import qualified GCIR.RustCG.Core.Index.Data.System            as Sys
-import qualified GCIR.RustCG.Core.Index.Scope.Bindable         as Scope
-import qualified GCIR.RustCG.Core.Index.Scope.Referable        as Scope
-import qualified GCIR.RustCG.Core.Index.Scope.Utils            as Scope
-import qualified GCIR.RustCG.Core.Index.Syntax.BlockLevel.Stmt as S
-import qualified GCIR.RustCG.Core.Index.Syntax.Base.Types      as T
-import qualified GCIR.RustCG.Core.Index.Scope.Generic          as Scope
+import qualified GCIR.RustCG.AST.Utils.Ident as ID
 -- *
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+specialNamespace :: [Text]
+specialNamespace =
+    [Text.pack "Helm", Text.pack "Compiler", Text.pack "Sudo", Text.pack "Native"]
 
 
-traverseDecls :: [Decl.Function] -> Sys.Index [Decl.Function]
-traverseDecls []  = return ([], Map.empty)
+isSudoFFI :: (Data.Data a, Data.Typeable a) => a -> Bool
+isSudoFFI input = List.any isSudoPath [ x | x@ID.Path{} <- Uni.universeBi input ]
 
-traverseDecls (fn:fns) = do
-    (fn', s1) <- indexFunction fn
-    (fns', s2) <- Scope.withLocalSubst s1 (traverseDecls fns)
+
+isSudoPath :: ID.Path -> Bool
+isSudoPath (ID.Path segs)
+    | List.length segs >= 2 =
+        let prefixs = List.init segs
+                |> map toText
+        in
+            prefixs == specialNamespace
     
-    return
-        (fn' : fns', Map.union s2 s1)
+    | otherwise =
+        False
+
+
+toText :: ID.Seg -> Text
+toText (ID.Seg _ x) = x
 
 
 
 
-indexFunction :: Decl.Function -> Sys.Index Decl.Function
-indexFunction fn@(Decl.Function name gs args out body)
-    | True <- SudoFFI.isSudoFFI fn = do
-        (name', s1) <- Scope.bindable name
-        
-        binder
-            (Decl.Function name' gs args out body)
-            s1
-    
-indexFunction (Decl.isRecFunction' -> (Just (Decl.Function name gs args out body))) = do
-    (name', s1) <- Scope.bindable name
-    (gs',   gs) <- List.unzip <$> M.mapM indexGeneric gs
-    (args', ss) <- List.unzip <$> M.mapM (indexInput (Map.unions gs)) args
-    
-    (body', _) <- Scope.withLocalSubst (Map.union s1 (Map.unions ss)) (S.indexBlock body)
-    
-    (out', _) <- indexOutput (Map.unions gs) out
-    
-    binder
-        (Decl.Function name' gs' args' out' body')
-        s1
-    
-indexFunction (Decl.Function name gs args out body) = do
-    (name', s1) <- Scope.bindable name
-    (gs',   gs) <- List.unzip <$> M.mapM indexGeneric gs
-    (args', ss) <- List.unzip <$> M.mapM (indexInput (Map.unions gs)) args
-    
-    
-    (body', _) <- Scope.withLocalSubst (Map.unions ss) (S.indexBlock body)
-    
-    (out', _) <- indexOutput (Map.unions gs) out
-    
-    binder
-        (Decl.Function name' gs' args' out' body')
-        s1
 
 
 
-indexGeneric :: Etc.Generic -> Sys.Index Etc.Generic
-indexGeneric gen = do
-    (gen', subs) <- Scope.genericDecl gen
-    
-    binder gen' subs
 
 
-indexInput :: Sys.Subst -> Etc.Input -> Sys.Index Etc.Input
-indexInput gSubs (Etc.Input ident ty) = do
-    (ident', subs) <- Scope.bindable ident
-    (ty', _) <- Scope.withLocalSubst gSubs (T.indexType ty)
-    
-    binder
-        (Etc.Input ident' ty')
-        subs
-
-
-indexOutput :: Sys.Subst -> Etc.Output -> Sys.Index Etc.Output
-indexOutput gSubs (Etc.Output ty) = do
-    (ty', _) <- Scope.withLocalSubst gSubs (T.indexType ty)
-    
-    enter (Etc.Output ty')
 
 

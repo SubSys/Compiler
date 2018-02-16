@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE PatternGuards #-}
 module SLIR.HelmSyntax.Program.Core.Index.Syntax (
     traverseDecls
 ) where
@@ -73,8 +74,9 @@ import qualified SLIR.HelmSyntax.Program.Data.Interface as I
 import qualified SLIR.HelmSyntax.AST.Render.Syntax.Driver as Syntax
 
 -- + HelmSyntax AST Utils
-import qualified SLIR.HelmSyntax.AST.Utils.Scope           as Scope
-import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident as ID
+import qualified SLIR.HelmSyntax.AST.Utils.Scope                       as Scope
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident             as ID
+import qualified SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI as SudoFFI
 
 -- + HelmSyntax AST
 -- ++ Base
@@ -120,6 +122,12 @@ traverseDecls (fn:fns) = do
 
 
 traverseDecl :: Decl.Function -> Index.Index Decl.Function
+traverseDecl fn@(Decl.Function name args expr sig meta)
+    | True <- SudoFFI.isSuperFFI fn = do
+        (name', s1) <- Bindable.bindable name
+        return (Decl.Function name' args expr sig meta, s1)
+
+
 traverseDecl (Decl.Function name args expr sig meta) = do
     (name', s1) <- Bindable.bindable name
     (args', s2) <- List.unzip <$> M.mapM Bindable.bindable args
