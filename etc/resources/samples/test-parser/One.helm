@@ -22,22 +22,22 @@ type Visibility = All | Active | Completed
 
 (+) : Int -> Int -> Int
 (+) leftA rightA =
-    Helm.Compiler.Sudo.Native.plus leftA rightA
+    Helm.Compiler.Sudo.Native.plusInt leftA rightA
 
 
 (+) : Float -> Float -> Float
 (+) leftA rightA =
-    Helm.Compiler.Sudo.Native.plus leftA rightA
+    Helm.Compiler.Sudo.Native.plusFloat leftA rightA
 
 
 (-) : Int -> Int -> Int
 (-) leftA rightA =
-    Helm.Compiler.Sudo.Native.sub leftA rightA
+    Helm.Compiler.Sudo.Native.subInt leftA rightA
 
 
 (-) : Float -> Float -> Float
 (-) leftA rightA =
-    Helm.Compiler.Sudo.Native.sub leftA rightA
+    Helm.Compiler.Sudo.Native.subFloat leftA rightA
 
 
 
