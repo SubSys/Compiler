@@ -1,8 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module HLIR.HelmFlat.Pipeline (
     pipeline
+  , pipeline'
   , RustCG.toRustCG
   , RustCG.toRustCG'
+  , I.Program
 ) where
 
 
@@ -99,5 +101,6 @@ import qualified HLIR.HelmFlat.Feed.RustCG.Driver as RustCG
 pipeline :: IO (Either Text I.Program) -> IO (Either Text I.Program)
 pipeline x = x
 
-
+pipeline' :: I.Program -> IO (Either Text I.Program)
+pipeline' x = return $ Right $ x
 

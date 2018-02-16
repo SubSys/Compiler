@@ -1,7 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE ViewPatterns #-}
-module Helm.Toolchain.Frontend.Compile.Dev where
+module Helm.Toolchain.Frontend.Compile.Pipeline.RustCG (
+    pipeline
+  , pipeline'
+  , toSyntax
+  , toSyntax'
+) where
 
 
 -- *
@@ -72,9 +75,9 @@ import qualified Algebra.Graph              as G
 import qualified Algebra.Graph.Export.Dot   as Dot
 import qualified Algebra.Graph.AdjacencyMap as AM
 
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
+
 
 -- + Helm Toolchain
 import qualified Helm.Toolchain.Frontend.Data.Node   as Node
@@ -86,54 +89,48 @@ import qualified Helm.Toolchain.Frontend.Crawl.Driver    as Crawl
 import qualified Helm.Toolchain.Frontend.Ordering.Driver as Ordering
 
 
--- + Local
-import qualified Helm.Toolchain.Frontend.Compile.Driver as Compile
+-- + IRs
+import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
+import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
+import qualified GCIR.RustCG.Pipeline     as RustCG
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-
-
-
-
-
-
-rootDir = [Path.absdir|/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-project|]
-
-debugPath = "/Users/colbyn/SubSystems/Compiler/etc/runtime-log"
-debugDotfile = debugPath ++ "/modules.dot"
-
-
-upstream = do
-    helmFiles <- Crawl.collectHelmFiles [rootDir]
-    (errors, nodes) <- Either.partitionEithers <$> M.mapM Extract.parseHeader helmFiles
-    
-    if not (null errors) then
-        return $ Left (Report.BuildErrors errors)
-    else
-        return $ (Ordering.buildOrdering nodes)
-
-
-run = do
-    result <- (Compile.compile upstream)
+pipeline :: IO (Either Text RustCG.Program) -> IO (Either Text RustCG.Program)
+pipeline upstream = do
+    result <- upstream
     
     case result of
-        Left errors -> PP.prettyPrint errors
-        Right syntax ->
-            run' syntax
+        Left err      -> return $ Left err
+        Right payload -> pipeline' payload
 
 
 
-
-run' syntax = do
+pipeline' :: RustCG.Program -> IO (Either Text RustCG.Program)
+pipeline' payload = do
+    let payload' = return (Right payload) :: IO (Either Text RustCG.Program)
     
-    TIO.putStrLn syntax
+    RustCG.pipeline payload'
 
 
 
+toSyntax :: IO (Either Text RustCG.Program) -> IO (Either Text Text)
+toSyntax upstream = do
+    result <- upstream
+    
+    case result of
+        Left err -> return $ Left err
+        Right payload ->
+            toSyntax' payload
+
+
+
+toSyntax' :: RustCG.Program -> IO (Either Text Text)
+toSyntax' payload =
+    return
+        $ Right
+        $ RustCG.toSyntax' payload
 
 
 

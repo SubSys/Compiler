@@ -1,14 +1,14 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE ViewPatterns #-}
-module Helm.Toolchain.Frontend.Compile.Dev where
+module GCIR.RustCG.Feed.Syntax.Driver (
+    toSyntax
+  , toSyntax'
+) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
     (return
     , String
@@ -23,6 +23,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -53,89 +54,78 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-import qualified Data.String                  as String
-
-
-import qualified System.IO as SIO
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
 import qualified Data.Generics.Uniplate.Data as Uni
 
-
 -- + OS APIS & Related
-import qualified Path
-import qualified Path.IO as PIO
-
--- + Graphing & Related
-import qualified Algebra.Graph              as G
-import qualified Algebra.Graph.Export.Dot   as Dot
-import qualified Algebra.Graph.AdjacencyMap as AM
-
+import qualified System.IO as SIO
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
--- + Helm Toolchain
-import qualified Helm.Toolchain.Frontend.Data.Node   as Node
-import qualified Helm.Toolchain.Frontend.Data.Report as Report
 
--- ++ Helm Toolchain - Drivers
-import qualified Helm.Toolchain.Frontend.Extract.Driver  as Extract
-import qualified Helm.Toolchain.Frontend.Crawl.Driver    as Crawl
-import qualified Helm.Toolchain.Frontend.Ordering.Driver as Ordering
 
+-- + RustCG AST Interface
+import qualified GCIR.RustCG.Data.Interface as I
+
+-- + RustCG AST Renderer
+import qualified GCIR.RustCG.AST.Render.Syntax as Syntax
+
+-- + RustCG AST Utils
+import qualified GCIR.RustCG.AST.Utils.Functions as Decl
+
+-- + RustCG AST
+-- ++ Base
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Literals              as Lit
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Types                 as T
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Etc                   as Etc
+-- ++ Block Level
+import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as S
+import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
+-- ++ Decl/Top Level
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local Prelude
+import GCIR.RustCG.Core.Index.Data.System (enter, binder)
 
 -- + Local
-import qualified Helm.Toolchain.Frontend.Compile.Driver as Compile
+import qualified GCIR.RustCG.Core.Index.Data.System                as Sys
+import qualified GCIR.RustCG.Core.Index.Syntax.DeclLevel.Functions as Decl
+import qualified GCIR.RustCG.Core.Index.Syntax.DeclLevel.Enums     as Decl
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-
-
-
-
-
-
-rootDir = [Path.absdir|/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-project|]
-
-debugPath = "/Users/colbyn/SubSystems/Compiler/etc/runtime-log"
-debugDotfile = debugPath ++ "/modules.dot"
-
-
-upstream = do
-    helmFiles <- Crawl.collectHelmFiles [rootDir]
-    (errors, nodes) <- Either.partitionEithers <$> M.mapM Extract.parseHeader helmFiles
-    
-    if not (null errors) then
-        return $ Left (Report.BuildErrors errors)
-    else
-        return $ (Ordering.buildOrdering nodes)
-
-
-run = do
-    result <- (Compile.compile upstream)
+toSyntax :: IO (Either Text I.Program) -> IO (Either Text Text)
+toSyntax upstream = do
+    result <- upstream
     
     case result of
-        Left errors -> PP.prettyPrint errors
-        Right syntax ->
-            run' syntax
+        Left err      -> return $ Left err
+        Right payload ->
+            return
+                $ Right
+                $ toSyntax' payload
 
 
 
-
-run' syntax = do
-    
-    TIO.putStrLn syntax
-
-
-
-
-
+toSyntax' :: I.Program -> Text
+toSyntax' payload =
+    let fns = I.getFunctions payload
+            |> Syntax.renderFunctions
+        ens = I.getEnums payload
+            |> Syntax.renderEnums
+    in
+        Text.unlines
+            [ ens
+            , fns
+            ]
 
 
 

@@ -3,6 +3,8 @@ module SLIR.HelmSyntax.Pipeline (
     pipeline
   , Feed.toHelmFlat
   , Feed.toHelmFlat'
+  , modulePipeline
+  , programPipeline
 ) where
 
 
@@ -98,6 +100,7 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
 -- + HelmSyntax & HelmFlat Interfaces
 import qualified SLIR.HelmSyntax.Program.Data.Interface as HelmSyntax
+
 import qualified HLIR.HelmFlat.Data.Interface           as HelmFlat
 
 -- + IR Feed
@@ -130,12 +133,34 @@ pipeline dependencies filePathInfo sourceCode =
     sourceCode
         |> Driver.runModuleParser filePathInfo
         |> Validate.userspaceLiteral
+        |> Driver.initDeps dependencies
         |> Driver.typeCheck
+        |> Driver.normalize
         |> Interface.toProgram
         |> Driver.desugar
         |> Driver.lambdaLift
         |> Driver.uncurryTerms
         |> Driver'.typeCheck
 
+
+modulePipeline :: [InitDeps.ForeignModule] -> Pre.FilePath -> IO (Either Text Module.Module)
+modulePipeline deps filePath =
+    SIO.readFile filePath
+        |> Driver.runModuleParser filePath
+        |> Validate.userspaceLiteral
+        |> Driver.initDeps deps
+        |> Driver.typeCheck
+        |> Driver.normalize
+
+
+programPipeline :: [IO (Either Text Module.Module)] -> IO (Either Text Program.Program)
+programPipeline modules =
+    modules
+        |> map Interface.toProgram
+        |> Interface.mergePrograms
+        |> Driver.desugar
+        |> Driver.lambdaLift
+        |> Driver.uncurryTerms
+        |> Driver'.typeCheck
 
 

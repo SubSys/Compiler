@@ -1,7 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE ViewPatterns #-}
-module Helm.Toolchain.Frontend.Compile.Dev where
+module GCIR.RustCG.Pipeline (
+    pipeline
+  , Feed.toSyntax
+  , Feed.toSyntax'
+  , I.Program
+) where
 
 
 -- *
@@ -10,7 +13,7 @@ import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
 import Data.Monoid ((<>))
 import Prelude
-    (return
+    ( return
     , String
     , IO
     , show
@@ -23,6 +26,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -53,93 +57,51 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-import qualified Data.String                  as String
-
-
-import qualified System.IO as SIO
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
 import qualified Data.Generics.Uniplate.Data as Uni
 
-
 -- + OS APIS & Related
-import qualified Path
-import qualified Path.IO as PIO
-
--- + Graphing & Related
-import qualified Algebra.Graph              as G
-import qualified Algebra.Graph.Export.Dot   as Dot
-import qualified Algebra.Graph.AdjacencyMap as AM
-
+import qualified System.IO as SIO
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
--- + Helm Toolchain
-import qualified Helm.Toolchain.Frontend.Data.Node   as Node
-import qualified Helm.Toolchain.Frontend.Data.Report as Report
-
--- ++ Helm Toolchain - Drivers
-import qualified Helm.Toolchain.Frontend.Extract.Driver  as Extract
-import qualified Helm.Toolchain.Frontend.Crawl.Driver    as Crawl
-import qualified Helm.Toolchain.Frontend.Ordering.Driver as Ordering
 
 
--- + Local
-import qualified Helm.Toolchain.Frontend.Compile.Driver as Compile
+-- + RustCG AST Interface
+import qualified GCIR.RustCG.Data.Interface as I
+
+-- + RustCG AST Renderer
+import qualified GCIR.RustCG.AST.Render.Syntax as Syntax
+
+-- + RustCG AST
+-- ++ Base
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Literals              as Lit
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Types                 as T
+import qualified GCIR.RustCG.AST.Data.Semantic.Base.Etc                   as Etc
+-- ++ Block Level
+import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as S
+import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
+-- ++ Decl/Top Level
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
+import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + RustCG Drivers
+import qualified GCIR.RustCG.Core.Index.Driver as Driver
+
+-- + RustCG AST Feeds
+import qualified GCIR.RustCG.Feed.Syntax.Driver as Feed
 -- *
 
 
-
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-
-
-
-
-
-
-rootDir = [Path.absdir|/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-project|]
-
-debugPath = "/Users/colbyn/SubSystems/Compiler/etc/runtime-log"
-debugDotfile = debugPath ++ "/modules.dot"
-
-
-upstream = do
-    helmFiles <- Crawl.collectHelmFiles [rootDir]
-    (errors, nodes) <- Either.partitionEithers <$> M.mapM Extract.parseHeader helmFiles
-    
-    if not (null errors) then
-        return $ Left (Report.BuildErrors errors)
-    else
-        return $ (Ordering.buildOrdering nodes)
-
-
-run = do
-    result <- (Compile.compile upstream)
-    
-    case result of
-        Left errors -> PP.prettyPrint errors
-        Right syntax ->
-            run' syntax
-
-
-
-
-run' syntax = do
-    
-    TIO.putStrLn syntax
-
-
-
-
-
-
-
-
-
-
+pipeline :: IO (Either Text I.Program) -> IO (Either Text I.Program)
+pipeline payload =
+    payload
+        |> Driver.index
 
 

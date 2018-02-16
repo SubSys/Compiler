@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE ViewPatterns #-}
-module Helm.Toolchain.Frontend.Compile.Dev where
+module Helm.Toolchain.Frontend.Compile.Pipeline (
+    pipeline
+) where
 
 
 -- *
@@ -72,9 +72,9 @@ import qualified Algebra.Graph              as G
 import qualified Algebra.Graph.Export.Dot   as Dot
 import qualified Algebra.Graph.AdjacencyMap as AM
 
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
+
 
 -- + Helm Toolchain
 import qualified Helm.Toolchain.Frontend.Data.Node   as Node
@@ -86,60 +86,24 @@ import qualified Helm.Toolchain.Frontend.Crawl.Driver    as Crawl
 import qualified Helm.Toolchain.Frontend.Ordering.Driver as Ordering
 
 
+-- ++ HelmSyntax Interfaces
+import qualified SLIR.HelmSyntax.Module.Data.Interface         as HelmSyntax.Module
+import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver as InitDeps
+
 -- + Local
-import qualified Helm.Toolchain.Frontend.Compile.Driver as Compile
+import qualified Helm.Toolchain.Frontend.Compile.Pipeline.HelmSyntax  as HelmSyntax
+import qualified Helm.Toolchain.Frontend.Compile.Pipeline.HelmFlat    as HelmFlat
+import qualified Helm.Toolchain.Frontend.Compile.Pipeline.RustCG      as RustCG
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-
-
-
-
-
-
-rootDir = [Path.absdir|/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-project|]
-
-debugPath = "/Users/colbyn/SubSystems/Compiler/etc/runtime-log"
-debugDotfile = debugPath ++ "/modules.dot"
-
-
-upstream = do
-    helmFiles <- Crawl.collectHelmFiles [rootDir]
-    (errors, nodes) <- Either.partitionEithers <$> M.mapM Extract.parseHeader helmFiles
-    
-    if not (null errors) then
-        return $ Left (Report.BuildErrors errors)
-    else
-        return $ (Ordering.buildOrdering nodes)
-
-
-run = do
-    result <- (Compile.compile upstream)
-    
-    case result of
-        Left errors -> PP.prettyPrint errors
-        Right syntax ->
-            run' syntax
-
-
-
-
-run' syntax = do
-    
-    TIO.putStrLn syntax
-
-
-
-
-
-
-
-
-
-
-
+pipeline :: [[Node.Node]] -> IO (Either Text Text)
+pipeline nodes =
+    nodes |> HelmSyntax.pipeline'
+          |> HelmSyntax.toHelmFlat
+          |> HelmFlat.pipeline
+          |> HelmFlat.toRustCG
+          |> RustCG.pipeline
+          |> RustCG.toSyntax
 

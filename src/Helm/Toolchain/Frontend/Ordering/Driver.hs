@@ -119,6 +119,10 @@ parallelize = parallelOrder
 
 packOrder :: [Text] -> Map.Map Text Node.Node -> [Node.Node]
 packOrder [] _ = []
+packOrder ((Node.isSudoFFI' -> True):names) records =
+    packOrder names records
+
+
 packOrder (name:names) records
     | Just node <- Map.lookup name records =
         node : packOrder names records

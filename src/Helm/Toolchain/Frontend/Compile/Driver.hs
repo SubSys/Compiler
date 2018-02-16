@@ -1,7 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE ViewPatterns #-}
-module Helm.Toolchain.Frontend.Ordering.Dev where
+module Helm.Toolchain.Frontend.Compile.Driver (
+    compile
+  , compile'
+) where
 
 
 -- *
@@ -68,124 +69,43 @@ import qualified Path
 import qualified Path.IO as PIO
 
 -- + Graphing & Related
-import qualified Algebra.Graph            as G
-import qualified Algebra.Graph.Export.Dot as Dot
+import qualified Algebra.Graph              as G
+import qualified Algebra.Graph.Export.Dot   as Dot
+import qualified Algebra.Graph.AdjacencyMap as AM
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
+
 
 -- + Helm Toolchain
 import qualified Helm.Toolchain.Frontend.Data.Node   as Node
 import qualified Helm.Toolchain.Frontend.Data.Report as Report
 
 -- ++ Helm Toolchain - Drivers
-import qualified Helm.Toolchain.Frontend.Extract.Driver as Extract
-import qualified Helm.Toolchain.Frontend.Crawl.Driver   as Crawl
+import qualified Helm.Toolchain.Frontend.Extract.Driver  as Extract
+import qualified Helm.Toolchain.Frontend.Crawl.Driver    as Crawl
+import qualified Helm.Toolchain.Frontend.Ordering.Driver as Ordering
+
 
 -- + Local
-import qualified Helm.Toolchain.Frontend.Ordering.Validations as Validate
+import qualified Helm.Toolchain.Frontend.Compile.Pipeline as Pipeline
 -- *
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-
-
-
-
-
-
-
-rootDir = [Path.absdir|/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-project|]
-
-debugPath = "/Users/colbyn/SubSystems/Compiler/etc/runtime-log"
-debugDotfile = debugPath ++ "/modules.dot"
-
-
-upstream = do
-    helmFiles <- Crawl.collectHelmFiles [rootDir]
-    (errors, nodes) <- Either.partitionEithers <$> M.mapM Extract.parseHeader helmFiles
-    
-    if not (null errors) then
-        return $ Left errors
-    else
-        return $ Right nodes
-
-
-run = do
+compile :: IO (Either Report.BuildError [[Node.Node]]) -> IO (Either Text Text)
+compile upstream = do
     result <- upstream
     
     case result of
-        Left errors -> M.mapM_ PP.prettyPrint errors
+        Left err ->
+            return $ Left $ Text.pack $ PP.prettyShow err
         Right nodes ->
-            run' nodes
+            compile' nodes
 
 
 
 
-run' nodes = do
-    
-    -- M.mapM_ PP.prettyPrint nodes
-    
-    -- M.mapM_ PP.prettyPrint nodes
-    
-    TIO.writeFile debugDotfile (Dot.exportAsIs graph)
-    
-    M.mapM_ PP.prettyPrint nodes'
-    
-    
-    return ()
-    
-    
-    where
-        bar = putStrLn $ "\n" ++ List.replicate 100 '-' ++ "\n"
-        
-        (graph, records) = init nodes
-        
-        nodes' = G.vertexList graph
-        
-
-
-
-
-
--- serialize :: [Node.Node] -> [Node.Node]
--- serialize []    = []
--- serialize nodes
---     | nodes' == nodes = nodes
---     | otherwise =
---         serialize nodes'
---     where
---         nodes' = List.sortBy orderBy nodes
--- 
--- 
--- 
--- orderBy :: Node.Node -> Node.Node -> Ordering
--- orderBy (Node.Node fileName1 moduleName1 imports1)
---         (Node.Node fileName2 moduleName2 imports2)
--- 
---     | moduleName1 `List.elem` imports2 = LT
---     | otherwise = EQ
-
-
-
-init :: [Node.Node] -> (G.Graph Text, Map.Map Text Node.Node)
-init nodes =
-    (G.overlays graphs, Map.unions records)
-    where
-        (graphs, records) = List.unzip $ map initNode nodes
-
-
-initNode :: Node.Node -> (G.Graph Text, Map.Map Text Node.Node)
-initNode node@(Node.Node filePath (Node.toText -> moduleName) (Node.toTexts -> imports)) =
-    let
-        graph = G.edges $ List.zip (List.repeat moduleName) imports
-        record = Map.singleton moduleName node
-    in
-        (graph, record)
-
-
-
+compile' :: [[Node.Node]] -> IO (Either Text Text)
+compile' = Pipeline.pipeline
 

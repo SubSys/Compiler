@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6e3f8e5cd6bcf1eb421a906edff531d057c0e737218829b9e720390ef0f671d8
+-- hash: 1d5ef245d311813ecdfde4bf588b4cf1d06cb194f43a32de3f04e0b1336862e8
 
 name:           Compiler
 version:        0.1.0.0
@@ -82,7 +82,50 @@ library
       Proto.Util.List
       Proto.Util.Misc
       Proto.Util.Text
+      GCIR.RustCG.AST.Data.Semantic.Base.Etc
+      GCIR.RustCG.AST.Data.Semantic.Base.Ident
+      GCIR.RustCG.AST.Data.Semantic.Base.Literals
+      GCIR.RustCG.AST.Data.Semantic.Base.Types
+      GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns
+      GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt
+      GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums
+      GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants
+      GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions
+      GCIR.RustCG.AST.Render.Syntax
+      GCIR.RustCG.AST.Render.Syntax.Base.Etc
+      GCIR.RustCG.AST.Render.Syntax.Base.Ident
+      GCIR.RustCG.AST.Render.Syntax.Base.Literals
+      GCIR.RustCG.AST.Render.Syntax.Base.Types
+      GCIR.RustCG.AST.Render.Syntax.BlockLevel.Patterns
+      GCIR.RustCG.AST.Render.Syntax.BlockLevel.Stmt
+      GCIR.RustCG.AST.Render.Syntax.DeclLevel.Enums
+      GCIR.RustCG.AST.Render.Syntax.DeclLevel.Enums.Variants
+      GCIR.RustCG.AST.Render.Syntax.DeclLevel.Functions
+      GCIR.RustCG.AST.Utils.Functions
+      GCIR.RustCG.AST.Utils.Generic.SudoFFI
+      GCIR.RustCG.AST.Utils.Ident
+      GCIR.RustCG.Core.Index.Data.System
+      GCIR.RustCG.Core.Index.Driver
+      GCIR.RustCG.Core.Index.Scope.Bindable
+      GCIR.RustCG.Core.Index.Scope.Generic
+      GCIR.RustCG.Core.Index.Scope.Referable
+      GCIR.RustCG.Core.Index.Scope.Utils
+      GCIR.RustCG.Core.Index.Syntax.Base.Types
+      GCIR.RustCG.Core.Index.Syntax.BlockLevel.Patterns
+      GCIR.RustCG.Core.Index.Syntax.BlockLevel.Stmt
+      GCIR.RustCG.Core.Index.Syntax.DeclLevel.Enums
+      GCIR.RustCG.Core.Index.Syntax.DeclLevel.Functions
+      GCIR.RustCG.Data.Interface
+      GCIR.RustCG.Dev.DryRun
+      GCIR.RustCG.Feed.Syntax.Driver
+      GCIR.RustCG.Internal.AST
+      GCIR.RustCG.Pipeline
       Helm.Toolchain.Frontend.Compile.Dev
+      Helm.Toolchain.Frontend.Compile.Driver
+      Helm.Toolchain.Frontend.Compile.Pipeline
+      Helm.Toolchain.Frontend.Compile.Pipeline.HelmFlat
+      Helm.Toolchain.Frontend.Compile.Pipeline.HelmSyntax
+      Helm.Toolchain.Frontend.Compile.Pipeline.RustCG
       Helm.Toolchain.Frontend.Crawl.Dev
       Helm.Toolchain.Frontend.Crawl.Driver
       Helm.Toolchain.Frontend.Data.Node
@@ -103,9 +146,34 @@ library
       HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns
       HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions
       HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions
+      HLIR.HelmFlat.AST.Render.Syntax.Base.Etc
+      HLIR.HelmFlat.AST.Render.Syntax.Base.Ident
+      HLIR.HelmFlat.AST.Render.Syntax.Base.Types
+      HLIR.HelmFlat.AST.Render.Syntax.Base.Values
+      HLIR.HelmFlat.AST.Render.Syntax.Driver
+      HLIR.HelmFlat.AST.Render.Syntax.TermLevel.Expr
+      HLIR.HelmFlat.AST.Render.Syntax.TermLevel.Patterns
+      HLIR.HelmFlat.AST.Render.Syntax.TopLevel.Functions
+      HLIR.HelmFlat.AST.Render.Syntax.TopLevel.Unions
+      HLIR.HelmFlat.AST.Utils.Class.Ident
+      HLIR.HelmFlat.AST.Utils.Functions.Recursive
+      HLIR.HelmFlat.AST.Utils.Generic.Scope
+      HLIR.HelmFlat.AST.Utils.Generic.SudoFFI
+      HLIR.HelmFlat.AST.Utils.Generic.TypesEnv
+      HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers
+      HLIR.HelmFlat.AST.Utils.Misc.Fresh
+      HLIR.HelmFlat.AST.Utils.Types
+      HLIR.HelmFlat.AST.Utils.Unions
       HLIR.HelmFlat.Data.Interface
       HLIR.HelmFlat.Dev.DryRun
+      HLIR.HelmFlat.Feed.RustCG.Driver
+      HLIR.HelmFlat.Feed.RustCG.Init.Decls
+      HLIR.HelmFlat.Feed.RustCG.Init.Exprs
+      HLIR.HelmFlat.Feed.RustCG.Init.Variants
+      HLIR.HelmFlat.Feed.RustCG.Post.Finalize
+      HLIR.HelmFlat.Feed.RustCG.Syntax
       HLIR.HelmFlat.Internal.AST
+      HLIR.HelmFlat.Pipeline
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Header
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident

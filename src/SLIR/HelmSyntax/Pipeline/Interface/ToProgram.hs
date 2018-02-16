@@ -2,6 +2,7 @@
 module SLIR.HelmSyntax.Pipeline.Interface.ToProgram (
     toProgram
   , toProgram'
+  , mergePrograms
 ) where
 
 
@@ -101,9 +102,6 @@ import qualified SLIR.HelmSyntax.Program.Data.Interface as Program
 
 
 
-
-
-
 toProgram :: IO (Either Text Module.Module) -> IO (Either Text Program.Program)
 toProgram input = do
     result <- input
@@ -126,7 +124,41 @@ toProgram' payload =
         fns = Module.getFunctions payload
         uns = Module.getUnions payload
 
+mergePrograms :: [IO (Either Text Program.Program)] -> IO (Either Text Program.Program)
+mergePrograms upstream = do
+    (invalids, valids) <- partition upstream
+    
+    if not (null invalids) then
+        return
+            $ Left
+            $ Text.unlines invalids
+    
+    else
+        return
+            $ Right
+            $ merge' valids
 
 
+merge' :: [Program.Program] -> Program.Program
+merge' modules =
+    let fns = flatten $ map Program.getFunctions modules
+        uns = flatten $ map Program.getUnions modules
+    in
+        Program.Program
+            { Program.unions = uns
+            , Program.functions = fns
+            }
 
+partition :: [IO (Either Text Program.Program)] -> IO ([Text], [Program.Program])
+partition [] = return ([], [])
+partition (upstream:rest) = do
+    result <- upstream
+    
+    case result of
+        Left err -> do
+            (invalids, valids) <- partition rest
+            return (err : invalids, valids)
+        Right valid -> do
+            (invalids, valids) <- partition rest
+            return (invalids, valid : valids)
 

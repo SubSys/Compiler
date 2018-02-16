@@ -8,6 +8,8 @@ module Helm.Toolchain.Frontend.Data.Node (
   , toText
   , toTexts
   , fromText
+  , isSudoFFI
+  , isSudoFFI'
 ) where
 
 
@@ -138,7 +140,15 @@ breakOn =
     Text.split ('.' ==)
 
 
+isSudoFFI :: Namespace -> Bool
+isSudoFFI (Namespace xs) =
+    xs == sudoNamespace
 
+isSudoFFI' :: Text -> Bool
+isSudoFFI' (fromText -> ns) = isSudoFFI ns
+
+sudoNamespace =
+    [Text.pack "Helm", Text.pack "Compiler", Text.pack "Sudo", Text.pack "Native"]
 
 
 
