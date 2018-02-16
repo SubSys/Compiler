@@ -1,6 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ViewPatterns #-}
-module GCIR.RustCG.AST.Utils.Functions where
+module GCIR.RustCG.AST.Utils.Functions (
+    isRecFunction
+) where
 
 
 -- *
@@ -87,4 +89,21 @@ import qualified GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+
+-- + Local
+import qualified GCIR.RustCG.AST.Utils.Ident as ID
 -- *
+
+
+isRecFunction :: Decl.Function -> Bool
+isRecFunction (Decl.Function name _ _ _ body) =
+    let
+        x1 = [ident | (S.Ref (ID.getRef -> ident)) <- Uni.universeBi body]
+        x2 = [ident | (S.FunCall (ID.getRef -> ident) _) <- Uni.universeBi body]
+    in
+        name `List.elem` (x1 ++ x2)
+
+isRecFunction _ = False
+
+
+
