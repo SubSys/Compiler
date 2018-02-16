@@ -1,5 +1,4 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns #-}
 module GCIR.RustCG.Core.Index.Driver (
     index
   , index'
@@ -96,6 +95,7 @@ import GCIR.RustCG.Core.Index.Data.System (enter, binder)
 -- + Local
 import qualified GCIR.RustCG.Core.Index.Data.System                as Sys
 import qualified GCIR.RustCG.Core.Index.Syntax.DeclLevel.Functions as Decl
+import qualified GCIR.RustCG.Core.Index.Syntax.DeclLevel.Enums     as Decl
 -- *
 
 
@@ -114,8 +114,15 @@ index upstream = do
 
 
 index' :: I.Program -> I.Program
-index' payload@(I.getFunctions -> decls) =
-    I.updateFunctions (globalize decls) payload
+index' payload =
+    let fns = globalize (I.getFunctions payload)
+        ens = map normEnum $ I.getEnums payload
+    in
+    
+        I.Program
+            { I.enums = ens
+            , I.functions = fns
+            }
 
 
 
@@ -128,7 +135,9 @@ globalize :: [Decl.Function] -> [Decl.Function]
 globalize decls =
     fst $ Sys.runState (Decl.traverseDecls decls) 0 Map.empty
 
-
+normEnum :: Decl.Enum -> Decl.Enum
+normEnum enum =
+    fst $ Sys.runState (Decl.indexEnum enum) 0 Map.empty
 
 
 

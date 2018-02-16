@@ -1,6 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module GCIR.RustCG.Core.Index.Scope.Bindable (
-    bindable
+{-# LANGUAGE ViewPatterns #-}
+module GCIR.RustCG.Core.Index.Syntax.DeclLevel.Enums (
+    traverseEnums
+  , indexEnum
 ) where
 
 
@@ -70,6 +72,9 @@ import qualified Text.Show.Prettyprint as PP
 -- + RustCG AST Interface
 import qualified GCIR.RustCG.Data.Interface as I
 
+-- + RustCG AST Utils
+import qualified GCIR.RustCG.AST.Utils.Functions as Decl
+
 -- + RustCG AST
 -- ++ Base
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
@@ -84,54 +89,59 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
+-- + Local Prelude
+import GCIR.RustCG.Core.Index.Data.System (enter, binder)
+
 -- + Local
-import qualified GCIR.RustCG.Core.Index.Data.System as Sys
+import qualified GCIR.RustCG.Core.Index.Data.System            as Sys
+import qualified GCIR.RustCG.Core.Index.Scope.Bindable         as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Referable        as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Utils            as Scope
+import qualified GCIR.RustCG.Core.Index.Syntax.BlockLevel.Stmt as S
+import qualified GCIR.RustCG.Core.Index.Syntax.Base.Types      as T
+import qualified GCIR.RustCG.Core.Index.Scope.Generic          as Scope
 -- *
 
 
+{-# ANN module ("HLint: ignore" :: String) #-}
+
+traverseEnums :: [Decl.Enum] -> Sys.State [Decl.Enum]
+traverseEnums enums = do
+    (enums', _) <- List.unzip <$> M.mapM indexEnum enums
+    
+    return enums'
 
 
-
-bindable :: ID.Ident -> Sys.State (ID.Ident, Sys.Subst)
-bindable binder = do
-    idx <- Sys.incCounter
-    -- *
-
-    -- *
-    let (binder', subs) = newSubst binder idx
-    -- *
-
-    -- *
-    return (binder', subs)
+indexEnum :: Decl.Enum -> Sys.Index Decl.Enum
+indexEnum (Decl.Enum ident gs vs) = do
+    -- (ident', s1) <- Scope.bindable ident
+    (gs', s2) <- List.unzip <$> M.mapM indexGeneric gs
+    (vs', _) <- Scope.withLocalSubst
+                    (Map.unions s2)
+                    (List.unzip <$> M.mapM indexVariant vs)
+    
+    
+    enter
+        (Decl.Enum ident gs' vs')
     
 
 
--- *
--- |  Internal
--- *
+indexVariant :: Decl.Variant -> Sys.Index Decl.Variant
+indexVariant (Decl.TupleVariant name args) = do
+    (args', _) <- List.unzip <$> M.mapM T.indexType args
+    
+    enter (Decl.TupleVariant name args')
 
-
-globalPrefix :: Text
-globalPrefix = Text.pack "f"
-
-
-newSubst :: ID.Ident -> Int -> (ID.Ident, Sys.Subst)
-newSubst ident idx =
-    let
-        -- Finish
-        newBinder = freshIdent idx
-        subs'     = Map.singleton ident newBinder
-
-    in
-        (newBinder, subs')
+indexVariant (Decl.UnitVariant name) =
+    enter (Decl.UnitVariant name)
 
 
 
-freshIdent :: Int -> ID.Ident
-freshIdent i =
-    let
-        idx = Text.pack $ show i
-    in
-        ID.Ident $ globalPrefix `Text.append` idx
+indexGeneric :: Etc.Generic -> Sys.Index Etc.Generic
+indexGeneric gen = do
+    (gen', subs) <- Scope.genericDecl gen
+    
+    binder gen' subs
+
 
 

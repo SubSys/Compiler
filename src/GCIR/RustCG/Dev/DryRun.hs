@@ -140,9 +140,9 @@ run = do
 
 run' payload = do
     
-    
+    (TIO.putStrLn . Syntax.renderEnums) ens
+    putStrLn "\n"
     (TIO.putStrLn . Syntax.renderFunctions) fns
-    -- M.mapM_ PP.prettyPrint fns
 
     where
         fns = I.getFunctions payload

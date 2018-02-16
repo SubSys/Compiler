@@ -97,8 +97,12 @@ import qualified GCIR.RustCG.Core.Index.Scope.Bindable         as Scope
 import qualified GCIR.RustCG.Core.Index.Scope.Referable        as Scope
 import qualified GCIR.RustCG.Core.Index.Scope.Utils            as Scope
 import qualified GCIR.RustCG.Core.Index.Syntax.BlockLevel.Stmt as S
+import qualified GCIR.RustCG.Core.Index.Syntax.Base.Types      as T
+import qualified GCIR.RustCG.Core.Index.Scope.Generic          as Scope
 -- *
 
+
+{-# ANN module ("HLint: ignore" :: String) #-}
 
 
 traverseDecls :: [Decl.Function] -> Sys.Index [Decl.Function]
@@ -117,34 +121,54 @@ traverseDecls (fn:fns) = do
 indexFunction :: Decl.Function -> Sys.Index Decl.Function
 indexFunction (Decl.isRecFunction' -> (Just (Decl.Function name gs args out body))) = do
     (name', s1) <- Scope.bindable name
-    (args', ss) <- List.unzip <$> M.mapM indexInput args
+    (gs',   gs) <- List.unzip <$> M.mapM indexGeneric gs
+    (args', ss) <- List.unzip <$> M.mapM (indexInput (Map.unions gs)) args
     
     (body', _) <- Scope.withLocalSubst (Map.union s1 (Map.unions ss)) (S.indexBlock body)
     
+    (out', _) <- indexOutput (Map.unions gs) out
+    
     binder
-        (Decl.Function name' gs args' out body')
+        (Decl.Function name' gs' args' out' body')
         s1
     
 indexFunction (Decl.Function name gs args out body) = do
     (name', s1) <- Scope.bindable name
-    (args', ss) <- List.unzip <$> M.mapM indexInput args
+    (gs',   gs) <- List.unzip <$> M.mapM indexGeneric gs
+    (args', ss) <- List.unzip <$> M.mapM (indexInput (Map.unions gs)) args
+    
     
     (body', _) <- Scope.withLocalSubst (Map.unions ss) (S.indexBlock body)
     
+    (out', _) <- indexOutput (Map.unions gs) out
+    
     binder
-        (Decl.Function name' gs args' out body')
+        (Decl.Function name' gs' args' out' body')
         s1
 
 
 
+indexGeneric :: Etc.Generic -> Sys.Index Etc.Generic
+indexGeneric gen = do
+    (gen', subs) <- Scope.genericDecl gen
+    
+    binder gen' subs
 
-indexInput :: Etc.Input -> Sys.Index Etc.Input
-indexInput (Etc.Input ident ty) = do
+
+indexInput :: Sys.Subst -> Etc.Input -> Sys.Index Etc.Input
+indexInput gSubs (Etc.Input ident ty) = do
     (ident', subs) <- Scope.bindable ident
+    (ty', _) <- Scope.withLocalSubst gSubs (T.indexType ty)
     
     binder
-        (Etc.Input ident' ty)
+        (Etc.Input ident' ty')
         subs
 
+
+indexOutput :: Sys.Subst -> Etc.Output -> Sys.Index Etc.Output
+indexOutput gSubs (Etc.Output ty) = do
+    (ty', _) <- Scope.withLocalSubst gSubs (T.indexType ty)
+    
+    enter (Etc.Output ty')
 
 

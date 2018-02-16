@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module GCIR.RustCG.Core.Index.Scope.Bindable (
-    bindable
+module GCIR.RustCG.Core.Index.Scope.Generic (
+    genericDecl
 ) where
 
 
@@ -18,6 +18,7 @@ import Prelude
     , (>>=)
     , (>>)
     , fromIntegral
+    , (!!)
     )
 
 import qualified Prelude    as Pre
@@ -91,9 +92,8 @@ import qualified GCIR.RustCG.Core.Index.Data.System as Sys
 
 
 
-
-bindable :: ID.Ident -> Sys.State (ID.Ident, Sys.Subst)
-bindable binder = do
+genericDecl :: Etc.Generic -> Sys.State (Etc.Generic, Sys.Subst)
+genericDecl (Etc.Generic binder) = do
     idx <- Sys.incCounter
     -- *
 
@@ -102,7 +102,7 @@ bindable binder = do
     -- *
 
     -- *
-    return (binder', subs)
+    return (Etc.Generic binder', subs)
     
 
 
@@ -110,9 +110,13 @@ bindable binder = do
 -- |  Internal
 -- *
 
+letters :: [Text]
+letters =
+    Text.pack <$> ([1..] >>= flip M.replicateM ['A'..'Z'])
+
 
 globalPrefix :: Text
-globalPrefix = Text.pack "f"
+globalPrefix = Text.pack ""
 
 
 newSubst :: ID.Ident -> Int -> (ID.Ident, Sys.Subst)
@@ -130,8 +134,7 @@ newSubst ident idx =
 freshIdent :: Int -> ID.Ident
 freshIdent i =
     let
-        idx = Text.pack $ show i
+        idx = letters !! i
     in
         ID.Ident $ globalPrefix `Text.append` idx
-
 

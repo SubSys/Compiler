@@ -1,6 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module GCIR.RustCG.Core.Index.Scope.Bindable (
-    bindable
+-- {-# LANGUAGE ViewPatterns #-}
+module GCIR.RustCG.Core.Index.Syntax.Base.Types (
+    indexType
 ) where
 
 
@@ -70,6 +71,10 @@ import qualified Text.Show.Prettyprint as PP
 -- + RustCG AST Interface
 import qualified GCIR.RustCG.Data.Interface as I
 
+-- + RustCG AST Utils
+import qualified GCIR.RustCG.AST.Utils.Functions as Decl
+import qualified GCIR.RustCG.AST.Utils.Ident     as ID
+
 -- + RustCG AST
 -- ++ Base
 import qualified GCIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
@@ -84,54 +89,35 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Dec
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
+-- + Local Prelude
+import GCIR.RustCG.Core.Index.Data.System (enter, binder)
+
 -- + Local
-import qualified GCIR.RustCG.Core.Index.Data.System as Sys
+import qualified GCIR.RustCG.Core.Index.Data.System            as Sys
+import qualified GCIR.RustCG.Core.Index.Scope.Bindable         as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Referable        as Scope
+import qualified GCIR.RustCG.Core.Index.Scope.Utils            as Scope
+import qualified GCIR.RustCG.Core.Index.Syntax.BlockLevel.Stmt as S
 -- *
 
 
 
-
-
-bindable :: ID.Ident -> Sys.State (ID.Ident, Sys.Subst)
-bindable binder = do
-    idx <- Sys.incCounter
-    -- *
-
-    -- *
-    let (binder', subs) = newSubst binder idx
-    -- *
-
-    -- *
-    return (binder', subs)
+indexType :: T.Type -> Sys.Index T.Type
+indexType ty = do
+    ty' <- Uni.transformM f ty
     
-
-
--- *
--- |  Internal
--- *
-
-
-globalPrefix :: Text
-globalPrefix = Text.pack "f"
-
-
-newSubst :: ID.Ident -> Int -> (ID.Ident, Sys.Subst)
-newSubst ident idx =
-    let
-        -- Finish
-        newBinder = freshIdent idx
-        subs'     = Map.singleton ident newBinder
-
-    in
-        (newBinder, subs')
+    enter ty'
+    
+    where
+        f (T.Generic ident) = do
+            (ident', _) <- Scope.referable (ID.ident2Path ident)
+            
+            return (T.Generic $ ID.getRef ident')
+        
+        f x = return x
 
 
 
-freshIdent :: Int -> ID.Ident
-freshIdent i =
-    let
-        idx = Text.pack $ show i
-    in
-        ID.Ident $ globalPrefix `Text.append` idx
+
 
 
