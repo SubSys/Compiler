@@ -66,6 +66,11 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 
+-- + HelmFlat AST Utils
+import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
+import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
+import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
+import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
 
 -- + HelmFlat AST Interface
 import qualified HLIR.HelmFlat.Data.Interface as HelmFlat
@@ -78,6 +83,8 @@ import qualified HLIR.HelmFlat.Feed.RustCG.Syntax        as Syntax
 import qualified HLIR.HelmFlat.Feed.RustCG.Init.Exprs    as Init
 import qualified HLIR.HelmFlat.Feed.RustCG.Init.Decls    as Init
 import qualified HLIR.HelmFlat.Feed.RustCG.Init.Variants as Init
+
+import qualified HLIR.HelmFlat.Feed.RustCG.Post.Finalize as Finalize
 -- *
 
 
@@ -90,7 +97,7 @@ toRustCG upstream = do
         Right payload ->
             return
                 $ Right
-                $ toRustCG' payload
+                $ Finalize.setFunRefs (TyEnv.genTypesEnv (I.getFunctions payload)) (toRustCG' payload)
 
 
 

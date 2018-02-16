@@ -1,5 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns #-}
+-- {-# LANGUAGE ViewPatterns #-}
 module GCIR.RustCG.Core.Index.Scope.Referable (
     referable
 ) where
@@ -95,10 +95,10 @@ import qualified GCIR.RustCG.Core.Index.Data.System as Sys
 
 
 referable :: ID.Path -> Sys.State (ID.Path, Sys.Subst)
-referable path@(ID.getRef -> ref) = do
+referable path = do
     s <- M.ask
 
-    case Map.lookup ref s of
+    case Map.lookup (ID.getRefAsIdent path) s of
         Nothing    -> return (path, Map.empty)
         Just ident -> return (ID.updatePathRef ident path, Map.empty)
 

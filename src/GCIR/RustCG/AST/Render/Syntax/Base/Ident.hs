@@ -107,7 +107,10 @@ renderPath (ID.Path segs) =
         |> Util.hcat
 
 renderSeg :: ID.Seg -> Doc
-renderSeg (ID.Seg prefix txt) = render txt
+renderSeg (ID.Seg (Just ID.Ref) txt) =
+    "&" <> render txt
+
+renderSeg (ID.Seg Nothing txt) = render txt
 
 
 -- | Internal Helpers

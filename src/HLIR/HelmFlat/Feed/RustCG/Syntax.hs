@@ -2,6 +2,8 @@
 module HLIR.HelmFlat.Feed.RustCG.Syntax (
     dropUnion
   , dropFunction
+  , dropType
+  , dropIdent
 ) where
 
 

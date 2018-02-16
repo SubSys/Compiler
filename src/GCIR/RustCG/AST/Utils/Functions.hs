@@ -99,8 +99,8 @@ import qualified GCIR.RustCG.AST.Utils.Ident as ID
 isRecFunction :: Decl.Function -> Bool
 isRecFunction (Decl.Function name _ _ _ body) =
     let
-        x1 = [ident | (S.Ref (ID.getRef -> ident)) <- Uni.universeBi body]
-        x2 = [ident | (S.FunCall (ID.getRef -> ident) _) <- Uni.universeBi body]
+        x1 = [ident | (S.Ref (ID.getRefAsIdent -> ident)) <- Uni.universeBi body]
+        x2 = [ident | (S.FunCall (ID.getRefAsIdent -> ident) _) <- Uni.universeBi body]
     in
         name `List.elem` (x1 ++ x2)
 
@@ -114,8 +114,8 @@ isRecFunction _ = False
 isRecFunction' :: Decl.Function -> Maybe Decl.Function
 isRecFunction' fn@(Decl.Function name _ _ _ body) =
     let
-        x1 = [ident | (S.Ref (ID.getRef -> ident)) <- Uni.universeBi body]
-        x2 = [ident | (S.FunCall (ID.getRef -> ident) _) <- Uni.universeBi body]
+        x1 = [ident | (S.Ref (ID.getRefAsIdent -> ident)) <- Uni.universeBi body]
+        x2 = [ident | (S.FunCall (ID.getRefAsIdent -> ident) _) <- Uni.universeBi body]
     in
         if name `List.elem` (x1 ++ x2) then
             Just fn

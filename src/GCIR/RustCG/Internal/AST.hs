@@ -261,7 +261,8 @@ data Path = Path [Seg]
 data Seg = Seg (Maybe Prefix) Text
     deriving (Show, Eq, Ord, Data, Typeable)
 
-data Prefix = Prefix
+data Prefix
+    = Ref
     deriving (Show, Eq, Ord, Data, Typeable)
 
 

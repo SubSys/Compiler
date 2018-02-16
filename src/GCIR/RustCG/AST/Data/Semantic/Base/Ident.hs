@@ -5,7 +5,7 @@ module GCIR.RustCG.AST.Data.Semantic.Base.Ident (
     IR.Ident
   , IR.Path
   , IR.Seg
-  , IR.Prefix
+  , IR.Prefix(..)
 
   , pattern Ident
   , pattern Path

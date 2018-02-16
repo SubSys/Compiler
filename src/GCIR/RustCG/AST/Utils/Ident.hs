@@ -1,8 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns #-}
 module GCIR.RustCG.AST.Utils.Ident (
-    getRefSeg
-  , getRef
+    getRef
+  , getRefAsIdent
   , ident2Seg
   , updatePathRef
   , ident2Path
@@ -99,16 +98,11 @@ import qualified GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Dec
 
 -- | Get Path Referrer - Raw Seg
 --
-getRefSeg :: ID.Path -> ID.Seg
-getRefSeg (ID.Path segs) = List.last segs
+getRef :: ID.Path -> ID.Seg
+getRef (ID.Path segs) = List.last segs
 
-
--- | Get Path Referrer - As Ident
---
-
-
-getRef :: ID.Path -> ID.Ident
-getRef (getRefSeg -> (ID.Seg _ txt)) = ID.Ident txt
+getRefAsIdent :: ID.Path -> ID.Ident
+getRefAsIdent (ID.Path segs) = seg2Ident $ List.last segs
 
 
 ident2Seg :: ID.Ident -> ID.Seg
@@ -116,19 +110,33 @@ ident2Seg (ID.Ident txt) =
     ID.Seg Nothing txt
 
 updatePathRef :: ID.Ident -> ID.Path -> ID.Path
-updatePathRef ident (ID.Path segs)
-    | List.length segs >= 2 =
-        let inits = List.init segs
-        in
-            ID.Path (inits ++ [ident2Seg ident])
-    | otherwise =
-        ID.Path [ident2Seg ident]
+updatePathRef (ID.Ident txt) (ID.Path [ID.Seg prefix _]) =
+    ID.Path [ID.Seg prefix txt]
+
+updatePathRef (ID.Ident txt) (ID.Path segs) =
+    let
+        ns = List.init segs
+        (ID.Seg prefix _) = List.last segs
+        newRef = ID.Seg prefix txt
+    in
+        ID.Path (ns ++ [newRef])
+
+-- updatePathRef ident (ID.Path segs)
+--     | List.length segs >= 2 =
+--         let inits = List.init segs
+--         in
+--             ID.Path (inits ++ [ident2Seg ident])
+--     | otherwise =
+--         ID.Path [ident2Seg ident]
 
 
 ident2Path :: ID.Ident -> ID.Path
 ident2Path (ID.Ident txt) =
     ID.Path [ID.Seg Nothing txt]
 
+
+seg2Ident :: ID.Seg -> ID.Ident
+seg2Ident (ID.Seg _ x) = ID.Ident x
 
 
 
