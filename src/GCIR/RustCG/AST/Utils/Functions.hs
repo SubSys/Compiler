@@ -2,6 +2,7 @@
 {-# LANGUAGE ViewPatterns #-}
 module GCIR.RustCG.AST.Utils.Functions (
     isRecFunction
+  , isRecFunction'
 ) where
 
 
@@ -105,5 +106,22 @@ isRecFunction (Decl.Function name _ _ _ body) =
 
 isRecFunction _ = False
 
+
+-- | For ViewPatterns
+--
+
+
+isRecFunction' :: Decl.Function -> Maybe Decl.Function
+isRecFunction' fn@(Decl.Function name _ _ _ body) =
+    let
+        x1 = [ident | (S.Ref (ID.getRef -> ident)) <- Uni.universeBi body]
+        x2 = [ident | (S.FunCall (ID.getRef -> ident) _) <- Uni.universeBi body]
+    in
+        if name `List.elem` (x1 ++ x2) then
+            Just fn
+        else
+            Nothing
+
+isRecFunction' _ = Nothing
 
 
