@@ -182,10 +182,15 @@ buildModule deps node =
     let path = Node.path node
         name = Node.name node
     in do
-        result <- HelmSyntax.modulePipeline [] (Path.toFilePath path)
+        result <- HelmSyntax.modulePipeline deps (Path.toFilePath path)
         case result of
-            Left err      -> return $ Left $ formatError err
             Right payload -> return $ Right payload
+            Left err      -> return $ Left $ formatError err
+            -- Left err ->
+            --     error $ String.unlines
+            --         (map PP.prettyShow deps)
+            -- Left err ->
+            --     error $ PP.prettyShow node
 
 
 formatError :: Text -> Text

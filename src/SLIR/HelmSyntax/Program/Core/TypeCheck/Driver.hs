@@ -3,8 +3,6 @@
 module SLIR.HelmSyntax.Program.Core.TypeCheck.Driver (
     typeCheck
   , typeCheck'
-  , typeCheckDebug
-  , typeCheckDebug'
 ) where
 
 
@@ -143,27 +141,6 @@ typeCheck' (Interface.toModule' -> payload) =
         Right payload' ->
             Interface.toProgram' payload'
 
-
-
-
-typeCheckDebug :: IO (Either Text I.Program) -> IO (Either Text I.Program)
-typeCheckDebug upstream = do
-    result <- upstream
-    
-    case result of
-        Left err -> return $ Left err
-        Right payload ->
-            return
-                $ Right
-                $ typeCheckDebug' payload
-
-
-typeCheckDebug' :: I.Program -> I.Program
-typeCheckDebug' (Interface.toModule' -> payload) =
-    case Driver.typeCheckDebug' payload of
-        Left err -> error $ internalCompilerFailure err
-        Right payload' ->
-            Interface.toProgram' payload'
 
 
 

@@ -138,7 +138,7 @@ sortEvalOrder upstream = do
 
 sortEvalOrder' :: I.Module -> Either Text I.Module
 sortEvalOrder' payload@(I.getFunctions -> decls) =
-    case Syntax.sortEvalOrder decls of
+    case Syntax.sortEvalOrder' decls of
         Left err -> Left $ Text.pack $ PP.prettyShow err
         Right decls' ->
             Right

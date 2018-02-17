@@ -97,7 +97,9 @@ isSudoNS (Just (isSudoNS' -> True)) = True
 isSudoNS _ = False
 
 isSudoNS' :: ID.Namespace -> Bool
-isSudoNS' (ID.Namespace sudoNamespaceSegs) = True
+isSudoNS' (ID.Namespace ns) =
+    ns == sudoNamespaceSegs
+    
 -- isSudoNS' _ = False
 
 

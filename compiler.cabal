@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1d5ef245d311813ecdfde4bf588b4cf1d06cb194f43a32de3f04e0b1336862e8
+-- hash: 1391f8771afaaf9ff7eda854e55811b36d0d7d857f999f6104b7344440d465f0
 
 name:           Compiler
 version:        0.1.0.0
@@ -133,8 +133,6 @@ library
       Helm.Toolchain.Frontend.Extract.Driver
       Helm.Toolchain.Frontend.Ordering.Debug.DOT.Export
       Helm.Toolchain.Frontend.Ordering.Debug.Utils
-      Helm.Toolchain.Frontend.Ordering.Dev
-      Helm.Toolchain.Frontend.Ordering.Dev'
       Helm.Toolchain.Frontend.Ordering.Driver
       Helm.Toolchain.Frontend.Ordering.Validations
       Helm.Toolchain.Frontend.Ordering.Validations.Utils

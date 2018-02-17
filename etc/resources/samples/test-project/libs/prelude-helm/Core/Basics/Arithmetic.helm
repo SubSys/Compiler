@@ -61,7 +61,7 @@ import Helm.Compiler.Sudo.Native
 (//) left right =
     Helm.Compiler.Sudo.Native.intDiv left right
 
-
+plus : Int -> Int -> Int
 plus x y =
     x + y
 

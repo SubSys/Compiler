@@ -115,6 +115,7 @@ import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver as InitDeps
 import qualified SLIR.HelmSyntax.Module.Core.InfixResolve.Driver         as Driver -- TODO
 import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver               as Driver
 import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver            as Driver
+import qualified SLIR.HelmSyntax.Module.Core.Ordering.Driver             as Driver
 -- +++ Toolchain Specific
 import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver           as Driver
 import qualified SLIR.HelmSyntax.Module.System.Normalize.Driver          as Driver
@@ -125,6 +126,8 @@ import qualified SLIR.HelmSyntax.Program.Core.Desugar.Driver             as Driv
 import qualified SLIR.HelmSyntax.Program.Core.Lift.Driver                as Driver
 import qualified SLIR.HelmSyntax.Program.Core.TypeCheck.Driver           as Driver'
 import qualified SLIR.HelmSyntax.Program.Core.Uncurry.Driver             as Driver
+import qualified SLIR.HelmSyntax.Program.Core.Ordering.Driver            as Driver'
+import qualified SLIR.HelmSyntax.Program.Core.Index.Driver               as Driver
 -- *
 
 
@@ -150,6 +153,7 @@ modulePipeline deps filePath =
         |> Validate.userspaceLiteral
         |> Driver.initDeps deps
         |> Driver.typeCheck
+        |> Driver.initDeps deps
         |> Driver.normalize
 
 
@@ -158,9 +162,12 @@ programPipeline modules =
     modules
         |> map Interface.toProgram
         |> Interface.mergePrograms
+        |> Driver'.sortEvalOrder
+        |> Driver.index
         |> Driver.desugar
         |> Driver.lambdaLift
         |> Driver.uncurryTerms
         |> Driver'.typeCheck
+
 
 

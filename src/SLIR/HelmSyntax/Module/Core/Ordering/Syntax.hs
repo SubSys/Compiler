@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 module SLIR.HelmSyntax.Module.Core.Ordering.Syntax (
     sortEvalOrder
+  , sortEvalOrder'
 ) where
 
 
@@ -55,6 +56,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -126,8 +128,10 @@ sortEvalOrder input = M.runExcept (Uni.transformM f input)
         f decls@(initDecls -> graph) =
             case sortDecls graph of
                 Left err -> M.throwError err
-                Right xs ->
-                    return $ arrangeDeclsBy xs decls
+                Right xs -> do
+                    let ys = arrangeDeclsBy xs decls
+                    
+                    return ys
 
 
 
@@ -141,12 +145,11 @@ sortEvalOrder' decls@(initDecls -> graph) =
             Right $ arrangeDeclsBy xs decls
 
 
-
 arrangeDeclsBy :: [Text] -> [Decl.Function] -> [Decl.Function]
 arrangeDeclsBy xs decls = flatten $ map get xs
     where
         pred :: Text -> Decl.Function -> Bool
-        pred (ID.Ident_ -> ident) fn =
+        pred (fromText -> ident) fn =
             ident == ID.get fn
         
         get :: Text -> [Decl.Function]
@@ -176,11 +179,36 @@ initDecls decls =
                 freeVars = Scope.freeVars decl
                 
                 -- Finalize
-                node = (ID.getText ident, ID.getTexts freeVars)
+                node = (toText ident, (map toText) freeVars)
             in
                 node
 
 
 
+-- | Internal Helpers
+--
+
+
+toText :: ID.Ident -> Text
+toText (ID.Ident txt (Just (ID.Namespace segs)) _) =
+    Text.intercalate (Text.pack ".") $ segs ++ [txt]
+
+toText (ID.Ident txt Nothing _) =
+    txt
+
+fromText :: Text -> ID.Ident
+fromText (breakOn -> [x]) =
+    ID.Ident_ x
+    
+fromText (breakOn -> xs) =
+    let
+        segs = List.init xs
+        name = List.last xs
+    in
+        ID.Ident' name (Just $ ID.Namespace segs)
+
+
+breakOn =
+    Text.split ('.' ==)
 
 

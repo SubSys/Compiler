@@ -102,6 +102,8 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 import qualified SLIR.HelmSyntax.Module.Core.Parser.Driver    as Driver
 import qualified SLIR.HelmSyntax.Module.Core.TypeCheck.Driver as Driver
 
+import qualified SLIR.HelmSyntax.Module.System.Normalize.Driver as Driver
+
 -- + Local
 import qualified SLIR.HelmSyntax.Module.Core.Ordering.Driver as Driver
 -- *
@@ -130,7 +132,9 @@ upstream =
         sourceCode
             |> Driver.runModuleParser filePath
             |> Driver.typeCheck
+            |> Driver.normalize
             |> Driver.sortEvalOrder
+            -- |> Driver.typeCheck
 
 
 

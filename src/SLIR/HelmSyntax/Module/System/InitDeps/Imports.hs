@@ -59,6 +59,7 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 
 -- + Recursion Schemes & Related
@@ -143,15 +144,44 @@ processImport :: [ForeignModule]
               -> Either
                     Report.DependencyError
                     ([Decl.Function], [Decl.Union], [Decl.Infix])
+
+
 processImport _ (Header.ImportDecl (SudoFFI.isSudoNS' -> True) _ _) = Right ([], [], [])
+
+processImport mods (Header.ImportDecl name Nothing Nothing)
+    | Just payload <- getModule name mods =
+        let
+            -- Setup
+            -- exports = I.getExports payload
+            namespace = name
+
+            -- Finalize
+            fns = I.getFunctions payload
+                |> initFuns namespace
+                |> recordOriginalDeclNS name
+
+            uns = I.getUnions payload
+                |> initUnions namespace
+                |> recordOriginalUnionNS name
+
+            fxs = I.getFixities payload
+                |> namespaceOverride namespace
+                |> recordOriginalNamespace name
+
+        in
+            Right (fns, uns, fxs)
+
+
 
 processImport mods (Header.ImportDecl name Nothing (Just Header.Everything))
     | Just payload <- getModule name mods =
         let
             -- Finalize
             fns = I.getFunctions payload
+                |> stripFunsNamespace
                 |> recordOriginalDeclNS name
             uns = I.getUnions payload
+                |> stripUnsNamespace
                 |> recordOriginalUnionNS name
             fxs = I.getFixities payload
                 |> recordOriginalNamespace name
@@ -162,18 +192,18 @@ processImport mods (Header.ImportDecl name asName (Just entries))
     | Just payload <- getModule name mods =
         let
             -- Setup
-            exports = I.getExports payload
+            -- exports = I.getExports payload
             namespace = formatNSWithAsName name asName
 
             -- Finalize
             fns = I.getFunctions payload
-                |> declEntriesFilter exports
+                -- |> declEntriesFilter exports
                 |> declEntriesFilter entries
                 |> initFuns namespace
                 |> recordOriginalDeclNS name
 
             uns = I.getUnions payload
-                |> unionEntriesFilter exports
+                -- |> unionEntriesFilter exports
                 |> unionEntriesFilter entries
                 |> initUnions namespace
                 |> recordOriginalUnionNS name
@@ -372,4 +402,41 @@ recordOriginalNamespace ns = Uni.transformBi (f ns)
                 , Meta.overloadedTargetType = Nothing
                 , Meta.originalNamespace = Just ns
                 }
+
+
+
+-- When importing everything into the current namespace,
+-- remove original namespace.
+stripFunsNamespace :: [Decl.Function] -> [Decl.Function]
+stripFunsNamespace = map strip
+    where
+        strip :: Decl.Function -> Decl.Function
+        strip (Decl.Function (Etc.Binder (ID.Ident txt _ m) ty) args expr sig meta) =
+            Decl.Function
+                (Etc.Binder (ID.Ident txt Nothing m) ty)
+                args
+                expr
+                sig
+                meta
+
+
+stripUnsNamespace :: [Decl.Union] -> [Decl.Union]
+stripUnsNamespace = map strip
+    where
+        stripCons :: Decl.Constructor -> Decl.Constructor
+        stripCons (Decl.Constructor (ID.Ident txt _ m) args meta) =
+            Decl.Constructor
+                (ID.Ident txt Nothing m)
+                args
+                meta
+        
+        strip :: Decl.Union -> Decl.Union
+        strip (Decl.Union (ID.Ident txt _ m) as cs meta) =
+            Decl.Union
+                (ID.Ident txt Nothing m)
+                as
+                cs
+                meta
+        
+        
 

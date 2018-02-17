@@ -138,7 +138,7 @@ upstream =
             |> DevUtil.toProgram
             -- |> Driver.desugarP1
             |> Driver.uncurryTerms
-            |> Driver'.typeCheckDebug
+            |> Driver'.typeCheck
 
 
 

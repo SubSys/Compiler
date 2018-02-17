@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE PatternGuards #-}
 module SLIR.HelmSyntax.Module.System.Normalize.Syntax (
     normalize
 ) where
@@ -99,6 +100,11 @@ import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 
 
 
+{-# ANN module ("HLint: ignore" :: String) #-}
+
+
+
+
 
 normalize :: (Data.Data a, Data.Typeable a) => I.Module -> a -> a
 normalize payload = Uni.transformBi (normIdent payload)
@@ -107,20 +113,48 @@ normalize payload = Uni.transformBi (normIdent payload)
 
 
 
+-- normIdent :: I.Module -> ID.Ident -> ID.Ident
+-- normIdent payload ident
+--     | isLocal ident payload =
+--         namespaceOverride (I.getModuleName payload) ident
+-- 
+-- 
+--     | isExternal ident payload =
+        -- case lookupOriginalNamespace ident of
+        --     Nothing -> error $ Text.unpack $ Text.unlines
+        --         [ Text.pack "Internal compiler failure!"
+        --         , Text.pack "Failed to find the original namespace for:"
+        --         , Text.pack $ PP.prettyShow ident
+        --         , Text.pack "During normalization."
+        --         , Text.pack "\n"
+        --         , Text.pack "Current Module:"
+        --         , Text.pack $ PP.prettyShow (I.getModuleName payload)
+        --         ]
+        --     Just ns ->
+        --         namespaceOverride (I.getModuleName payload) ident
+-- 
+--     | otherwise =
+--         ident
+
+
 normIdent :: I.Module -> ID.Ident -> ID.Ident
 normIdent payload ident
     | isLocal ident payload =
         namespaceOverride (I.getModuleName payload) ident
-    | isExternal ident payload =
-        case lookupOriginalNamespace ident of
-            Nothing -> error $ Text.unpack $ Text.unlines
-                [ Text.pack "Internal compiler failure!"
-                , Text.pack "Failed to find the original namespace for:"
-                , Text.pack $ PP.prettyShow ident
-                , Text.pack "During normalization."
-                ]
-            Just ns ->
-                namespaceOverride (I.getModuleName payload) ident
+    
+    | (Just depIdent) <- isExternal ident payload =
+        case lookupOriginalNamespace depIdent of
+                Nothing -> error $ Text.unpack $ Text.unlines
+                    [ Text.pack "Internal compiler failure!"
+                    , Text.pack "Failed to find the original namespace for:"
+                    , Text.pack $ PP.prettyShow ident
+                    , Text.pack "During normalization."
+                    , Text.pack "\n"
+                    , Text.pack "Current Module:"
+                    , Text.pack $ PP.prettyShow (I.getModuleName payload)
+                    ]
+                Just ns ->
+                    namespaceOverride ns ident
     
     | otherwise =
         ident
@@ -145,16 +179,16 @@ isLocal name payload
 
 -- | 
 -- I.e. a dependency
-isExternal :: ID.Ident -> I.Module -> Bool
-isExternal name payload
-    |  name `List.elem` ID.gets funDeps
-    || name `List.elem` ID.gets unsDeps 
-    || name `List.elem` ID.gets cons    = True
-    | otherwise                         = False
-    where
-        unsDeps = I.getUnionDeps payload
-        funDeps = I.getFunctionDeps payload
-        cons = flatten $ map Union.getConstructors unsDeps
+-- isExternal :: ID.Ident -> I.Module -> Bool
+-- isExternal name payload
+--     |  name `List.elem` ID.gets funDeps
+--     || name `List.elem` ID.gets unsDeps 
+--     || name `List.elem` ID.gets cons    = True
+--     | otherwise                         = False
+--     where
+--         unsDeps = I.getUnionDeps payload
+--         funDeps = I.getFunctionDeps payload
+--         cons = flatten $ map Union.getConstructors unsDeps
 
 
 namespaceOverride :: (Data.Data a, Data.Typeable a) => ID.Namespace -> a -> a
@@ -167,6 +201,21 @@ namespaceOverride ns = Uni.transformBi f
 
 lookupOriginalNamespace :: ID.Ident -> Maybe ID.Namespace
 lookupOriginalNamespace (ID.Ident _ _ meta) = Meta.originalNamespace meta
+
+
+
+-- | 
+-- I.e. a dependency
+isExternal :: ID.Ident -> I.Module -> Maybe ID.Ident
+isExternal name payload
+    | Just x <- List.find (== name) (ID.gets funDeps) = Just x
+    | Just x <- List.find (== name) (ID.gets unsDeps) = Just x
+    | Just x <- List.find (== name) (ID.gets cons)    = Just x
+    | otherwise                                       = Nothing
+    where
+        unsDeps = I.getUnionDeps payload
+        funDeps = I.getFunctionDeps payload
+        cons = flatten $ map Union.getConstructors unsDeps
 
 
 
