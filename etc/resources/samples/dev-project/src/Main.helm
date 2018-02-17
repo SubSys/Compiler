@@ -1,0 +1,18 @@
+module Main exposing (..)
+
+import Core exposing (..)
+import Platform exposing (..)
+
+
+alpha : Float
+alpha =
+    1.0 + 2.0
+
+
+beta : Int
+beta =
+    1 + 2
+
+
+
+

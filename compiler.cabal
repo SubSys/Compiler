@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1391f8771afaaf9ff7eda854e55811b36d0d7d857f999f6104b7344440d465f0
+-- hash: 306cc433ca4cfb8353e16995d07f7aab9f3949f64d33b3c5217b18c64ac75490
 
 name:           Compiler
 version:        0.1.0.0
@@ -120,22 +120,23 @@ library
       GCIR.RustCG.Feed.Syntax.Driver
       GCIR.RustCG.Internal.AST
       GCIR.RustCG.Pipeline
-      Helm.Toolchain.Frontend.Compile.Dev
-      Helm.Toolchain.Frontend.Compile.Driver
-      Helm.Toolchain.Frontend.Compile.Pipeline
-      Helm.Toolchain.Frontend.Compile.Pipeline.HelmFlat
-      Helm.Toolchain.Frontend.Compile.Pipeline.HelmSyntax
-      Helm.Toolchain.Frontend.Compile.Pipeline.RustCG
-      Helm.Toolchain.Frontend.Crawl.Dev
-      Helm.Toolchain.Frontend.Crawl.Driver
-      Helm.Toolchain.Frontend.Data.Node
-      Helm.Toolchain.Frontend.Data.Report
-      Helm.Toolchain.Frontend.Extract.Driver
-      Helm.Toolchain.Frontend.Ordering.Debug.DOT.Export
-      Helm.Toolchain.Frontend.Ordering.Debug.Utils
-      Helm.Toolchain.Frontend.Ordering.Driver
-      Helm.Toolchain.Frontend.Ordering.Validations
-      Helm.Toolchain.Frontend.Ordering.Validations.Utils
+      Helm.Toolchain.Frontend.Pipeline.Compile.Dev
+      Helm.Toolchain.Frontend.Pipeline.Compile.Driver
+      Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline
+      Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline.HelmFlat
+      Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline.HelmSyntax
+      Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline.RustCG
+      Helm.Toolchain.Frontend.Pipeline.Crawl.Dev
+      Helm.Toolchain.Frontend.Pipeline.Crawl.Driver
+      Helm.Toolchain.Frontend.Pipeline.Data.Node
+      Helm.Toolchain.Frontend.Pipeline.Data.Report
+      Helm.Toolchain.Frontend.Pipeline.Driver
+      Helm.Toolchain.Frontend.Pipeline.Extract.Driver
+      Helm.Toolchain.Frontend.Pipeline.Ordering.Debug.DOT.Export
+      Helm.Toolchain.Frontend.Pipeline.Ordering.Debug.Utils
+      Helm.Toolchain.Frontend.Pipeline.Ordering.Driver
+      Helm.Toolchain.Frontend.Pipeline.Ordering.Validations
+      Helm.Toolchain.Frontend.Pipeline.Ordering.Validations.Utils
       HLIR.HelmFlat.AST.Data.Semantic.Base.Etc
       HLIR.HelmFlat.AST.Data.Semantic.Base.Ident
       HLIR.HelmFlat.AST.Data.Semantic.Base.Types

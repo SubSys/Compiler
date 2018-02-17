@@ -1,0 +1,58 @@
+module Core
+    exposing
+        ( (+)
+        , (-)
+        , (==)
+        , plus
+        )
+
+
+
+import Helm.Compiler.Sudo.Native
+
+
+(+) : Int -> Int -> Int
+(+) leftA rightA =
+    Helm.Compiler.Sudo.Native.plusInt leftA rightA
+
+
+(+) : Float -> Float -> Float
+(+) leftA rightA =
+    Helm.Compiler.Sudo.Native.plusFloat leftA rightA
+
+
+(-) : Int -> Int -> Int
+(-) leftA rightA =
+    Helm.Compiler.Sudo.Native.subInt leftA rightA
+
+
+(-) : Float -> Float -> Float
+(-) leftA rightA =
+    Helm.Compiler.Sudo.Native.subFloat leftA rightA
+
+
+
+(==) : Int -> Int -> Bool
+(==) leftA rightA =
+    Helm.Compiler.Sudo.Native.isEqInt leftA rightA
+
+(==) : Float -> Float -> Bool
+(==) leftA rightA =
+    Helm.Compiler.Sudo.Native.isEqFloat leftA rightA
+
+(==) : String -> String -> Bool
+(==) leftA rightA =
+    Helm.Compiler.Sudo.Native.isEqString leftA rightA
+
+(==) : Char -> Char -> Bool
+(==) leftA rightA =
+    Helm.Compiler.Sudo.Native.isEqChar leftA rightA
+
+plus x y =
+    x + y
+
+
+
+
+
+
