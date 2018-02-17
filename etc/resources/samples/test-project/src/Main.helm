@@ -1,0 +1,14 @@
+module Main exposing (..)
+
+
+-- import Core exposing (..)
+-- import Core.Debug as Debug
+
+import Core.Basics.Arithmetic
+
+
+type X = X
+
+test = Core.Basics.Arithmetic.plus 1 2
+
+

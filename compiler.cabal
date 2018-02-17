@@ -1,112 +1,387 @@
-name:                compiler
-version:             0.1.0.0
--- synopsis:
--- description:
-homepage:            https://github.com/githubuser/compiler#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2017 Author name here
-category:            Web
-build-type:          Simple
-extra-source-files:  README.md
-cabal-version:       >=1.10
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 1391f8771afaaf9ff7eda854e55811b36d0d7d857f999f6104b7344440d465f0
+
+name:           Compiler
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/githubuser/Compiler#readme>
+homepage:       https://github.com/githubuser/Compiler#readme
+bug-reports:    https://github.com/githubuser/Compiler/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2018 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/Compiler
 
 library
-    hs-source-dirs:    libs/prelude-hs
-                     , libs/helm-frontend
-                     , libs/helm-backend
-                     , libs/helm-system
-                     , libs/rust
-                     , libs/metal
-                     , libs/system
-                     , dev
-                     , libs/helm-build
-                     , libs/helm-core
-
-    build-depends:     base >=4.2 && <5
-                     , aeson >= 0.11
-                     , aeson-pretty < 0.8
-                     , ansi-terminal >= 0.6.2.1 && < 0.7
-                     , ansi-wl-pprint >= 0.6.7 && < 0.7
-                     , bytestring >= 0.9 && < 0.11
-                     , containers >= 0.3 && < 0.6
-                     , directory >= 1.0 && < 2.0
-                     , edit-distance >= 0.2 && < 0.3
-                     , filepath >= 1 && < 2.0
-                     , mtl >= 2.2 && < 3
-                     , pretty >= 1.0 && < 2.0
-                     , process
-                     , text >= 1 && < 2
-                     , union-find >= 0.2 && < 0.3
-                     , llvm-hs-pure
-                     , llvm-hs
-                     , binary
-                     
-                     -- late add?
-                     , semigroups
-                     
-                     , ghc-prim
-                     
-                     , megaparsec
-                     , transformers
-                     
-                     , QuickCheck
-                     
-                     , constraints
-                     
-                     , uniplate
-                     , lens
-                     , show-prettyprint
-                     , wl-pprint-text
-                     
-                     , hoopl
-                     , ilist
-                     , unordered-containers
-                     
-                     , bound
-                     , unbound-generics
-                     , derive
-                     
-                     , mmorph
-                     , recursion-schemes
-                     , unix
-                     
-                     , algebraic-graphs
-                     , hashable
-                       
-    -- exposed-modules:
-    --     SLIR.HelmSyntax.Core.TypeCheck'.Dev
-    
-
-    default-language:    Haskell2010
-
-
-
+  hs-source-dirs:
+      libs/prelude-hs
+      src
+  build-depends:
+      algebraic-graphs
+    , async
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , megaparsec
+    , mtl
+    , path
+    , path-io
+    , process
+    , recursion-schemes
+    , show-prettyprint
+    , stm
+    , text
+    , time
+    , transformers
+    , uniplate
+    , unix
+    , unordered-containers
+    , vector
+    , wl-pprint-text
+  exposed-modules:
+      Core
+      Core.Control.Flow
+      Core.Either.Util
+      Core.List.Util
+      Core.Text.Util
+      Core.Utils
+      Framework.Text.Parser
+      Framework.Text.Parser.Data.Util
+      Framework.Text.Parser.Prelude
+      Framework.Text.Parser.Prelude.Combinators.Layout
+      Framework.Text.Parser.Prelude.Combinators.Lexer
+      Framework.Text.Parser.Prelude.Combinators.Misc
+      Framework.Text.Parser.Prelude.Combinators.Symbol
+      Framework.Text.Parser.Prelude.Data.Parser
+      Framework.Text.Renderer
+      Framework.Text.Renderer.Prelude.Class
+      Framework.Text.Renderer.Prelude.Data
+      Framework.Text.Renderer.Prelude.Instances.Primitives
+      Framework.Text.Renderer.Prelude.Utils.Operators
+      Framework.Text.Renderer.Utils
+      Framework.Text.Renderer.Utils.Display
+      Proto.Class
+      Proto.Data
+      Proto.System.Console
+      Proto.Util
+      Proto.Util.List
+      Proto.Util.Misc
+      Proto.Util.Text
+      GCIR.RustCG.AST.Data.Semantic.Base.Etc
+      GCIR.RustCG.AST.Data.Semantic.Base.Ident
+      GCIR.RustCG.AST.Data.Semantic.Base.Literals
+      GCIR.RustCG.AST.Data.Semantic.Base.Types
+      GCIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns
+      GCIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt
+      GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums
+      GCIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants
+      GCIR.RustCG.AST.Data.Semantic.DeclLevel.Functions
+      GCIR.RustCG.AST.Render.Syntax
+      GCIR.RustCG.AST.Render.Syntax.Base.Etc
+      GCIR.RustCG.AST.Render.Syntax.Base.Ident
+      GCIR.RustCG.AST.Render.Syntax.Base.Literals
+      GCIR.RustCG.AST.Render.Syntax.Base.Types
+      GCIR.RustCG.AST.Render.Syntax.BlockLevel.Patterns
+      GCIR.RustCG.AST.Render.Syntax.BlockLevel.Stmt
+      GCIR.RustCG.AST.Render.Syntax.DeclLevel.Enums
+      GCIR.RustCG.AST.Render.Syntax.DeclLevel.Enums.Variants
+      GCIR.RustCG.AST.Render.Syntax.DeclLevel.Functions
+      GCIR.RustCG.AST.Utils.Functions
+      GCIR.RustCG.AST.Utils.Generic.SudoFFI
+      GCIR.RustCG.AST.Utils.Ident
+      GCIR.RustCG.Core.Index.Data.System
+      GCIR.RustCG.Core.Index.Driver
+      GCIR.RustCG.Core.Index.Scope.Bindable
+      GCIR.RustCG.Core.Index.Scope.Generic
+      GCIR.RustCG.Core.Index.Scope.Referable
+      GCIR.RustCG.Core.Index.Scope.Utils
+      GCIR.RustCG.Core.Index.Syntax.Base.Types
+      GCIR.RustCG.Core.Index.Syntax.BlockLevel.Patterns
+      GCIR.RustCG.Core.Index.Syntax.BlockLevel.Stmt
+      GCIR.RustCG.Core.Index.Syntax.DeclLevel.Enums
+      GCIR.RustCG.Core.Index.Syntax.DeclLevel.Functions
+      GCIR.RustCG.Data.Interface
+      GCIR.RustCG.Dev.DryRun
+      GCIR.RustCG.Feed.Syntax.Driver
+      GCIR.RustCG.Internal.AST
+      GCIR.RustCG.Pipeline
+      Helm.Toolchain.Frontend.Compile.Dev
+      Helm.Toolchain.Frontend.Compile.Driver
+      Helm.Toolchain.Frontend.Compile.Pipeline
+      Helm.Toolchain.Frontend.Compile.Pipeline.HelmFlat
+      Helm.Toolchain.Frontend.Compile.Pipeline.HelmSyntax
+      Helm.Toolchain.Frontend.Compile.Pipeline.RustCG
+      Helm.Toolchain.Frontend.Crawl.Dev
+      Helm.Toolchain.Frontend.Crawl.Driver
+      Helm.Toolchain.Frontend.Data.Node
+      Helm.Toolchain.Frontend.Data.Report
+      Helm.Toolchain.Frontend.Extract.Driver
+      Helm.Toolchain.Frontend.Ordering.Debug.DOT.Export
+      Helm.Toolchain.Frontend.Ordering.Debug.Utils
+      Helm.Toolchain.Frontend.Ordering.Driver
+      Helm.Toolchain.Frontend.Ordering.Validations
+      Helm.Toolchain.Frontend.Ordering.Validations.Utils
+      HLIR.HelmFlat.AST.Data.Semantic.Base.Etc
+      HLIR.HelmFlat.AST.Data.Semantic.Base.Ident
+      HLIR.HelmFlat.AST.Data.Semantic.Base.Types
+      HLIR.HelmFlat.AST.Data.Semantic.Base.Values
+      HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr
+      HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns
+      HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions
+      HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions
+      HLIR.HelmFlat.AST.Render.Syntax.Base.Etc
+      HLIR.HelmFlat.AST.Render.Syntax.Base.Ident
+      HLIR.HelmFlat.AST.Render.Syntax.Base.Types
+      HLIR.HelmFlat.AST.Render.Syntax.Base.Values
+      HLIR.HelmFlat.AST.Render.Syntax.Driver
+      HLIR.HelmFlat.AST.Render.Syntax.TermLevel.Expr
+      HLIR.HelmFlat.AST.Render.Syntax.TermLevel.Patterns
+      HLIR.HelmFlat.AST.Render.Syntax.TopLevel.Functions
+      HLIR.HelmFlat.AST.Render.Syntax.TopLevel.Unions
+      HLIR.HelmFlat.AST.Utils.Class.Ident
+      HLIR.HelmFlat.AST.Utils.Functions.Recursive
+      HLIR.HelmFlat.AST.Utils.Generic.Scope
+      HLIR.HelmFlat.AST.Utils.Generic.SudoFFI
+      HLIR.HelmFlat.AST.Utils.Generic.TypesEnv
+      HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers
+      HLIR.HelmFlat.AST.Utils.Misc.Fresh
+      HLIR.HelmFlat.AST.Utils.Types
+      HLIR.HelmFlat.AST.Utils.Unions
+      HLIR.HelmFlat.Data.Interface
+      HLIR.HelmFlat.Dev.DryRun
+      HLIR.HelmFlat.Feed.RustCG.Driver
+      HLIR.HelmFlat.Feed.RustCG.Init.Decls
+      HLIR.HelmFlat.Feed.RustCG.Init.Exprs
+      HLIR.HelmFlat.Feed.RustCG.Init.Variants
+      HLIR.HelmFlat.Feed.RustCG.Post.Finalize
+      HLIR.HelmFlat.Feed.RustCG.Syntax
+      HLIR.HelmFlat.Internal.AST
+      HLIR.HelmFlat.Pipeline
+      SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc
+      SLIR.HelmSyntax.AST.Data.Semantic.Base.Header
+      SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident
+      SLIR.HelmSyntax.AST.Data.Semantic.Base.Metadata
+      SLIR.HelmSyntax.AST.Data.Semantic.Base.Types
+      SLIR.HelmSyntax.AST.Data.Semantic.Base.Values
+      SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Expr
+      SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Patterns
+      SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities
+      SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions
+      SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions
+      SLIR.HelmSyntax.AST.Render.Syntax.Base.Etc
+      SLIR.HelmSyntax.AST.Render.Syntax.Base.Ident
+      SLIR.HelmSyntax.AST.Render.Syntax.Base.Types
+      SLIR.HelmSyntax.AST.Render.Syntax.Base.Values
+      SLIR.HelmSyntax.AST.Render.Syntax.Driver
+      SLIR.HelmSyntax.AST.Render.Syntax.TermLevel.Expr
+      SLIR.HelmSyntax.AST.Render.Syntax.TermLevel.Patterns
+      SLIR.HelmSyntax.AST.Render.Syntax.TopLevel.Fixities
+      SLIR.HelmSyntax.AST.Render.Syntax.TopLevel.Functions
+      SLIR.HelmSyntax.AST.Render.Syntax.TopLevel.Unions
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Binders
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Expr
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Fresh
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.Inline
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.Recursive
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Ident
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Special.Overloaded
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Special.Superposed
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Type
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Unions
+      SLIR.HelmSyntax.AST.Utils.Scope
+      SLIR.HelmSyntax.Dev.DryRun
+      SLIR.HelmSyntax.Internal.AST
+      SLIR.HelmSyntax.Module.Core.InfixResolve.Driver
+      SLIR.HelmSyntax.Module.Core.Ordering.Data.Node
+      SLIR.HelmSyntax.Module.Core.Ordering.Data.Report
+      SLIR.HelmSyntax.Module.Core.Ordering.Debug.Dot.Export
+      SLIR.HelmSyntax.Module.Core.Ordering.Dev
+      SLIR.HelmSyntax.Module.Core.Ordering.Driver
+      SLIR.HelmSyntax.Module.Core.Ordering.Syntax
+      SLIR.HelmSyntax.Module.Core.Ordering.Validations.Functions
+      SLIR.HelmSyntax.Module.Core.Ordering.Validations.Unions
+      SLIR.HelmSyntax.Module.Core.Parser.Dev
+      SLIR.HelmSyntax.Module.Core.Parser.Driver
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Base.Etc
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Base.Header
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Base.Ident
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Base.Metadata
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Base.Types
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Base.Values
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Header
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Header.ImportDecl
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Header.ModuleDecl
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.Program
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.TermLevel.Expr
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.TermLevel.Expr.Helpers
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.TermLevel.Patterns
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.TopLevel.Fixities
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.TopLevel.Functions
+      SLIR.HelmSyntax.Module.Core.Parser.Syntax.TopLevel.Unions
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Data.Report
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Dev
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Driver
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Data.Env
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Data.System
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Engine
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Engine.Update.Binders
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Init.Decl
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Init.Unions
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Internal.FreshIdents
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Syntax.Base
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Syntax.Constrain
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Syntax.Constrain.Overloaded
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Syntax.Scope
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Utils.General
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Inference.Utils.TypeSystem
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Solver.Data.Constraint
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Solver.Data.System
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Solver.Engine
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Solver.Unifier.Types
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Solver.Unifier.Types.Superposed
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Subst.Types
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Syntax.Base.Etc
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Syntax.Base.Metadata
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Syntax.Base.Values
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Syntax.TermLevel.Expr
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Syntax.TermLevel.Patterns
+      SLIR.HelmSyntax.Module.Core.TypeCheck.Syntax.TopLevel.Functions
+      SLIR.HelmSyntax.Module.Data.Interface
+      SLIR.HelmSyntax.Module.Dev.Labs.Alpha
+      SLIR.HelmSyntax.Module.Dev.Utils.Interface.ToProgram
+      SLIR.HelmSyntax.Module.System.Cache.Driver
+      SLIR.HelmSyntax.Module.System.InitDeps.Data.Report
+      SLIR.HelmSyntax.Module.System.InitDeps.Dev
+      SLIR.HelmSyntax.Module.System.InitDeps.Driver
+      SLIR.HelmSyntax.Module.System.InitDeps.Imports
+      SLIR.HelmSyntax.Module.System.Normalize.Dev
+      SLIR.HelmSyntax.Module.System.Normalize.Driver
+      SLIR.HelmSyntax.Module.System.Normalize.Syntax
+      SLIR.HelmSyntax.Module.Validity.UserspaceLiteral.Driver
+      SLIR.HelmSyntax.Pipeline
+      SLIR.HelmSyntax.Pipeline.Interface.ToProgram
+      SLIR.HelmSyntax.Program.Core.Desugar.Dev
+      SLIR.HelmSyntax.Program.Core.Desugar.Driver
+      SLIR.HelmSyntax.Program.Core.Desugar.P1.Pass
+      SLIR.HelmSyntax.Program.Core.Desugar.P2.Pass
+      SLIR.HelmSyntax.Program.Core.Desugar.P3.Data
+      SLIR.HelmSyntax.Program.Core.Desugar.P3.Overloaded.Index
+      SLIR.HelmSyntax.Program.Core.Desugar.P3.Pass
+      SLIR.HelmSyntax.Program.Core.Index.Data
+      SLIR.HelmSyntax.Program.Core.Index.Dev
+      SLIR.HelmSyntax.Program.Core.Index.Driver
+      SLIR.HelmSyntax.Program.Core.Index.Env.Types
+      SLIR.HelmSyntax.Program.Core.Index.Scope.Bindable
+      SLIR.HelmSyntax.Program.Core.Index.Scope.Referable
+      SLIR.HelmSyntax.Program.Core.Index.Scope.Utils
+      SLIR.HelmSyntax.Program.Core.Index.Setup.Decls
+      SLIR.HelmSyntax.Program.Core.Index.Syntax
+      SLIR.HelmSyntax.Program.Core.Lift.Data.Report
+      SLIR.HelmSyntax.Program.Core.Lift.Data.System
+      SLIR.HelmSyntax.Program.Core.Lift.Dev
+      SLIR.HelmSyntax.Program.Core.Lift.Driver
+      SLIR.HelmSyntax.Program.Core.Lift.Syntax
+      SLIR.HelmSyntax.Program.Core.Lift.Syntax.Helpers
+      SLIR.HelmSyntax.Program.Core.Lift.Utils.Scope
+      SLIR.HelmSyntax.Program.Core.Ordering.Driver
+      SLIR.HelmSyntax.Program.Core.TypeCheck.Dev
+      SLIR.HelmSyntax.Program.Core.TypeCheck.Driver
+      SLIR.HelmSyntax.Program.Core.TypeCheck.Interface.Conversion.ToModule
+      SLIR.HelmSyntax.Program.Core.TypeCheck.Interface.Conversion.ToProgram
+      SLIR.HelmSyntax.Program.Core.Uncurry.Auxiliary.ImpArgs
+      SLIR.HelmSyntax.Program.Core.Uncurry.Dev
+      SLIR.HelmSyntax.Program.Core.Uncurry.Driver
+      SLIR.HelmSyntax.Program.Core.Uncurry.Syntax
+      SLIR.HelmSyntax.Program.Data.Interface
+      SLIR.HelmSyntax.Program.Dev.Utils.Interface.ToModule
+      SLIR.HelmSyntax.Program.Feed.HelmFlat.Driver
+      SLIR.HelmSyntax.Program.Feed.HelmFlat.Syntax
+  other-modules:
+      Paths_Compiler
+  default-language: Haskell2010
 
 executable app
-    hs-source-dirs:      app
-    main-is:             Main.hs
+  main-is: Main.hs
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Compiler
+    , algebraic-graphs
+    , async
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , megaparsec
+    , mtl
+    , path
+    , path-io
+    , process
+    , recursion-schemes
+    , show-prettyprint
+    , stm
+    , text
+    , time
+    , transformers
+    , uniplate
+    , unix
+    , unordered-containers
+    , vector
+    , wl-pprint-text
+  other-modules:
+      Paths_Compiler
+  default-language: Haskell2010
 
-    ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-    build-depends:       base
-                     , compiler
-                     , aeson >= 0.11
-                     , aeson-pretty < 0.8
-                     , ansi-terminal >= 0.6.2.1 && < 0.7
-                     , ansi-wl-pprint >= 0.6.7 && < 0.7
-                     , bytestring >= 0.9 && < 0.11
-                     , containers >= 0.3 && < 0.6
-                     , directory >= 1.0 && < 2.0
-                     , edit-distance >= 0.2 && < 0.3
-                     , filemanip >= 0.3.5 && < 0.4
-                     , filepath >= 1 && < 2.0
-                     , language-glsl >= 0.0.2 && < 0.3
-                     , mtl >= 2.2 && < 3
-                     , parsec
-                     , pretty >= 1.0 && < 2.0
-                     , process
-                     , text >= 1 && < 2
-                     , union-find >= 0.2 && < 0.3
-    default-language:    Haskell2010
+test-suite Compiler-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Compiler
+    , algebraic-graphs
+    , async
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , megaparsec
+    , mtl
+    , path
+    , path-io
+    , process
+    , recursion-schemes
+    , show-prettyprint
+    , stm
+    , text
+    , time
+    , transformers
+    , uniplate
+    , unix
+    , unordered-containers
+    , vector
+    , wl-pprint-text
+  other-modules:
+      Paths_Compiler
+  default-language: Haskell2010

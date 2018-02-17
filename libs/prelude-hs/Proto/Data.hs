@@ -9,6 +9,7 @@ module Proto.Data (
     , Text
     , Integer
     , Double
+    , Float
 ) where
 
 import Data.Int
@@ -18,4 +19,4 @@ import Data.Either
 import Data.Tuple
 import Data.Char 
 import Data.Text (Text)
-import Prelude (Integer, Double)
+import Prelude (Integer, Double, Float)

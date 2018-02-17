@@ -4,9 +4,9 @@ module Core.Either.Util (
     , fromRight
 ) where
 
--- *
+
 import qualified Data.Either as E
--- *
+
 
 
 fromLeft :: a -> E.Either a b -> a

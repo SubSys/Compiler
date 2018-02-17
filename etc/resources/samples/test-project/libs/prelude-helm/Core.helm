@@ -1,0 +1,17 @@
+module Core exposing (..)
+
+
+import Core.Basics exposing (..)
+import Core.Char exposing (..)
+import Core.List exposing (..)
+import Core.Maybe exposing (..)
+import Core.Result exposing (..)
+import Core.String exposing (..)
+import Core.Tuple exposing (..)
+
+import Core.Platform exposing (..)
+import Core.Platform.Cmd exposing (..)
+import Core.Platform.Sub exposing (..)
+
+
+

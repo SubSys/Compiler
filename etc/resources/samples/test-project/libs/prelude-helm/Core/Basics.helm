@@ -1,0 +1,9 @@
+module Core.Basics exposing (..)
+
+
+
+import Core.Basics.Arithmetic exposing (..)
+import Core.Basics.Equality exposing (..)
+import Core.Basics.Comparison exposing (..)
+import Core.Basics.Booleans exposing (..)
+import Core.Basics.Utils.Functional exposing (..)

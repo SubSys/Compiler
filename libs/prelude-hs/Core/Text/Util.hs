@@ -4,9 +4,9 @@ module Core.Text.Util (
 ) where
 
 
--- *
+
 import qualified Data.Text as Text
--- *
+
 
 punctuate :: Text.Text -> [Text.Text] -> [Text.Text]
 punctuate _ []     = []
