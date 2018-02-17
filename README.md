@@ -405,6 +405,7 @@ Note that, the above representation may be significantly outdated.
 - General compiler:
     - Friendly error messages, especially including type inference errors.
     - Operator associativity resolution, and the like (though lots of parens work).
+    - Module reexports.
 - Rust Codegen:
     - recursive data types (easy)
     - recursive functions I.e. Tail Call Optimization (not so easy)
