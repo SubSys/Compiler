@@ -1,10 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Pipeline (
-    pipeline
-  , RustCG.toRustCG
-  , RustCG.toRustCG'
-  , I.Program
-) where
+module HLIR.HelmFlat.Core.Init.Dev where
 
 
 -- *
@@ -92,17 +87,73 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
 
--- + AST Feeds
-import qualified HLIR.HelmFlat.Feed.RustCG.Driver as RustCG
-
--- + HelmFlat Drivers
+-- + Local
 import qualified HLIR.HelmFlat.Core.Init.Driver as Driver
 -- *
 
 
-pipeline :: IO (Either Text I.Program) -> IO (Either Text I.Program)
-pipeline payload =
-    payload |> Driver.init
+
+
+
+{-# ANN module ("HLint: ignore" :: String) #-}
+
+
+
+
+
+
+inputFilePath
+    = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
+
+
+
+
+
+upstream =
+    let
+        filePath   = inputFilePath
+        sourceCode = SIO.readFile inputFilePath
+    in
+        sourceCode
+            |> HelmSyntax.pipeline [] filePath
+            |> HelmSyntax.toHelmFlat
+            |> Driver.init
+
+
+
+run = do
+    result <- upstream
+    case result of
+        Left  err     -> putStrLn $ Text.unpack err
+        Right payload -> run' payload
+
+
+
+run' payload = do
+    
+    
+    (TIO.putStrLn . Syntax.renderFunctions) fns
+
+    where
+        fns = I.getFunctions payload
+        uns = I.getUnions payload
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

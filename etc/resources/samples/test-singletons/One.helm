@@ -1,0 +1,56 @@
+module One exposing (..)
+
+
+import Helm.Compiler.Sudo.Native
+
+
+type Maybe a
+    = Nothing
+    | Just a
+
+type Either a b
+    = Left a
+    | Right b b
+
+
+type User = Anonymous | Named String
+
+type Visibility = All | Active | Completed
+
+
+
+gamma =
+    if True then
+        1
+    else if False then
+        2
+    else if False then
+        3
+    else
+        4
+
+
+
+
+alpha x =
+    case x of
+        Nothing -> 1
+        Just (Left _) -> 1
+        Just (Right y) -> y
+
+
+
+
+
+beta x =
+    if  | isNothing x
+        | isJust x
+        , isRight (getArg1 x)
+
+
+
+
+
+
+
+

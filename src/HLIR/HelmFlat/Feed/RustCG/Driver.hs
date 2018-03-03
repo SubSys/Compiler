@@ -80,8 +80,6 @@ import qualified GCIR.RustCG.Data.Interface   as RustCG
 
 -- + Local
 import qualified HLIR.HelmFlat.Feed.RustCG.Syntax        as Syntax
-import qualified HLIR.HelmFlat.Feed.RustCG.Init.Exprs    as Init
-import qualified HLIR.HelmFlat.Feed.RustCG.Init.Decls    as Init
 import qualified HLIR.HelmFlat.Feed.RustCG.Init.Variants as Init
 
 import qualified HLIR.HelmFlat.Feed.RustCG.Post.Finalize as Finalize
@@ -106,8 +104,6 @@ toRustCG' :: HelmFlat.Program -> RustCG.Program
 toRustCG' payload =
     let
         fns = HelmFlat.getFunctions payload
-            |> Init.updateSudoFFIBinders
-            |> Init.deFunBaseValues
             |> Init.setVariantPaths (I.getUnions payload)
             |> map Syntax.dropFunction
         uns = HelmFlat.getUnions payload

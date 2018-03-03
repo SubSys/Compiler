@@ -1,7 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns #-}
-module HLIR.HelmFlat.Feed.RustCG.Init.Decls (
-    updateSudoFFIBinders
+module HLIR.HelmFlat.Core.Init.Pass.References (
+    deFunBaseValues
 ) where
 
 
@@ -54,6 +53,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -66,6 +66,8 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 
+-- + HelmFlat AST Interface
+import qualified HLIR.HelmFlat.Data.Interface as I
 
 -- + HelmFlat AST Utils
 import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
@@ -88,14 +90,70 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- *
 
 
-updateSudoFFIBinders :: [Decl.Function] -> [Decl.Function]
-updateSudoFFIBinders = map updateSudoFFIBinder
+-- NOTE:
+-- * Deps on `HLIR.HelmFlat.Core.Init.Pass.SudoFFI.updateSudoFFIBinders`,
+--   because it expects all binders to have an associated type.
 
 
-updateSudoFFIBinder :: Decl.Function -> Decl.Function
-updateSudoFFIBinder decl@(SudoFFI.isSudoFFI -> True) =
-    Type.synthSudoFFIBinderTs decl
+
+deFunBaseValues :: [Decl.Function] -> [Decl.Function]
+deFunBaseValues decls =
+    let
+        tyEnv = TyEnv.genTypesEnv decls
+        fnEnv = genFunEnv decls
+    in
+        decls
+              |> Uni.transformBi (deFunBaseValues' fnEnv tyEnv)
+              |> Uni.transformBi (deFunParamRefs fnEnv tyEnv)
 
 
-updateSudoFFIBinder x = x
+deFunBaseValues' :: [ID.Ident] -> Map.Map ID.Ident T.Type -> E.Expr -> E.Expr
+deFunBaseValues' fnEnv tyEnv expr@(E.FunCall ident [])
+    | Nothing <- Map.lookup ident tyEnv =
+        error $ Text.unpack $ Text.unlines
+            [ Text.pack "Unknown base-type: "
+            , Text.pack $ PP.prettyShow ident
+            ]
+
+deFunBaseValues' fnEnv tyEnv expr@(E.FunCall ident [])
+    | True <- TyEnv.isBaseType ident tyEnv
+    , False <- ident `List.elem` fnEnv =
+        E.Ref ident
+    | otherwise =
+        expr
+
+deFunBaseValues' _ _ x = x
+
+
+
+deFunParamRefs fnEnv tyEnv (E.FunCall ident args)
+    | Just ty <- Map.lookup ident tyEnv =
+        let inputTypes = Type.getInputTypes ty
+        in 
+            E.FunCall ident (checkArgs inputTypes args)
+
+deFunParamRefs _ _ x = x
+
+checkArgs :: [T.Type] -> [E.Expr] -> [E.Expr]
+checkArgs = List.zipWith f 
+    where
+        f :: T.Type -> E.Expr -> E.Expr
+        f t@T.Arr{} (E.FunCall ident []) =
+            E.Ref ident
+        
+        f _ e = e
+
+
+
+
+-- | Setup Stuff
+--
+
+-- | Env for solving "Is this a function reference, or call?"
+--
+genFunEnv :: (Data.Data a, Data.Typeable a) => a -> [ID.Ident]
+genFunEnv input =
+    [ name | (Decl.Function (Etc.Binder name _) _ _ _) <- Uni.universeBi input ]
+
+
 

@@ -1,9 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Pipeline (
-    pipeline
-  , RustCG.toRustCG
-  , RustCG.toRustCG'
-  , I.Program
+{-# LANGUAGE ViewPatterns #-}
+module HLIR.HelmFlat.Core.Init.Pass.SudoFFI (
+    updateSudoFFIBinders
 ) where
 
 
@@ -56,6 +54,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -68,42 +67,38 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 
--- + Upstream IRs
-import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
-
--- + HelmFlat Interface
+-- + HelmFlat AST Interface
 import qualified HLIR.HelmFlat.Data.Interface as I
 
--- + HelmFlat Renderer
-import qualified HLIR.HelmFlat.AST.Render.Syntax.Driver as Syntax
+-- + HelmFlat AST Utils
+import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
+import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
+import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
+import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
 
 -- + HelmFlat AST
 -- ++ Base
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc      as Etc
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident    as ID
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types    as T
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values   as V
-
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc           as Etc
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident         as ID
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types         as T
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values        as V
 -- ++ TermLevel
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
-
 -- ++ TopLevel
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
-
--- + AST Feeds
-import qualified HLIR.HelmFlat.Feed.RustCG.Driver as RustCG
-
--- + HelmFlat Drivers
-import qualified HLIR.HelmFlat.Core.Init.Driver as Driver
 -- *
 
 
-pipeline :: IO (Either Text I.Program) -> IO (Either Text I.Program)
-pipeline payload =
-    payload |> Driver.init
+updateSudoFFIBinders :: [Decl.Function] -> [Decl.Function]
+updateSudoFFIBinders = map updateSudoFFIBinder
 
 
+updateSudoFFIBinder :: Decl.Function -> Decl.Function
+updateSudoFFIBinder decl@(SudoFFI.isSudoFFI -> True) =
+    Type.synthSudoFFIBinderTs decl
 
+
+updateSudoFFIBinder x = x
 

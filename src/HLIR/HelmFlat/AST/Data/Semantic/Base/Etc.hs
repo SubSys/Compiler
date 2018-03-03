@@ -4,8 +4,6 @@ module HLIR.HelmFlat.AST.Data.Semantic.Base.Etc (
     IR.Binder
   , pattern Binder
   , pattern Binder_
-  -- , IR.Ref
-  -- , pattern Ref
 ) where
 
 
@@ -25,8 +23,3 @@ pattern Binder_ :: IR.Ident -> IR.Binder
 pattern Binder_ ident <- IR.Binder ident _
     where
         Binder_ ident = IR.Binder ident Nothing
-
-
-pattern Ref :: IR.Ident -> IR.Ref
-pattern Ref ident = IR.Ref ident
-

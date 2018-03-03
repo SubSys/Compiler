@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 306cc433ca4cfb8353e16995d07f7aab9f3949f64d33b3c5217b18c64ac75490
+-- hash: 8ff93c3ed8903d11a538a474bb087978c24e0cf21d83d61f94d0fe7e82ebdef3
 
 name:           Compiler
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   hs-source-dirs:
       libs/prelude-hs
+      dev
       src
   build-depends:
       algebraic-graphs
@@ -37,6 +38,7 @@ library
     , containers
     , directory
     , filepath
+    , htoml
     , megaparsec
     , mtl
     , path
@@ -120,6 +122,12 @@ library
       GCIR.RustCG.Feed.Syntax.Driver
       GCIR.RustCG.Internal.AST
       GCIR.RustCG.Pipeline
+      Helm.Toolchain.Frontend.Manifest.Data
+      Helm.Toolchain.Frontend.Manifest.Data.Report
+      Helm.Toolchain.Frontend.Manifest.Dev
+      Helm.Toolchain.Frontend.Manifest.File.Parse
+      Helm.Toolchain.Frontend.Manifest.File.Write
+      Helm.Toolchain.Frontend.Manifest.Project.Template
       Helm.Toolchain.Frontend.Pipeline.Compile.Dev
       Helm.Toolchain.Frontend.Pipeline.Compile.Driver
       Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline
@@ -163,11 +171,13 @@ library
       HLIR.HelmFlat.AST.Utils.Misc.Fresh
       HLIR.HelmFlat.AST.Utils.Types
       HLIR.HelmFlat.AST.Utils.Unions
+      HLIR.HelmFlat.Core.Init.Dev
+      HLIR.HelmFlat.Core.Init.Driver
+      HLIR.HelmFlat.Core.Init.Pass.References
+      HLIR.HelmFlat.Core.Init.Pass.SudoFFI
       HLIR.HelmFlat.Data.Interface
       HLIR.HelmFlat.Dev.DryRun
       HLIR.HelmFlat.Feed.RustCG.Driver
-      HLIR.HelmFlat.Feed.RustCG.Init.Decls
-      HLIR.HelmFlat.Feed.RustCG.Init.Exprs
       HLIR.HelmFlat.Feed.RustCG.Init.Variants
       HLIR.HelmFlat.Feed.RustCG.Post.Finalize
       HLIR.HelmFlat.Feed.RustCG.Syntax
@@ -332,6 +342,7 @@ executable app
     , containers
     , directory
     , filepath
+    , htoml
     , megaparsec
     , mtl
     , path
@@ -367,6 +378,7 @@ test-suite Compiler-test
     , containers
     , directory
     , filepath
+    , htoml
     , megaparsec
     , mtl
     , path

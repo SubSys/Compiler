@@ -135,19 +135,22 @@ renderExpr f (E.Case expr caseAlts) =
         renderAlt = P.renderCaseAlt (renderExpr f)
 
 
+renderExpr f (E.Ref name) =
+    "&" <> ID.renderIdent name
+
 
 renderExpr f (E.FunCall name []) =
     let
         name' = ID.renderIdent name
     in
-        name'
+        name' <> emptyCallParens
 
 
 renderExpr f (E.ConCall name []) =
     let
         name' = ID.renderIdent name
     in
-        name'
+        name' <> emptyCallParens
 
 
 
@@ -182,6 +185,7 @@ renderExpr f (E.ConCall name args) =
 -- | Internal Helpers
 
 callParens x = "｟" <+> x <+> "｠"
+emptyCallParens = "｟｠"
 
 
 

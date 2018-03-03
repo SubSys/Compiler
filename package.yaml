@@ -43,11 +43,13 @@ dependencies:
 - uniplate
 - algebraic-graphs
 - process
+- htoml
 
 
 library:
   source-dirs:
       - libs/prelude-hs
+      - dev
       - src
 
 executables:

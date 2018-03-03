@@ -1,6 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.RustCG.Init.Exprs (
-    deFunBaseValues
+{-# LANGUAGE ViewPatterns #-}
+module HLIR.HelmFlat.Core.Init.Driver (
+    init
+  , init'
 ) where
 
 
@@ -66,6 +68,8 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 
+-- + HelmFlat AST Interface
+import qualified HLIR.HelmFlat.Data.Interface as I
 
 -- + HelmFlat AST Utils
 import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
@@ -85,70 +89,33 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
 -- ++ TopLevel
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
+
+-- + Local
+import qualified HLIR.HelmFlat.Core.Init.Pass.References as RefPass
+import qualified HLIR.HelmFlat.Core.Init.Pass.SudoFFI    as SudoFFIPass
 -- *
 
 
 
-deFunBaseValues :: [Decl.Function] -> [Decl.Function]
-deFunBaseValues decls =
-    let
-        tyEnv = TyEnv.genTypesEnv decls
-        fnEnv = genFunEnv decls
-    in
-        decls
-              |> Uni.transformBi (deFunBaseValues' fnEnv tyEnv)
-              |> Uni.transformBi (deFunParamRefs fnEnv tyEnv)
+
+init :: IO (Either Text I.Program) -> IO (Either Text I.Program)
+init upstream = do
+    result <- upstream
+    
+    case result of
+        Left err -> return $ Left err
+        Right payload ->
+            return
+                $ Right
+                $ init' payload
 
 
-deFunBaseValues' :: [ID.Ident] -> Map.Map ID.Ident T.Type -> E.Expr -> E.Expr
-deFunBaseValues' fnEnv tyEnv expr@(E.FunCall ident [])
-    | Nothing <- Map.lookup ident tyEnv =
-        error $ Text.unpack $ Text.unlines
-            [ Text.pack "Unknown base-type: "
-            , Text.pack $ PP.prettyShow ident
-            ]
-
-deFunBaseValues' fnEnv tyEnv expr@(E.FunCall ident [])
-    | True <- TyEnv.isBaseType ident tyEnv
-    , False <- ident `List.elem` fnEnv =
-        E.Ref ident
-    | otherwise =
-        expr
-
-deFunBaseValues' _ _ x = x
+init' :: I.Program -> I.Program
+init' payload@(I.getFunctions -> decls) =
+    payload |> I.updateFunctions (passes decls)
 
 
-
-deFunParamRefs fnEnv tyEnv (E.FunCall ident args)
-    | Just ty <- Map.lookup ident tyEnv =
-        let inputTypes = Type.getInputTypes ty
-        in 
-            E.FunCall ident (checkArgs inputTypes args)
-
-deFunParamRefs _ _ x = x
-
-checkArgs :: [T.Type] -> [E.Expr] -> [E.Expr]
-checkArgs = List.zipWith f 
-    where
-        f :: T.Type -> E.Expr -> E.Expr
-        f t@T.Arr{} (E.FunCall ident []) =
-            E.Ref ident
-        
-        f _ e = e
-
-
-
-
--- | Setup Stuff
---
-
--- | Env for solving "Is this a function reference, or call?"
---
-genFunEnv :: (Data.Data a, Data.Typeable a) => a -> [ID.Ident]
-genFunEnv input =
-    [ name | (Decl.Function (Etc.Binder name _) _ _ _) <- Uni.universeBi input ]
-
-
-
-
+passes decls =
+    decls |> SudoFFIPass.updateSudoFFIBinders
+          |> RefPass.deFunBaseValues
 

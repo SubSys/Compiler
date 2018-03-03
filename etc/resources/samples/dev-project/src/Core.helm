@@ -9,6 +9,7 @@ module Core
 
 
 import Helm.Compiler.Sudo.Native
+import Core.Native
 
 
 (+) : Int -> Int -> Int
