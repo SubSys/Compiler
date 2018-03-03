@@ -1,6 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
-    setFunRefs
+module CGIR.RustCG.AST.Render.Syntax (
+    renderFunctions
+  , renderEnums
+  , packDoc
 ) where
 
 
@@ -8,9 +10,8 @@ module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
-    ( return
+    (return
     , String
     , IO
     , show
@@ -23,6 +24,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -53,6 +55,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -61,15 +64,18 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
+-- + Frameworks
+import Framework.Text.Renderer
+import qualified Framework.Text.Renderer.Utils as Util
+import qualified Text.PrettyPrint.Leijen.Text  as P
+
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
--- + HelmFlat AST Utils
-import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
-import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
+
+-- + RustCG AST Interface
+import qualified CGIR.RustCG.Data.Interface as I
 
 -- + RustCG AST
 -- ++ Base
@@ -86,60 +92,34 @@ import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Dec
 import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified HLIR.HelmFlat.Feed.RustCG.Syntax as Syntax
+import qualified CGIR.RustCG.AST.Render.Syntax.DeclLevel.Enums     as Decl
+import qualified CGIR.RustCG.AST.Render.Syntax.DeclLevel.Functions as Decl
 -- *
 
 
 
-
--- | 
--- Essentially, if a value is referencing a function, we need to update the ref value with an `&` prefix.
---
-setFunRefs env = Uni.transformBi (setFunRefs' (convertTypesEnv env))
-
-setFunRefs' :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-setFunRefs' env (S.FunCall path args) =
-    S.FunCall path (map (checkArg env) args)
-
-setFunRefs' env x = x
+{-# ANN module ("HLint: ignore" :: String) #-}
 
 
-checkArg :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-checkArg env (S.Ref path) =
-    S.Ref (checkPath env path)
 
-checkArg _ s = s
+renderFunctions :: [Decl.Function] -> Text
+renderFunctions xs =
+    map (packDoc Decl.renderFunction) xs
+        |> Text.unlines
 
 
-checkPath :: Map.Map ID.Ident T.Type -> ID.Path -> ID.Path
-checkPath env (ID.Path [ID.Seg Nothing txt])
-    | Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        ID.Path [ID.Seg (Just ID.Ref) txt]
+renderEnums :: [Decl.Enum] -> Text
+renderEnums xs =
+    map (packDoc Decl.renderEnum) xs
+        |> Text.unlines
 
-checkPath env (ID.Path segs)
-    | (ID.Seg Nothing txt) <- ref
-    , Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        let ref' = ID.Seg (Just ID.Ref) txt
-        in
-            ID.Path (ns ++ [ref'])
+
+
+packDoc :: (a -> Doc) -> a -> Text
+packDoc f doc =
+    P.displayTStrict toSimpleDoc
     where
-        ref = List.last segs
-        ns  = List.init segs
-
-
-checkPath env p = p
-
-
--- | Internal Helpers
---
-
-convertTypesEnv env = Map.fromList $ map convert $ Map.toList env
-    where
-        convert (ident, ty) =
-            ( Syntax.dropIdent ident
-            , Syntax.dropType ty
-            )
-
+        toSimpleDoc = P.renderPretty 0.4 400 (f doc)
 
 
 

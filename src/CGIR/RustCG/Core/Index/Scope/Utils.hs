@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
-    setFunRefs
+module CGIR.RustCG.Core.Index.Scope.Utils (
+    withLocalSubst
 ) where
 
 
@@ -8,9 +8,8 @@ module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
-    ( return
+    (return
     , String
     , IO
     , show
@@ -23,6 +22,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -53,6 +53,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -65,11 +66,9 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 
--- + HelmFlat AST Utils
-import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
-import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
+
+-- + RustCG AST Interface
+import qualified CGIR.RustCG.Data.Interface as I
 
 -- + RustCG AST
 -- ++ Base
@@ -86,62 +85,16 @@ import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Dec
 import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified HLIR.HelmFlat.Feed.RustCG.Syntax as Syntax
+import qualified CGIR.RustCG.Core.Index.Data.System as Sys
 -- *
 
 
-
-
--- | 
--- Essentially, if a value is referencing a function, we need to update the ref value with an `&` prefix.
---
-setFunRefs env = Uni.transformBi (setFunRefs' (convertTypesEnv env))
-
-setFunRefs' :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-setFunRefs' env (S.FunCall path args) =
-    S.FunCall path (map (checkArg env) args)
-
-setFunRefs' env x = x
-
-
-checkArg :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-checkArg env (S.Ref path) =
-    S.Ref (checkPath env path)
-
-checkArg _ s = s
-
-
-checkPath :: Map.Map ID.Ident T.Type -> ID.Path -> ID.Path
-checkPath env (ID.Path [ID.Seg Nothing txt])
-    | Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        ID.Path [ID.Seg (Just ID.Ref) txt]
-
-checkPath env (ID.Path segs)
-    | (ID.Seg Nothing txt) <- ref
-    , Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        let ref' = ID.Seg (Just ID.Ref) txt
-        in
-            ID.Path (ns ++ [ref'])
+withLocalSubst :: Sys.Subst -> Sys.State a -> Sys.State a
+withLocalSubst s1 =
+    M.local modEnv
+    
     where
-        ref = List.last segs
-        ns  = List.init segs
-
-
-checkPath env p = p
-
-
--- | Internal Helpers
---
-
-convertTypesEnv env = Map.fromList $ map convert $ Map.toList env
-    where
-        convert (ident, ty) =
-            ( Syntax.dropIdent ident
-            , Syntax.dropType ty
-            )
-
-
-
-
+        
+        modEnv = Map.union s1
 
 

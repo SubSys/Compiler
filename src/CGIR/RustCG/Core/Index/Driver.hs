@@ -1,6 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
-    setFunRefs
+module CGIR.RustCG.Core.Index.Driver (
+    index
+  , index'
+  , globalize
 ) where
 
 
@@ -8,9 +10,8 @@ module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
-    ( return
+    (return
     , String
     , IO
     , show
@@ -23,6 +24,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -53,6 +55,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -65,11 +68,12 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 
--- + HelmFlat AST Utils
-import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
-import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
+
+-- + RustCG AST Interface
+import qualified CGIR.RustCG.Data.Interface as I
+
+-- + RustCG AST Utils
+import qualified CGIR.RustCG.AST.Utils.Functions as Decl
 
 -- + RustCG AST
 -- ++ Base
@@ -85,60 +89,55 @@ import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Dec
 import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
+-- + Local Prelude
+import CGIR.RustCG.Core.Index.Data.System (enter, binder)
+
 -- + Local
-import qualified HLIR.HelmFlat.Feed.RustCG.Syntax as Syntax
+import qualified CGIR.RustCG.Core.Index.Data.System                as Sys
+import qualified CGIR.RustCG.Core.Index.Syntax.DeclLevel.Functions as Decl
+import qualified CGIR.RustCG.Core.Index.Syntax.DeclLevel.Enums     as Decl
 -- *
 
 
 
-
--- | 
--- Essentially, if a value is referencing a function, we need to update the ref value with an `&` prefix.
---
-setFunRefs env = Uni.transformBi (setFunRefs' (convertTypesEnv env))
-
-setFunRefs' :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-setFunRefs' env (S.FunCall path args) =
-    S.FunCall path (map (checkArg env) args)
-
-setFunRefs' env x = x
-
-
-checkArg :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-checkArg env (S.Ref path) =
-    S.Ref (checkPath env path)
-
-checkArg _ s = s
+index :: IO (Either Text I.Program) -> IO (Either Text I.Program)
+index upstream = do
+    result <- upstream
+    
+    case result of
+        Left err      -> return $ Left err
+        Right payload ->
+            return
+                $ Right
+                $ index' payload
 
 
-checkPath :: Map.Map ID.Ident T.Type -> ID.Path -> ID.Path
-checkPath env (ID.Path [ID.Seg Nothing txt])
-    | Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        ID.Path [ID.Seg (Just ID.Ref) txt]
 
-checkPath env (ID.Path segs)
-    | (ID.Seg Nothing txt) <- ref
-    , Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        let ref' = ID.Seg (Just ID.Ref) txt
-        in
-            ID.Path (ns ++ [ref'])
-    where
-        ref = List.last segs
-        ns  = List.init segs
+index' :: I.Program -> I.Program
+index' payload =
+    let fns = globalize (I.getFunctions payload)
+        ens = map normEnum $ I.getEnums payload
+    in
+    
+        I.Program
+            { I.enums = ens
+            , I.functions = fns
+            }
 
 
-checkPath env p = p
 
 
--- | Internal Helpers
---
+-- *
+-- | Indexers
+-- *
 
-convertTypesEnv env = Map.fromList $ map convert $ Map.toList env
-    where
-        convert (ident, ty) =
-            ( Syntax.dropIdent ident
-            , Syntax.dropType ty
-            )
+globalize :: [Decl.Function] -> [Decl.Function]
+globalize decls =
+    fst $ Sys.runState (Decl.traverseDecls decls) 0 Map.empty
+
+normEnum :: Decl.Enum -> Decl.Enum
+normEnum enum =
+    fst $ Sys.runState (Decl.indexEnum enum) 0 Map.empty
 
 
 

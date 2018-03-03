@@ -76,7 +76,7 @@ import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
 import qualified HLIR.HelmFlat.Data.Interface as HelmFlat
 import qualified HLIR.HelmFlat.Data.Interface as I
 -- + RustCG AST Interface
-import qualified GCIR.RustCG.Data.Interface   as RustCG
+import qualified CGIR.RustCG.Data.Interface   as RustCG
 
 -- + Local
 import qualified HLIR.HelmFlat.Feed.RustCG.Syntax        as Syntax

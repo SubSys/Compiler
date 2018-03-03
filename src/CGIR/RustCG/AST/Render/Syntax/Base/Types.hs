@@ -1,6 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
-    setFunRefs
+{-# LANGUAGE OverloadedStrings #-}
+module CGIR.RustCG.AST.Render.Syntax.Base.Types (
+    renderType
 ) where
 
 
@@ -8,9 +9,8 @@ module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
-    ( return
+    (return
     , String
     , IO
     , show
@@ -23,6 +23,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -53,6 +54,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -61,15 +63,17 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
+-- + Frameworks
+import Framework.Text.Renderer
+import qualified Framework.Text.Renderer.Utils as Util
+
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
--- + HelmFlat AST Utils
-import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
-import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
+
+-- + RustCG AST Interface
+import qualified CGIR.RustCG.Data.Interface as I
 
 -- + RustCG AST
 -- ++ Base
@@ -86,59 +90,56 @@ import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Dec
 import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
 
 -- + Local
-import qualified HLIR.HelmFlat.Feed.RustCG.Syntax as Syntax
+import qualified CGIR.RustCG.AST.Render.Syntax.Base.Ident as ID
 -- *
 
 
 
-
--- | 
--- Essentially, if a value is referencing a function, we need to update the ref value with an `&` prefix.
---
-setFunRefs env = Uni.transformBi (setFunRefs' (convertTypesEnv env))
-
-setFunRefs' :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-setFunRefs' env (S.FunCall path args) =
-    S.FunCall path (map (checkArg env) args)
-
-setFunRefs' env x = x
+{-# ANN module ("HLint: ignore" :: String) #-}
 
 
-checkArg :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-checkArg env (S.Ref path) =
-    S.Ref (checkPath env path)
+renderType :: T.Type -> Doc
+renderType T.String = "&'static str"
+renderType T.Char   = "char"
+renderType T.Int    = "u32"
+renderType T.Float  = "f32"
+renderType T.Bool   = "bool"
 
-checkArg _ s = s
+renderType (T.Fn_ inTypes outType) =
+    let inTypes' = map renderType inTypes
+            |> Util.punctuate ","
+            |> Util.punctuate Util.space
+            |> Util.hcat
+            |> Util.parens
+        outType' = renderType outType
+    in
+        "&Fn" <> inTypes' <+> "->" <+> outType'
 
+renderType (T.Union path args) =
+    let path' = ID.renderPath path
+        args' = map renderType args
+            |> Util.punctuate ","
+            |> Util.punctuate Util.space
+            |> Util.hcat
+            |> Util.angles
+    in
+        path' <+> args'
 
-checkPath :: Map.Map ID.Ident T.Type -> ID.Path -> ID.Path
-checkPath env (ID.Path [ID.Seg Nothing txt])
-    | Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        ID.Path [ID.Seg (Just ID.Ref) txt]
+renderType (T.Generic ident) =
+    ID.renderIdent ident
 
-checkPath env (ID.Path segs)
-    | (ID.Seg Nothing txt) <- ref
-    , Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        let ref' = ID.Seg (Just ID.Ref) txt
-        in
-            ID.Path (ns ++ [ref'])
-    where
-        ref = List.last segs
-        ns  = List.init segs
+renderType (T.Box ty) =
+    "box" <+> renderType ty
 
+renderType (T.List ty) =
+    "List" <+> renderType ty
 
-checkPath env p = p
-
-
--- | Internal Helpers
---
-
-convertTypesEnv env = Map.fromList $ map convert $ Map.toList env
-    where
-        convert (ident, ty) =
-            ( Syntax.dropIdent ident
-            , Syntax.dropType ty
-            )
+renderType (T.Tuple types) =
+    map renderType types
+        |> Util.punctuate ","
+        |> Util.punctuate Util.space
+        |> Util.hcat
+        |> Util.parens
 
 
 

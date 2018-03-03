@@ -1,6 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
-    setFunRefs
+module CGIR.RustCG.AST.Utils.Ident (
+    getRef
+  , getRefAsIdent
+  , ident2Seg
+  , updatePathRef
+  , ident2Path
 ) where
 
 
@@ -8,9 +12,8 @@ module HLIR.HelmFlat.Feed.RustCG.Post.Finalize (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
-    ( return
+    (return
     , String
     , IO
     , show
@@ -23,6 +26,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -53,6 +57,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -61,15 +66,18 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
+-- + Frameworks
+import Framework.Text.Renderer
+import qualified Framework.Text.Renderer.Utils as Util
+import qualified Text.PrettyPrint.Leijen.Text  as P
+
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
--- + HelmFlat AST Utils
-import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
-import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
+
+-- + RustCG AST Interface
+import qualified CGIR.RustCG.Data.Interface as I
 
 -- + RustCG AST
 -- ++ Base
@@ -84,63 +92,51 @@ import qualified CGIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
 import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
 import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
 import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
-
--- + Local
-import qualified HLIR.HelmFlat.Feed.RustCG.Syntax as Syntax
 -- *
 
 
 
-
--- | 
--- Essentially, if a value is referencing a function, we need to update the ref value with an `&` prefix.
+-- | Get Path Referrer - Raw Seg
 --
-setFunRefs env = Uni.transformBi (setFunRefs' (convertTypesEnv env))
+getRef :: ID.Path -> ID.Seg
+getRef (ID.Path segs) = List.last segs
 
-setFunRefs' :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-setFunRefs' env (S.FunCall path args) =
-    S.FunCall path (map (checkArg env) args)
-
-setFunRefs' env x = x
+getRefAsIdent :: ID.Path -> ID.Ident
+getRefAsIdent (ID.Path segs) = seg2Ident $ List.last segs
 
 
-checkArg :: Map.Map ID.Ident T.Type -> S.Stmt -> S.Stmt
-checkArg env (S.Ref path) =
-    S.Ref (checkPath env path)
+ident2Seg :: ID.Ident -> ID.Seg
+ident2Seg (ID.Ident txt) =
+    ID.Seg Nothing txt
 
-checkArg _ s = s
+updatePathRef :: ID.Ident -> ID.Path -> ID.Path
+updatePathRef (ID.Ident txt) (ID.Path [ID.Seg prefix _]) =
+    ID.Path [ID.Seg prefix txt]
 
+updatePathRef (ID.Ident txt) (ID.Path segs) =
+    let
+        ns = List.init segs
+        (ID.Seg prefix _) = List.last segs
+        newRef = ID.Seg prefix txt
+    in
+        ID.Path (ns ++ [newRef])
 
-checkPath :: Map.Map ID.Ident T.Type -> ID.Path -> ID.Path
-checkPath env (ID.Path [ID.Seg Nothing txt])
-    | Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        ID.Path [ID.Seg (Just ID.Ref) txt]
-
-checkPath env (ID.Path segs)
-    | (ID.Seg Nothing txt) <- ref
-    , Just T.Fn{} <- Map.lookup (ID.Ident txt) env =
-        let ref' = ID.Seg (Just ID.Ref) txt
-        in
-            ID.Path (ns ++ [ref'])
-    where
-        ref = List.last segs
-        ns  = List.init segs
-
-
-checkPath env p = p
-
-
--- | Internal Helpers
---
-
-convertTypesEnv env = Map.fromList $ map convert $ Map.toList env
-    where
-        convert (ident, ty) =
-            ( Syntax.dropIdent ident
-            , Syntax.dropType ty
-            )
+-- updatePathRef ident (ID.Path segs)
+--     | List.length segs >= 2 =
+--         let inits = List.init segs
+--         in
+--             ID.Path (inits ++ [ident2Seg ident])
+--     | otherwise =
+--         ID.Path [ident2Seg ident]
 
 
+ident2Path :: ID.Ident -> ID.Path
+ident2Path (ID.Ident txt) =
+    ID.Path [ID.Seg Nothing txt]
+
+
+seg2Ident :: ID.Seg -> ID.Ident
+seg2Ident (ID.Seg _ x) = ID.Ident x
 
 
 
