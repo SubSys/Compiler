@@ -1,5 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.Cmm.Internal.AST where
+module LLIR.SPMD.Internal.AST where
 
 
 -- ~
@@ -81,9 +81,9 @@ import qualified Text.Show.Prettyprint as PP
     ## Value Declarations
 -}
 
-data FunctionDecl = Function Ident [Input] Output [Stmt]
+data Function = Function Type Ident [Input] Block
 
-data GlobalDecl = Global (Maybe StorageQualifier) Type Ident
+data Object = Object (Maybe StorageQualifier) Type Ident Stmt
 
 
 
@@ -93,9 +93,8 @@ data GlobalDecl = Global (Maybe StorageQualifier) Type Ident
     ## Type Declarations
 -}
 
-
 -- TODO: ....
-data Struct = Struct
+-- data Struct = Struct
 
 
 
@@ -103,7 +102,43 @@ data Struct = Struct
     # Block-Level Items
 -}
 
-data Stmt = Stmt
+newtype Block = Block [Stmt]
+
+
+data Stmt
+    = ExprStmt ExprStmt
+    | SelectionStmt SelectionStmt
+    | IterationStmt IterationStmt
+    | JumpStmt JumpStmt
+
+
+data ExprStmt
+    = Assignment Stmt Stmt
+    
+    | Reference Ident
+    | ConstructorCall Ident [Stmt]
+    | FunctionCall Ident [Stmt]
+    
+    | MethodAccess Ident Ident
+    | ArrayAccess Ident Index
+
+
+
+data SelectionStmt
+    = If [(Stmt, Block)] (Maybe Block)
+    | Switch Stmt [(Stmt, Block)] (Maybe Block)
+
+data IterationStmt
+    = For (Stmt, Stmt, Stmt) Block
+    | While Stmt Block
+
+data JumpStmt
+    = Continue
+    | Break
+    | Return (Maybe Stmt)
+    | Discard
+
+
 
 
 
@@ -196,8 +231,15 @@ data UnsignedIntegerSamplerType
 
 
 {-
-    # Qualifier Items
+    # Qualification Items
 -}
+
+data Qualification
+    = InvariantQualifier
+    | InterpolationQualifier
+    | PrecisionQualifier
+    | StorageQualifier
+    | ParameterQualifier
 
 
 {-
@@ -205,17 +247,22 @@ data UnsignedIntegerSamplerType
 -}
 
 data StorageQualifier
-    = ConstQualifier
-    | InQualifier (Maybe InterpolationQualifier)
-    | CentroidInQualifier (Maybe InterpolationQualifier)
-    | OutQualifier (Maybe InterpolationQualifier)
-    | CentroidOutQualifier (Maybe InterpolationQualifier)
-    | UniformQualifier
+    = ConstStorageQualifier
+    | InStorageQualifier (Maybe InterpolationQualifier)
+    | CentroidInStorageQualifier (Maybe InterpolationQualifier)
+    | OutStorageQualifier (Maybe InterpolationQualifier)
+    | CentroidOutStorageQualifier (Maybe InterpolationQualifier)
+    | UniformStorageQualifier
 
 
 {-
     ## Parameter Qualifier
 -}
+
+data ParameterQualifier
+    = InParameterQualifier
+    | OutParameterQualifier
+    | InoutParameterQualifier
 
 
 {-
@@ -241,16 +288,24 @@ data InterpolationQualifier
 {-
     ## Identifiers
 -}
-data Ident
+data Ident = Ident Text
 
 
 
 {-
     ## Etc.
 -}
-data Input
-data Output
 
+data Input = Input (Maybe ParameterQualifier) Type Ident
+
+
+
+
+{-
+    ## Misc. Aliases
+    > (For readability - Not Exposed)
+-}
+type Index = Int
 
 
 
