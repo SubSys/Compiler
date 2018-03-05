@@ -95,7 +95,7 @@ import qualified LLIR.SPMD.AST.Data.Base.Etc                   as S.Etc
 import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S.S
 -- ++ Decl/Top Level
 import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as S.Decl
-import qualified LLIR.SPMD.AST.Data.TopLevel.Objects           as S.Decl
+import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as S.Decl
 
 -- + Local
 -- *

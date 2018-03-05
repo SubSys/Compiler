@@ -61,13 +61,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Megaparsec & Related
-import qualified Text.Megaparsec.Char       as C
-import qualified Text.Megaparsec.Char.Lexer as L
-
--- + Frameworks
-import Framework.Text.Parser
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -94,7 +87,7 @@ import qualified LLIR.SPMD.AST.Data.Base.Etc                   as Etc
 import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S
 -- ++ Decl/Top Level
 import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as Decl
-import qualified LLIR.SPMD.AST.Data.TopLevel.Objects           as Decl
+import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as Decl
 -- *
 
 

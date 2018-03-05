@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module LLIR.SPMD.AST.Data.TopLevel.Objects (
+module LLIR.SPMD.AST.Data.TopLevel.Globals (
     IR.Object
   , IR.StorageQualifier
   , IR.InterpolationQualifier

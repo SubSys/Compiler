@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module LLIR.SPMD.AST.Render.Syntax.TopLevel.Objects (
+module LLIR.SPMD.AST.Render.Syntax.TopLevel.Globals (
     renderObject
   , renderSQ
   , renderIPQ
@@ -88,7 +88,7 @@ import qualified LLIR.SPMD.AST.Data.Base.Etc                   as Etc
 import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S
 -- ++ Decl/Top Level
 import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as Decl
-import qualified LLIR.SPMD.AST.Data.TopLevel.Objects           as Decl
+import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as Decl
 
 -- + Local
 import qualified LLIR.SPMD.AST.Render.Syntax.Base.Ident      as ID

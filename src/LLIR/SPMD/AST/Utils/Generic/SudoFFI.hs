@@ -1,7 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.SPMD.AST.Render.Syntax (
-    renderFunctions
-  , packDoc
+module LLIR.SPMD.AST.Utils.Generic.SudoFFI (
+    isSudoFFI
 ) where
 
 
@@ -64,11 +63,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-import qualified Text.PrettyPrint.Leijen.Text  as P
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -104,35 +98,14 @@ import qualified LLIR.SPMD.AST.Render.Syntax.TopLevel.Objects   as Decl
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+specialNamespace :: ID.Namespace
+specialNamespace =
+    ID.Namespace [Text.pack "Helm", Text.pack "Compiler", Text.pack "Sudo", Text.pack "Native"]
 
 
-
-renderFunctions :: [Decl.Function] -> Text
-renderFunctions xs =
-    map (packDoc Decl.renderFunction) xs
-        |> Text.unlines
-
-
-packDoc :: (a -> Doc) -> a -> Text
-packDoc f doc =
-    P.displayTStrict toSimpleDoc
+isSudoFFI :: (Data.Data a, Data.Typeable a) => a -> Bool
+isSudoFFI input = List.any pred [ ns | (ID.Ident _ (Just ns)) <- Uni.universeBi input ]
     where
-        toSimpleDoc = P.renderPretty 0.4 400 (f doc)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        pred :: ID.Namespace -> Bool
+        pred x =
+            x == specialNamespace
