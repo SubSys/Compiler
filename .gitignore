@@ -1,5 +1,6 @@
 .stack-work/
 Compiler.cabal
 *~
-./dev/
 .DS_Store
+local-dev-resources
+LocalDev

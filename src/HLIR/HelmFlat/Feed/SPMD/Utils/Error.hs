@@ -1,8 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE PatternGuards #-}
-module HLIR.HelmFlat.Feed.RustCG.Init.Variants (
-    setVariantPaths
+module HLIR.HelmFlat.Feed.SPMD.Utils.Error (
+    unsupported
 ) where
 
 
@@ -55,7 +53,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -68,77 +66,47 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 
-
--- + HelmFlat AST Interface
-import qualified HLIR.HelmFlat.Data.Interface as I
-
 -- + HelmFlat AST Utils
 import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
 import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
 import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
 import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
-import qualified HLIR.HelmFlat.AST.Utils.Unions                   as Union
 
 -- + HelmFlat AST
 -- ++ Base
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc           as Etc
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident         as ID
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types         as T
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values        as V
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc           as H.Etc
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident         as H.ID
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types         as H.T
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values        as H.V
 -- ++ TermLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as H.E
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as H.P
 -- ++ TopLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as H.Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as H.Decl
+
+-- + SPMD AST
+-- ++ Base
+import qualified LLIR.SPMD.AST.Data.Base.Ident                 as S.ID
+import qualified LLIR.SPMD.AST.Data.Base.Literals              as S.Lit
+import qualified LLIR.SPMD.AST.Data.Base.Types                 as S.T
+import qualified LLIR.SPMD.AST.Data.Base.Etc                   as S.Etc
+-- ++ Block Level
+import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S.S
+-- ++ Decl/Top Level
+import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as S.Decl
+import qualified LLIR.SPMD.AST.Data.TopLevel.Objects           as S.Decl
+
+-- + Local
 -- *
 
 
 
-setVariantPaths :: (Data.Data a, Data.Typeable a) => [Decl.Union] -> a -> a
-setVariantPaths uns input =
-    input   |> Uni.transformBi (exprConstrs uns)
-            |> Uni.transformBi (patrnConstrs uns)
+unsupported msg =
+    error $ String.unlines
+        [ "Unsupported literal value: "
+        , msg
+        , "\n"
+        , "Hint: strings/chars aren’t suitable for SPMD IR/GPU’s."
+        ]
 
-
--- | Internal Helpers
---
-
-exprConstrs :: [Decl.Union] -> E.Expr -> E.Expr
-exprConstrs uns (E.ConCall ident [])
-    | Just (unionName2NS -> unionName) <- Union.lookupUnionName ident uns =
-        E.ConCall (updateNamespace unionName ident) []
-
-exprConstrs uns (E.ConCall ident args)
-    | Just (unionName2NS -> unionName) <- Union.lookupUnionName ident uns =
-        E.ConCall (updateNamespace unionName ident) args
-
-
-exprConstrs _ e = e
-
-
-patrnConstrs :: [Decl.Union] -> P.Pattern -> P.Pattern
-patrnConstrs uns (P.Constr ident args)
-    | Just (unionName2NS -> unionName) <- Union.lookupUnionName ident uns =
-        P.Constr (updateNamespace unionName ident) args
-
-
-patrnConstrs _ p = p
-
-
-
-
-unionName2NS :: ID.Ident -> ID.Namespace
-unionName2NS (ID.Ident txt Nothing) =
-    ID.Namespace [txt]
-
-unionName2NS (ID.Ident txt (Just (ID.Namespace segs))) =
-    ID.Namespace (segs ++ [txt])
-
-updateNamespace :: ID.Namespace -> ID.Ident -> ID.Ident
-updateNamespace (ID.Namespace segs2) (ID.Ident txt (Just (ID.Namespace segs1))) =
-    ID.Ident txt (Just $ ID.Namespace (segs1 ++ segs2))
-
-updateNamespace ns (ID.Ident txt Nothing) =
-    ID.Ident txt (Just ns)
-    

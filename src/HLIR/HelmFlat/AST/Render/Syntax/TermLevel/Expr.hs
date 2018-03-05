@@ -118,10 +118,6 @@ renderExpr f (E.List xs) =
         |> Util.brackets
 
 
-renderExpr f (E.Constr name) =
-    ID.renderIdent name
-
-
 renderExpr f (E.Case expr caseAlts) =
     let expr'     = renderExpr f expr
         caseAlts' = map renderAlt caseAlts

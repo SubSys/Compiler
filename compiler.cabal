@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a2e4d84839a3b45aff6dd0a85e2a8de1c6bccb3964da86e4782764fec5a3c608
+-- hash: e0a1b7b34da7b0090491963beab5977398f9009cd6ced6353419283bed25266a
 
 name:           Compiler
 version:        0.1.0.0
@@ -84,7 +84,6 @@ library
       Proto.Util.List
       Proto.Util.Misc
       Proto.Util.Text
-      CGIR.GLSL.Internal.AST
       CGIR.RustCG.AST.Data.Semantic.Base.Etc
       CGIR.RustCG.AST.Data.Semantic.Base.Ident
       CGIR.RustCG.AST.Data.Semantic.Base.Literals
@@ -172,19 +171,48 @@ library
       HLIR.HelmFlat.AST.Utils.Misc.Fresh
       HLIR.HelmFlat.AST.Utils.Types
       HLIR.HelmFlat.AST.Utils.Unions
+      HLIR.HelmFlat.Core.Defunc.Driver
       HLIR.HelmFlat.Core.Init.Dev
       HLIR.HelmFlat.Core.Init.Driver
       HLIR.HelmFlat.Core.Init.Pass.References
       HLIR.HelmFlat.Core.Init.Pass.SudoFFI
+      HLIR.HelmFlat.Core.Inline.Driver
+      HLIR.HelmFlat.Core.Monomorph.Driver
       HLIR.HelmFlat.Data.Interface
       HLIR.HelmFlat.Dev.DryRun
       HLIR.HelmFlat.Feed.RustCG.Driver
       HLIR.HelmFlat.Feed.RustCG.Init.Variants
       HLIR.HelmFlat.Feed.RustCG.Post.Finalize
       HLIR.HelmFlat.Feed.RustCG.Syntax
+      HLIR.HelmFlat.Feed.SPMD.Driver
+      HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Etc
+      HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Ident
+      HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Literals
+      HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Types
+      HLIR.HelmFlat.Feed.SPMD.Syntax.BlockLevel.Stmt
+      HLIR.HelmFlat.Feed.SPMD.Syntax.TopLevel.Functions
+      HLIR.HelmFlat.Feed.SPMD.Utils.Error
       HLIR.HelmFlat.Internal.AST
+      HLIR.HelmFlat.LocalDev.DryRun
       HLIR.HelmFlat.Pipeline
-      LLIR.Cmm.Internal.AST
+      LLIR.SPMD.AST.Data.Base.Etc
+      LLIR.SPMD.AST.Data.Base.Ident
+      LLIR.SPMD.AST.Data.Base.Literals
+      LLIR.SPMD.AST.Data.Base.Types
+      LLIR.SPMD.AST.Data.BlockLevel.Stmt
+      LLIR.SPMD.AST.Data.TopLevel.Functions
+      LLIR.SPMD.AST.Data.TopLevel.Objects
+      LLIR.SPMD.AST.Render.Syntax
+      LLIR.SPMD.AST.Render.Syntax.Base.Etc
+      LLIR.SPMD.AST.Render.Syntax.Base.Ident
+      LLIR.SPMD.AST.Render.Syntax.Base.Literals
+      LLIR.SPMD.AST.Render.Syntax.Base.Types
+      LLIR.SPMD.AST.Render.Syntax.BlockLevel.Stmt
+      LLIR.SPMD.AST.Render.Syntax.TopLevel.Functions
+      LLIR.SPMD.AST.Render.Syntax.TopLevel.Objects
+      LLIR.SPMD.Data.Interface
+      LLIR.SPMD.Dev.DryRun
+      LLIR.SPMD.Internal.AST
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Header
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident

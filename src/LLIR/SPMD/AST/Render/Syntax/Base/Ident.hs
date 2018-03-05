@@ -1,12 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Pipeline (
-    pipeline
-  , RustCG.toRustCG
-  , RustCG.toRustCG'
-  , SPMD.toSPMD
-  , SPMD.toSPMD'
-  
-  , I.Program
+{-# LANGUAGE OverloadedStrings #-}
+module LLIR.SPMD.AST.Render.Syntax.Base.Ident (
+    renderIdent
+  , renderNamespace
 ) where
 
 
@@ -14,7 +10,6 @@ module HLIR.HelmFlat.Pipeline (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -29,6 +24,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -59,6 +55,8 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -67,47 +65,49 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
+-- + Frameworks
+import Framework.Text.Renderer
+import qualified Framework.Text.Renderer.Utils as Util
+
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
--- + Upstream IRs
-import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
 
--- + HelmFlat Interface
-import qualified HLIR.HelmFlat.Data.Interface as I
+-- + SPMD AST Interface
+import qualified LLIR.SPMD.Data.Interface as I
 
--- + HelmFlat Renderer
-import qualified HLIR.HelmFlat.AST.Render.Syntax.Driver as Syntax
-
--- + HelmFlat AST
+-- + SPMD AST
 -- ++ Base
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc      as Etc
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident    as ID
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types    as T
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values   as V
-
--- ++ TermLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
-
--- ++ TopLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
-
--- + AST Feeds
-import qualified HLIR.HelmFlat.Feed.RustCG.Driver as RustCG
-import qualified HLIR.HelmFlat.Feed.SPMD.Driver   as SPMD
-
--- + HelmFlat Drivers
-import qualified HLIR.HelmFlat.Core.Init.Driver as Driver
+import qualified LLIR.SPMD.AST.Data.Base.Ident                 as ID
+import qualified LLIR.SPMD.AST.Data.Base.Literals              as Lit
+import qualified LLIR.SPMD.AST.Data.Base.Types                 as T
+import qualified LLIR.SPMD.AST.Data.Base.Etc                   as Etc
+-- ++ Block Level
+import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S
+-- ++ Decl/Top Level
+import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as Decl
+import qualified LLIR.SPMD.AST.Data.TopLevel.Objects           as Decl
 -- *
 
 
-pipeline :: IO (Either Text I.Program) -> IO (Either Text I.Program)
-pipeline payload =
-    payload |> Driver.init
 
 
+{-# ANN module ("HLint: ignore" :: String) #-}
+
+
+
+
+renderIdent :: ID.Ident -> Doc
+renderIdent (ID.Ident name Nothing  ) = render name
+renderIdent (ID.Ident name (Just ns)) =
+    renderNamespace ns <> "." <> render name
+
+
+renderNamespace :: ID.Namespace -> Doc
+renderNamespace (ID.Namespace segs) =
+    map render segs
+        |> Util.punctuate "."
+        |> Util.hcat
 
 

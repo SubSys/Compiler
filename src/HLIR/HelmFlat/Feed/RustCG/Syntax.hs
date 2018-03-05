@@ -209,7 +209,7 @@ dropExpr (H.E.List xs) =
     R.S.List
         (map dropExpr xs)
 
-dropExpr (H.E.Constr ident) =
+dropExpr (H.E.ConCall ident []) =
     R.S.ConCall
         (toPath ident)
         []

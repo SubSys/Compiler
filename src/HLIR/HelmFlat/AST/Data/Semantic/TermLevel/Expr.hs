@@ -5,7 +5,6 @@ module HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr (
   , pattern Lit
   , pattern Tuple
   , pattern List
-  , pattern Constr
   , pattern Case
   , pattern FunCall
   , pattern ConCall
@@ -32,14 +31,6 @@ pattern Tuple items = IR.TupleExpr items
 pattern List :: [IR.Expr] -> IR.Expr
 pattern List xs = IR.ListExpr xs
 
-
--- |
--- A data constructor
---
-pattern Constr :: IR.Ident -> IR.Expr
-pattern Constr ident = IR.ConstrExpr ident
-
-
 -- |
 -- A case expression.
 --
@@ -53,7 +44,10 @@ pattern FunCall :: IR.Ident -> [IR.Expr] -> IR.Expr
 pattern FunCall name args = IR.FunCallExpr (IR.Ref name) args
 
 
--- | Uncurried version of value constructor (I.e. `E.Constr`) application
+-- | A data constructor
+-- Is Either:
+-- * An uncurried version of value constructor (I.e. `E.Constr`) application
+-- * A data constructor
 --
 pattern ConCall :: IR.Ident -> [IR.Expr] -> IR.Expr
 pattern ConCall name args = IR.ConCallExpr name args

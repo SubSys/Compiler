@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 module LLIR.SPMD.Internal.AST where
 
 
@@ -82,8 +83,10 @@ import qualified Text.Show.Prettyprint as PP
 -}
 
 data Function = Function Type Ident [Input] Block
+    deriving (Show, Eq, Ord, Data, Typeable)
 
-data Object = Object (Maybe StorageQualifier) Type Ident Stmt
+data Object = Object (Maybe StorageQualifier) Type Ident
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -103,6 +106,7 @@ data Object = Object (Maybe StorageQualifier) Type Ident Stmt
 -}
 
 newtype Block = Block [Stmt]
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data Stmt
@@ -110,34 +114,45 @@ data Stmt
     | SelectionStmt SelectionStmt
     | IterationStmt IterationStmt
     | JumpStmt JumpStmt
+    | InitLocalObject LocalObjectStmt
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data ExprStmt
-    = Assignment Stmt Stmt
+    = AssignmentStmt Stmt Stmt
     
-    | Reference Ident
-    | ConstructorCall Ident [Stmt]
-    | FunctionCall Ident [Stmt]
+    | ReferenceStmt Ident
+    | ConstructorCallStmt Ident [Stmt]
+    | FunctionCallStmt Ident [Stmt]
     
-    | MethodAccess Ident Ident
-    | ArrayAccess Ident Index
+    | MethodAccessStmt Ident Ident
+    | ArrayAccessStmt Ident Index
+    | LiteralStmt LiteralValue
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
 data SelectionStmt
-    = If [(Stmt, Block)] (Maybe Block)
-    | Switch Stmt [(Stmt, Block)] (Maybe Block)
+    = IfStmt [(Stmt, Block)] (Maybe Block)
+    | SwitchStmt Stmt [(Stmt, Block)] (Maybe Block)
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 data IterationStmt
-    = For (Stmt, Stmt, Stmt) Block
-    | While Stmt Block
+    = ForStmt (Stmt, Stmt, Stmt) Block
+    | WhileStmt Stmt Block
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 data JumpStmt
-    = Continue
-    | Break
-    | Return (Maybe Stmt)
-    | Discard
+    = ContinueStmt
+    | BreakStmt
+    | ReturnStmt (Maybe Stmt)
+    | DiscardStmt
+    deriving (Show, Eq, Ord, Data, Typeable)
 
+
+data LocalObjectStmt
+    = LocalObjectStmt Type Ident (Maybe Stmt)
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -152,6 +167,7 @@ data Type
     | FloatingPointSamplerType FloatingPointSamplerType
     | SignedIntegerSamplerType SignedIntegerSamplerType
     | UnsignedIntegerSamplerType UnsignedIntegerSamplerType
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data TransparentType
@@ -181,6 +197,7 @@ data TransparentType
     | Mat4x2Type
     | Mat4x3Type
     | Mat4x4Type
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data FloatingPointSamplerType
@@ -199,6 +216,7 @@ data FloatingPointSamplerType
     | SamplerBufferType
     | Sampler2DMSType
     | Sampler2DMSArrayType
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 data SignedIntegerSamplerType
@@ -212,6 +230,7 @@ data SignedIntegerSamplerType
     | IsamplerBufferType
     | Isampler2DMSType
     | Isampler2DMSArrayType
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -226,6 +245,7 @@ data UnsignedIntegerSamplerType
     | UsamplerBufferType
     | Usampler2DMSType
     | Usampler2DMSArrayType
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -233,13 +253,6 @@ data UnsignedIntegerSamplerType
 {-
     # Qualification Items
 -}
-
-data Qualification
-    = InvariantQualifier
-    | InterpolationQualifier
-    | PrecisionQualifier
-    | StorageQualifier
-    | ParameterQualifier
 
 
 {-
@@ -253,7 +266,7 @@ data StorageQualifier
     | OutStorageQualifier (Maybe InterpolationQualifier)
     | CentroidOutStorageQualifier (Maybe InterpolationQualifier)
     | UniformStorageQualifier
-
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 {-
     ## Parameter Qualifier
@@ -263,6 +276,7 @@ data ParameterQualifier
     = InParameterQualifier
     | OutParameterQualifier
     | InoutParameterQualifier
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 {-
@@ -272,6 +286,7 @@ data InterpolationQualifier
     = SmoothInterpolation
     | FlatInterpolation
     | NoperspectiveInterpolation
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 
@@ -286,10 +301,23 @@ data InterpolationQualifier
 
 
 {-
+    # Base Values
+-}
+data LiteralValue
+    = Float Double
+    | Int Int
+    | Bool Bool
+    deriving (Show, Eq, Ord, Data, Typeable)
+
+
+{-
     ## Identifiers
 -}
-data Ident = Ident Text
+data Ident = Ident Text (Maybe Namespace)
+    deriving (Show, Eq, Ord, Data, Typeable)
 
+data Namespace = Namespace [Text]
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 {-
@@ -297,6 +325,7 @@ data Ident = Ident Text
 -}
 
 data Input = Input (Maybe ParameterQualifier) Type Ident
+    deriving (Show, Eq, Ord, Data, Typeable)
 
 
 

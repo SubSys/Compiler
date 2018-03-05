@@ -231,8 +231,9 @@ dropExpr (HS.E.List xs _) =
         (map dropExpr xs)
 
 dropExpr (HS.E.Constr ident _) =
-    HF.E.Constr
+    HF.E.ConCall
         (dropIdent ident)
+        []
 
 
 dropExpr (HS.E.Case con alts _) =
