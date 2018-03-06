@@ -115,7 +115,7 @@ renderFunction' name args expr Nothing =
           |> Util.hcat
         expr' = S.renderBlock expr
     in
-        name <+> args' <+> "=" <$$> Util.indent 4 expr' <$$> Util.softline
+        name <+> args' <+> "=" <$$> expr' <$$> Util.softline
 
 
 renderFunction' name args expr (Just sig) =
@@ -127,7 +127,7 @@ renderFunction' name args expr (Just sig) =
         sig' = T.renderScheme sig
 
         typeDecl = name <+> ":" <+> sig'
-        exprDecl = name <+> args' <+> "=" <$$> Util.indent 4 expr'
+        exprDecl = name <+> args' <+> "=" <$$> expr'
     in
         typeDecl <$$> exprDecl <$$> Util.softline
 
