@@ -7,6 +7,7 @@ module HLIR.HelmFlat.AST.Data.Semantic.Base.Ident (
   , pattern Ident
   
   , pattern Ident'
+  , pattern Ident''
   , pattern Ident_
 ) where
 
@@ -38,6 +39,11 @@ pattern Ident' :: Pre.String -> IR.Ident
 pattern Ident' name <- IR.Ident (Text.unpack -> name) _
     where
         Ident' name = IR.Ident (Text.pack name) Nothing
+
+pattern Ident'' :: Pre.String -> Maybe IR.Namespace -> IR.Ident
+pattern Ident'' name ns <- IR.Ident (Text.unpack -> name) ns
+    where
+        Ident'' name ns = IR.Ident (Text.pack name) ns
 
 pattern Ident_ :: Text -> IR.Ident
 pattern Ident_ name <- IR.Ident name _

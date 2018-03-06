@@ -1,7 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns #-}
-module HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Types (
-    dropType
+module HLIR.HelmFlat.Feed.GLSL.Syntax.TopLevel.Functions (
+    dropFunction
 ) where
 
 
@@ -86,59 +85,45 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as H.P
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as H.Decl
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as H.Decl
 
--- + SPMD AST
+-- + GLSL AST
 -- ++ Base
-import qualified LLIR.SPMD.AST.Data.Base.Ident                 as S.ID
-import qualified LLIR.SPMD.AST.Data.Base.Literals              as S.Lit
-import qualified LLIR.SPMD.AST.Data.Base.Types                 as S.T
-import qualified LLIR.SPMD.AST.Data.Base.Etc                   as S.Etc
+import qualified CGIR.GLSL.AST.Data.Base.Ident                 as S.ID
+import qualified CGIR.GLSL.AST.Data.Base.Literals              as S.Lit
+import qualified CGIR.GLSL.AST.Data.Base.Types                 as S.T
+import qualified CGIR.GLSL.AST.Data.Base.Etc                   as S.Etc
 -- ++ Block Level
-import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S.S
+import qualified CGIR.GLSL.AST.Data.BlockLevel.Stmt            as S.S
 -- ++ Decl/Top Level
-import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as S.Decl
-import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as S.Decl
+import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as S.Decl
+import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as S.Decl
 
 -- + Local
-import qualified HLIR.HelmFlat.Feed.SPMD.Utils.Error as Error
+import qualified HLIR.HelmFlat.Feed.GLSL.Utils.Error as Error
 
-import qualified HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Ident as ID
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Etc        as Etc
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Ident      as ID
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Literals   as Lit
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Types      as T
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.BlockLevel.Stmt as S
 -- *
 
 
-
--- | Drop Types
---
-dropType :: H.T.Type -> S.T.Type
-dropType (builtin -> Just ty) = ty
-
-dropType H.T.Int    = S.T.Int
-dropType H.T.Float  = S.T.Float
-dropType H.T.Bool   = S.T.Bool
-
-dropType (H.T.List ty)         = error "Not yet implemented"
-dropType (H.T.Tuple ts)        = error "Not yet implemented"
-dropType (H.T.Union name args) = error "Not yet implemented"
-
-dropType H.T.String    = Error.unsupported "String"
-dropType H.T.Char      = Error.unsupported "Char"
-dropType (H.T.Var id') = Error.unsupported "Type variables. Internal error, should have been removed by now!"
-dropType ty@H.T.Arr{}  = Error.unsupported "Fn Types. Internal error, should have been removed by now!"
+dropFunction :: H.Decl.Function -> S.Decl.Function
+dropFunction (H.Decl.Function (H.Etc.Binder_ name) args body (Just scheme@(H.T.Forall [] ty))) =
+    S.Decl.Function
+        (T.dropType output)
+        (ID.dropIdent name)
+        (map binder2Input args)
+        (S.S.Block [S.dropExpr body])
+    
+    where
+        output = Type.getReturnType ty
 
 
-
--- TODO: ...
-builtin :: H.T.Type -> Maybe S.T.Type
-
--- Tuples to Vectors
-builtin (H.T.Tuple [H.T.Float, H.T.Float])                       = Just S.T.Vec2
-builtin (H.T.Tuple [H.T.Float, H.T.Float, H.T.Float])            = Just S.T.Vec3
-builtin (H.T.Tuple [H.T.Float, H.T.Float, H.T.Float, H.T.Float]) = Just S.T.Vec4
-
--- ?
-builtin (H.T.Union (H.ID.Ident' "Void") []) = Just S.T.Void
-
-builtin _ = Nothing
-
-
-
+binder2Input :: H.Etc.Binder -> S.Etc.Input
+binder2Input (H.Etc.Binder ident (Just ty)) =
+    S.Etc.Input
+        Nothing
+        (T.dropType ty)
+        (ID.dropIdent ident)
 

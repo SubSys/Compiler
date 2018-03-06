@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ViewPatterns #-}
-module HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Types (
-    dropType
+module HLIR.HelmFlat.Feed.GLSL.Syntax.BlockLevel.Stmt (
+    dropExpr
 ) where
 
 
@@ -86,59 +86,117 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as H.P
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as H.Decl
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as H.Decl
 
--- + SPMD AST
+-- + GLSL AST
 -- ++ Base
-import qualified LLIR.SPMD.AST.Data.Base.Ident                 as S.ID
-import qualified LLIR.SPMD.AST.Data.Base.Literals              as S.Lit
-import qualified LLIR.SPMD.AST.Data.Base.Types                 as S.T
-import qualified LLIR.SPMD.AST.Data.Base.Etc                   as S.Etc
+import qualified CGIR.GLSL.AST.Data.Base.Ident                 as S.ID
+import qualified CGIR.GLSL.AST.Data.Base.Literals              as S.Lit
+import qualified CGIR.GLSL.AST.Data.Base.Types                 as S.T
+import qualified CGIR.GLSL.AST.Data.Base.Etc                   as S.Etc
 -- ++ Block Level
-import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S.S
+import qualified CGIR.GLSL.AST.Data.BlockLevel.Stmt            as S.S
 -- ++ Decl/Top Level
-import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as S.Decl
-import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as S.Decl
+import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as S.Decl
+import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as S.Decl
 
 -- + Local
-import qualified HLIR.HelmFlat.Feed.SPMD.Utils.Error as Error
+import qualified HLIR.HelmFlat.Feed.GLSL.Utils.Error as Error
 
-import qualified HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Ident as ID
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Etc      as Etc
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Ident    as ID
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Literals as Lit
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Types    as T
 -- *
 
 
 
--- | Drop Types
---
-dropType :: H.T.Type -> S.T.Type
-dropType (builtin -> Just ty) = ty
 
-dropType H.T.Int    = S.T.Int
-dropType H.T.Float  = S.T.Float
-dropType H.T.Bool   = S.T.Bool
+dropExpr :: H.E.Expr -> S.S.Stmt
+dropExpr (builtin -> Just s) = s
 
-dropType (H.T.List ty)         = error "Not yet implemented"
-dropType (H.T.Tuple ts)        = error "Not yet implemented"
-dropType (H.T.Union name args) = error "Not yet implemented"
+dropExpr (H.E.Lit val) = S.S.Lit (Lit.dropLiteral val)
+dropExpr (H.E.Ref ident) = S.S.Ref (ID.dropIdent ident)
 
-dropType H.T.String    = Error.unsupported "String"
-dropType H.T.Char      = Error.unsupported "Char"
-dropType (H.T.Var id') = Error.unsupported "Type variables. Internal error, should have been removed by now!"
-dropType ty@H.T.Arr{}  = Error.unsupported "Fn Types. Internal error, should have been removed by now!"
+dropExpr (H.E.FunCall name args) =
+    S.S.FunCall
+        (ID.dropIdent name)
+        (map dropExpr args)
+
+dropExpr (H.E.Case caseExpr (isBoolPatterns -> Just (trueExpr, falseExpr))) =
+    S.S.If
+        [ ( dropExpr caseExpr
+          , S.S.Block
+            [ dropExpr trueExpr
+            ]
+          )
+        ]
+        (Just $ S.S.Block [dropExpr falseExpr])
+
+
+
+
+
+isBoolPatterns :: [H.P.CaseAlt] -> Maybe (H.E.Expr, H.E.Expr)
+isBoolPatterns [isTrueBranch -> Just trueExpr, isFalseBranch -> Just falseExpr] = Just (trueExpr, falseExpr)
+isBoolPatterns _ = Nothing
+
+
+isTrueBranch :: H.P.CaseAlt -> Maybe H.E.Expr
+isTrueBranch (H.P.CaseAlt (isBoolPatrn -> Just True) e) = Just e
+isTrueBranch _ = Nothing
+
+isFalseBranch :: H.P.CaseAlt -> Maybe H.E.Expr
+isFalseBranch (H.P.CaseAlt (isBoolPatrn -> Just False) e) = Just e
+isFalseBranch _ = Nothing
+
+isBoolPatrn :: H.P.Pattern -> Maybe Bool
+isBoolPatrn (H.P.Lit (H.V.Bool x)) = Just x
+isBoolPatrn _ = Nothing
+
 
 
 
 -- TODO: ...
-builtin :: H.T.Type -> Maybe S.T.Type
+builtin :: H.E.Expr -> Maybe S.S.Stmt
 
 -- Tuples to Vectors
-builtin (H.T.Tuple [H.T.Float, H.T.Float])                       = Just S.T.Vec2
-builtin (H.T.Tuple [H.T.Float, H.T.Float, H.T.Float])            = Just S.T.Vec3
-builtin (H.T.Tuple [H.T.Float, H.T.Float, H.T.Float, H.T.Float]) = Just S.T.Vec4
+builtin (H.E.Tuple
+    [ H.E.Lit (H.V.Float val1)
+    , H.E.Lit (H.V.Float val2)
+    ]) = Just $
+            S.S.FunCall
+                (S.ID.Ident' "vec2")
+                [ S.S.Lit $ S.Lit.Float val1
+                , S.S.Lit $ S.Lit.Float val2
+                ]
 
--- ?
-builtin (H.T.Union (H.ID.Ident' "Void") []) = Just S.T.Void
+builtin (H.E.Tuple
+    [ H.E.Lit (H.V.Float val1)
+    , H.E.Lit (H.V.Float val2)
+    , H.E.Lit (H.V.Float val3)
+    ]) = Just $
+            S.S.FunCall
+                (S.ID.Ident' "vec3")
+                [ S.S.Lit $ S.Lit.Float val1
+                , S.S.Lit $ S.Lit.Float val2
+                , S.S.Lit $ S.Lit.Float val3
+                ]
+
+builtin (H.E.Tuple
+    [ H.E.Lit (H.V.Float val1)
+    , H.E.Lit (H.V.Float val2)
+    , H.E.Lit (H.V.Float val3)
+    , H.E.Lit (H.V.Float val4)
+    ]) = Just $
+            S.S.FunCall
+                (S.ID.Ident' "vec4")
+                [ S.S.Lit $ S.Lit.Float val1
+                , S.S.Lit $ S.Lit.Float val2
+                , S.S.Lit $ S.Lit.Float val3
+                , S.S.Lit $ S.Lit.Float val4
+                ]
+
+
 
 builtin _ = Nothing
-
-
 
 

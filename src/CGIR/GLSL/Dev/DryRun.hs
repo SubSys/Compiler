@@ -1,15 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Pipeline (
-    pipeline
-  , RustCG.toRustCG
-  , RustCG.toRustCG'
-  , GLSL.toGLSL
-  , GLSL.toGLSL'
-  , SPMD.toSPMD
-  , SPMD.toSPMD'
-  
-  , I.Program
-) where
+module CGIR.GLSL.Dev.DryRun where
 
 
 -- *
@@ -31,6 +21,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -61,6 +52,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -73,44 +65,76 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 
+
+
 -- + Upstream IRs
 import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
+import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
 
--- + HelmFlat Interface
-import qualified HLIR.HelmFlat.Data.Interface as I
+-- + SPMD Syntax Renderer
+import qualified CGIR.GLSL.AST.Render.Syntax as Syntax
 
--- + HelmFlat Renderer
-import qualified HLIR.HelmFlat.AST.Render.Syntax.Driver as Syntax
+-- + GLSL AST Interface
+import qualified CGIR.GLSL.Data.Interface as I
 
--- + HelmFlat AST
+-- + GLSL AST
 -- ++ Base
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc      as Etc
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident    as ID
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types    as T
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values   as V
+import qualified CGIR.GLSL.AST.Data.Base.Ident                 as ID
+import qualified CGIR.GLSL.AST.Data.Base.Literals              as Lit
+import qualified CGIR.GLSL.AST.Data.Base.Types                 as T
+import qualified CGIR.GLSL.AST.Data.Base.Etc                   as Etc
+-- ++ Block Level
+import qualified CGIR.GLSL.AST.Data.BlockLevel.Stmt            as S
+-- ++ Decl/Top Level
+import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as Decl
+import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as Decl
 
--- ++ TermLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
-
--- ++ TopLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
-
--- + AST Feeds
-import qualified HLIR.HelmFlat.Feed.RustCG.Driver as RustCG
-import qualified HLIR.HelmFlat.Feed.SPMD.Driver   as SPMD
-import qualified HLIR.HelmFlat.Feed.GLSL.Driver   as GLSL
-
--- + HelmFlat Drivers
-import qualified HLIR.HelmFlat.Core.Init.Driver as Driver
+-- + SPMD Drivers
+import qualified CGIR.GLSL.Core.Index.Driver as Driver
 -- *
 
 
-pipeline :: IO (Either Text I.Program) -> IO (Either Text I.Program)
-pipeline payload =
-    payload |> Driver.init
+
+
+{-# ANN module ("HLint: ignore" :: String) #-}
 
 
 
+
+
+inputFilePath
+    = "/Users/colbyn/SubSystems/Compiler/etc/local-dev-resources/samples/Shader.helm"
+
+
+
+
+
+upstream =
+    let
+        filePath   = inputFilePath
+        sourceCode = SIO.readFile inputFilePath
+    in
+        sourceCode
+            |> HelmSyntax.pipeline [] filePath
+            |> HelmSyntax.toHelmFlat
+            |> HelmFlat.pipeline
+            |> HelmFlat.toGLSL
+            |> Driver.index
+
+
+
+run = do
+    result <- upstream
+    case result of
+        Left  err     -> putStrLn $ Text.unpack err
+        Right payload -> run' payload
+
+
+
+run' payload = do
+    
+    (TIO.putStrLn . Syntax.renderFunctions) fns
+
+    where
+        fns = I.getFunctions payload
 

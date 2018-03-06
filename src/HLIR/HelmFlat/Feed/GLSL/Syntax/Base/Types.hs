@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ViewPatterns #-}
-module HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Types (
+module HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Types (
     dropType
 ) where
 
@@ -86,22 +86,22 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as H.P
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as H.Decl
 import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as H.Decl
 
--- + SPMD AST
+-- + GLSL AST
 -- ++ Base
-import qualified LLIR.SPMD.AST.Data.Base.Ident                 as S.ID
-import qualified LLIR.SPMD.AST.Data.Base.Literals              as S.Lit
-import qualified LLIR.SPMD.AST.Data.Base.Types                 as S.T
-import qualified LLIR.SPMD.AST.Data.Base.Etc                   as S.Etc
+import qualified CGIR.GLSL.AST.Data.Base.Ident                 as S.ID
+import qualified CGIR.GLSL.AST.Data.Base.Literals              as S.Lit
+import qualified CGIR.GLSL.AST.Data.Base.Types                 as S.T
+import qualified CGIR.GLSL.AST.Data.Base.Etc                   as S.Etc
 -- ++ Block Level
-import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S.S
+import qualified CGIR.GLSL.AST.Data.BlockLevel.Stmt            as S.S
 -- ++ Decl/Top Level
-import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as S.Decl
-import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as S.Decl
+import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as S.Decl
+import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as S.Decl
 
 -- + Local
-import qualified HLIR.HelmFlat.Feed.SPMD.Utils.Error as Error
+import qualified HLIR.HelmFlat.Feed.GLSL.Utils.Error as Error
 
-import qualified HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Ident as ID
+import qualified HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Ident as ID
 -- *
 
 
