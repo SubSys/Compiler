@@ -66,6 +66,10 @@ import qualified Text.Show.Prettyprint as PP
 
 
 
+-- + Local Development & Debugging
+import qualified DevKit.Sample.Loader.CPU as SampleFile
+
+
 
 -- + Upstream IRs
 import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
@@ -102,23 +106,17 @@ import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 
 
 
-inputFilePath
-    = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
 
 
 
+upstream = do
+    filePath <- SampleFile.alphaFilePath
 
-
-upstream =
-    let
-        filePath   = inputFilePath
-        sourceCode = SIO.readFile inputFilePath
-    in
-        sourceCode
-            |> HelmSyntax.pipeline [] filePath
-            |> HelmSyntax.toHelmFlat
-            |> HelmFlat.pipeline
-            |> HelmFlat.toHelmLL
+    (SIO.readFile filePath)
+        |> HelmSyntax.pipeline [] filePath
+        |> HelmSyntax.toHelmFlat
+        |> HelmFlat.pipeline
+        |> HelmFlat.toHelmLL
 
 
 
