@@ -1,8 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module DevKit.Sample.Loader.CPU (
-    alpha
-  , beta
-  , gamma
+    alphaFilePath
+  , betaFilePath
+  , gammaFilePath
 ) where
 
 
@@ -104,18 +104,18 @@ inputFilePath filePath = do
         trim = List.filter (/= '\n')
 
 
-alpha :: IO String
-alpha =
+alphaFilePath :: IO String
+alphaFilePath =
     inputFilePath "/etc/resources/dev-samples/cpu/Alpha.helm"
 
 
-beta :: IO String
-beta =
+betaFilePath :: IO String
+betaFilePath =
     inputFilePath "/etc/resources/dev-samples/cpu/Beta.helm"
 
 
-gamma :: IO String
-gamma =
+gammaFilePath :: IO String
+gammaFilePath =
     inputFilePath "/etc/resources/dev-samples/cpu/Gamma.helm"
 
 

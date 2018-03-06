@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module DevKit.Sample.Loader.GPU (
-    alpha
+    alphaFilePath
 ) where
 
 -- *
@@ -101,8 +101,8 @@ inputFilePath filePath = do
         trim = List.filter (/= '\n')
 
 
-alpha :: IO String
-alpha =
+alphaFilePath :: IO String
+alphaFilePath =
     inputFilePath "/etc/resources/dev-samples/gpu/Alpha.helm"
 
 
