@@ -64,6 +64,8 @@ import qualified System.Process as SP
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
+-- + Local Development & Debugging
+import qualified DevKit.Sample.Loader.CPU as SampleFile
 
 
 -- + HelmSyntax Module Interface
@@ -125,23 +127,6 @@ import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
 
 
 
-getProjectRoot :: IO String
-getProjectRoot = do
-    SP.readCreateProcess (SP.shell "stack path --project-root" ) ""
-
-
-inputFilePath =
-    let
-        filePath = "/etc/resources/samples/test-parser/One.helm"
-    in do
-        projectDir <- getProjectRoot
-        
-        return $ trim projectDir ++ trim filePath
-    
-    where
-        trim = List.filter (/= '\n')
-
-
 -- NOTE:
 -- * You may use the below snippet to experiment with turning off/on various core passes (or plug-in new ones):
 -- 
@@ -158,7 +143,7 @@ inputFilePath =
 
 upstream = do
     -- Setup
-    filePath <- inputFilePath
+    filePath <- SampleFile.alphaFilePath
     let sourceCode = SIO.readFile filePath
     
     -- Run
