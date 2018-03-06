@@ -3,7 +3,4 @@ name = "dev-project"
 version = "0.0.1"
 sources = ["app", "src"]
 
-[sudo-ffi]
-sources = ["bootstrap/native/mod.rs"]
-
 

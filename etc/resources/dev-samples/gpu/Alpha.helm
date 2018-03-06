@@ -1,0 +1,55 @@
+module Alpha exposing (..)
+
+
+import Helm.Compiler.Sudo.Native
+
+
+
+(+) : Int -> Int -> Int
+(+) leftA rightA =
+    Helm.Compiler.Sudo.Native.plusInt leftA rightA
+
+(-) : Int -> Int -> Int
+(-) leftA rightA =
+    Helm.Compiler.Sudo.Native.subInt leftA rightA
+
+
+(==) : Int -> Int -> Bool
+(==) leftA rightA =
+    Helm.Compiler.Sudo.Native.isEqInt leftA rightA
+
+
+
+{-
+    # Builtin GLSL Stuff
+-}
+
+type Void = Void
+
+setFrameColor : (Float, Float, Float, Float) -> Void
+setFrameColor x =
+    Helm.Compiler.Sudo.Native.setFrameColor x
+
+
+
+
+
+
+
+{-
+    # Application
+-}
+
+
+alpha x y =
+    x + y
+
+
+
+beta : (Float, Float, Float, Float)
+beta =
+    (0.0, 0.0, 0.0, 0.0)
+
+
+main =
+    setFrameColor (1.0,0.0,1.0,1.0)

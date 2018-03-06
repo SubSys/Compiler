@@ -1,7 +1,9 @@
-module One exposing (..)
+module Beta exposing (..)
+
 
 
 import Helm.Compiler.Sudo.Native
+
 
 
 type Maybe a
@@ -22,22 +24,22 @@ type Visibility = All | Active | Completed
 
 (+) : Int -> Int -> Int
 (+) leftA rightA =
-    Helm.Compiler.Sudo.Native.plusInt leftA rightA
+    Helm.Compiler.Sudo.Native.plus leftA rightA
 
 
 (+) : Float -> Float -> Float
 (+) leftA rightA =
-    Helm.Compiler.Sudo.Native.plusFloat leftA rightA
+    Helm.Compiler.Sudo.Native.plus leftA rightA
 
 
 (-) : Int -> Int -> Int
 (-) leftA rightA =
-    Helm.Compiler.Sudo.Native.subInt leftA rightA
+    Helm.Compiler.Sudo.Native.sub leftA rightA
 
 
 (-) : Float -> Float -> Float
 (-) leftA rightA =
-    Helm.Compiler.Sudo.Native.subFloat leftA rightA
+    Helm.Compiler.Sudo.Native.sub leftA rightA
 
 
 
@@ -168,7 +170,7 @@ test = phi id
 test2 = test 0
 
 
-main = 0
+
 
 
 

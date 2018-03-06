@@ -1,7 +1,0 @@
-module Main
-
-import Prelude exposing (..)
-
-x = 0
-
-
