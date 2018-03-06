@@ -90,7 +90,7 @@ import qualified LLIR.SPMD.AST.Render.Syntax.Base.Literals      as Lit
 import qualified LLIR.SPMD.AST.Render.Syntax.Base.Types         as T
 import qualified LLIR.SPMD.AST.Render.Syntax.BlockLevel.Stmt    as S
 import qualified LLIR.SPMD.AST.Render.Syntax.TopLevel.Functions as Decl
-import qualified LLIR.SPMD.AST.Render.Syntax.TopLevel.Objects   as Decl
+import qualified LLIR.SPMD.AST.Render.Syntax.TopLevel.Globals   as Decl
 -- *
 
 

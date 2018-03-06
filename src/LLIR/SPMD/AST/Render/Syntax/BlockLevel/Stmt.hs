@@ -113,6 +113,7 @@ renderBlock (S.Block stmts) =
 
 
 renderStmt :: S.Stmt -> Doc
+renderStmt (S.Lit val) = Lit.renderLiteral val
 renderStmt (S.Ref ident) = ID.renderIdent ident
 renderStmt (S.Init ty name Nothing) =
     let ty' = T.renderType ty

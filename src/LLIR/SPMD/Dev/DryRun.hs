@@ -88,6 +88,9 @@ import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S
 -- ++ Decl/Top Level
 import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as Decl
 import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as Decl
+
+-- + SPMD Drivers
+import qualified LLIR.SPMD.Core.Index.Driver as Driver
 -- *
 
 
@@ -116,6 +119,7 @@ upstream =
             |> HelmSyntax.toHelmFlat
             |> HelmFlat.pipeline
             |> HelmFlat.toSPMD
+            |> Driver.index
 
 
 

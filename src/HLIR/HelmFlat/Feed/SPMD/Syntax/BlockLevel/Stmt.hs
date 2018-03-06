@@ -111,6 +111,8 @@ import qualified HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Types    as T
 
 
 dropExpr :: H.E.Expr -> S.S.Stmt
+dropExpr (builtin -> Just s) = s
+
 dropExpr (H.E.Lit val) = S.S.Lit (Lit.dropLiteral val)
 dropExpr (H.E.Ref ident) = S.S.Ref (ID.dropIdent ident)
 
@@ -133,9 +135,6 @@ dropExpr (H.E.Case caseExpr (isBoolPatterns -> Just (trueExpr, falseExpr))) =
 
 
 
-
-
-
 isBoolPatterns :: [H.P.CaseAlt] -> Maybe (H.E.Expr, H.E.Expr)
 isBoolPatterns [isTrueBranch -> Just trueExpr, isFalseBranch -> Just falseExpr] = Just (trueExpr, falseExpr)
 isBoolPatterns _ = Nothing
@@ -152,4 +151,52 @@ isFalseBranch _ = Nothing
 isBoolPatrn :: H.P.Pattern -> Maybe Bool
 isBoolPatrn (H.P.Lit (H.V.Bool x)) = Just x
 isBoolPatrn _ = Nothing
+
+
+
+
+-- TODO: ...
+builtin :: H.E.Expr -> Maybe S.S.Stmt
+
+-- Tuples to Vectors
+builtin (H.E.Tuple
+    [ H.E.Lit (H.V.Float val1)
+    , H.E.Lit (H.V.Float val2)
+    ]) = Just $
+            S.S.FunCall
+                (S.ID.Ident' "vec2")
+                [ S.S.Lit $ S.Lit.Float val1
+                , S.S.Lit $ S.Lit.Float val2
+                ]
+
+builtin (H.E.Tuple
+    [ H.E.Lit (H.V.Float val1)
+    , H.E.Lit (H.V.Float val2)
+    , H.E.Lit (H.V.Float val3)
+    ]) = Just $
+            S.S.FunCall
+                (S.ID.Ident' "vec3")
+                [ S.S.Lit $ S.Lit.Float val1
+                , S.S.Lit $ S.Lit.Float val2
+                , S.S.Lit $ S.Lit.Float val3
+                ]
+
+builtin (H.E.Tuple
+    [ H.E.Lit (H.V.Float val1)
+    , H.E.Lit (H.V.Float val2)
+    , H.E.Lit (H.V.Float val3)
+    , H.E.Lit (H.V.Float val4)
+    ]) = Just $
+            S.S.FunCall
+                (S.ID.Ident' "vec4")
+                [ S.S.Lit $ S.Lit.Float val1
+                , S.S.Lit $ S.Lit.Float val2
+                , S.S.Lit $ S.Lit.Float val3
+                , S.S.Lit $ S.Lit.Float val4
+                ]
+
+
+
+builtin _ = Nothing
+
 

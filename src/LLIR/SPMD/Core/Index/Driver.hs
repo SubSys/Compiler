@@ -1,7 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.SPMD.AST.Render.Syntax (
-    renderFunctions
-  , packDoc
+{-# LANGUAGE ViewPatterns #-}
+module LLIR.SPMD.Core.Index.Driver (
+    index
+  , index'
+  , globalize
 ) where
 
 
@@ -64,11 +66,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-import qualified Text.PrettyPrint.Leijen.Text  as P
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -76,6 +73,9 @@ import qualified Text.Show.Prettyprint as PP
 
 -- + SPMD AST Interface
 import qualified LLIR.SPMD.Data.Interface as I
+
+-- + SPMD AST Utils
+import qualified LLIR.SPMD.AST.Utils.Auxiliary.Functions as Fun
 
 -- + SPMD AST
 -- ++ Base
@@ -90,42 +90,38 @@ import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as Decl
 import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as Decl
 
 -- + Local
-import qualified LLIR.SPMD.AST.Render.Syntax.Base.Ident         as ID
-import qualified LLIR.SPMD.AST.Render.Syntax.Base.Etc           as Etc
-import qualified LLIR.SPMD.AST.Render.Syntax.Base.Literals      as Lit
-import qualified LLIR.SPMD.AST.Render.Syntax.Base.Types         as T
-import qualified LLIR.SPMD.AST.Render.Syntax.BlockLevel.Stmt    as S
-import qualified LLIR.SPMD.AST.Render.Syntax.TopLevel.Functions as Decl
-import qualified LLIR.SPMD.AST.Render.Syntax.TopLevel.Globals   as Decl
+import qualified LLIR.SPMD.Core.Index.Data.System               as Sys
+import qualified LLIR.SPMD.Core.Index.Syntax.TopLevel.Functions as Decl
 -- *
 
 
 
 
-
-
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-
-renderFunctions :: [Decl.Function] -> Text
-renderFunctions xs =
-    map (packDoc Decl.renderFunction) xs
-        |> Text.unlines
-
-
-packDoc :: (a -> Doc) -> a -> Text
-packDoc f doc =
-    P.displayTStrict toSimpleDoc
-    where
-        toSimpleDoc = P.renderPretty 0.4 400 (f doc)
+index :: IO (Either Text I.Program) -> IO (Either Text I.Program)
+index upstream = do
+    result <- upstream
+    
+    case result of
+        Left err -> return $ Left err
+        Right payload ->
+            return
+                $ Right
+                $ index' payload
 
 
 
+index' :: I.Program -> I.Program
+index' payload@(I.getFunctions -> decls) =
+    payload |> I.updateFunctions (globalize decls)
 
 
 
+-- | Indexers
+--
 
+globalize :: [Decl.Function] -> [Decl.Function]
+globalize decls =
+    fst $ Sys.runState (Decl.traverseDecls decls) 0 Map.empty
 
 
 

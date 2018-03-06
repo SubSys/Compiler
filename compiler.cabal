@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e0a1b7b34da7b0090491963beab5977398f9009cd6ced6353419283bed25266a
+-- hash: d59fe8f395939ff3cdcb32cb47a6992301968eaa0c774949ee080776af236a96
 
 name:           Compiler
 version:        0.1.0.0
@@ -201,7 +201,7 @@ library
       LLIR.SPMD.AST.Data.Base.Types
       LLIR.SPMD.AST.Data.BlockLevel.Stmt
       LLIR.SPMD.AST.Data.TopLevel.Functions
-      LLIR.SPMD.AST.Data.TopLevel.Objects
+      LLIR.SPMD.AST.Data.TopLevel.Globals
       LLIR.SPMD.AST.Render.Syntax
       LLIR.SPMD.AST.Render.Syntax.Base.Etc
       LLIR.SPMD.AST.Render.Syntax.Base.Ident
@@ -209,7 +209,17 @@ library
       LLIR.SPMD.AST.Render.Syntax.Base.Types
       LLIR.SPMD.AST.Render.Syntax.BlockLevel.Stmt
       LLIR.SPMD.AST.Render.Syntax.TopLevel.Functions
-      LLIR.SPMD.AST.Render.Syntax.TopLevel.Objects
+      LLIR.SPMD.AST.Render.Syntax.TopLevel.Globals
+      LLIR.SPMD.AST.Utils.Auxiliary.Functions
+      LLIR.SPMD.AST.Utils.Generic.SudoFFI
+      LLIR.SPMD.Core.Index.Data.System
+      LLIR.SPMD.Core.Index.Driver
+      LLIR.SPMD.Core.Index.Scope.Bindable
+      LLIR.SPMD.Core.Index.Scope.Referable
+      LLIR.SPMD.Core.Index.Scope.Utils
+      LLIR.SPMD.Core.Index.Syntax.BlockLevel.Stmt
+      LLIR.SPMD.Core.Index.Syntax.TopLevel.Functions
+      LLIR.SPMD.Core.Index.Syntax.TopLevel.Globals
       LLIR.SPMD.Data.Interface
       LLIR.SPMD.Dev.DryRun
       LLIR.SPMD.Internal.AST

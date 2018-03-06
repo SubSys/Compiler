@@ -128,4 +128,15 @@ dropType ty@H.T.Arr{}  = Error.unsupported "Fn Types. Internal error, should hav
 
 -- TODO: ...
 builtin :: H.T.Type -> Maybe S.T.Type
+
+-- Tuples to Vectors
+builtin (H.T.Tuple [H.T.Float, H.T.Float])                       = Just S.T.Vec2
+builtin (H.T.Tuple [H.T.Float, H.T.Float, H.T.Float])            = Just S.T.Vec3
+builtin (H.T.Tuple [H.T.Float, H.T.Float, H.T.Float, H.T.Float]) = Just S.T.Vec4
+
+
 builtin _ = Nothing
+
+
+
+

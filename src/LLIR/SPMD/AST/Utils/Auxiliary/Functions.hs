@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.SPMD.AST.Render.Syntax (
-    renderFunctions
-  , packDoc
+module LLIR.SPMD.AST.Utils.Auxiliary.Functions (
+    isRecFunction
+  , isRecFunction'
 ) where
 
 
@@ -64,11 +64,6 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-import qualified Text.PrettyPrint.Leijen.Text  as P
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
@@ -89,14 +84,15 @@ import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S
 import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as Decl
 import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as Decl
 
+-- + Local Prelude
+import LLIR.SPMD.Core.Index.Data.System (enter)
+
 -- + Local
-import qualified LLIR.SPMD.AST.Render.Syntax.Base.Ident         as ID
-import qualified LLIR.SPMD.AST.Render.Syntax.Base.Etc           as Etc
-import qualified LLIR.SPMD.AST.Render.Syntax.Base.Literals      as Lit
-import qualified LLIR.SPMD.AST.Render.Syntax.Base.Types         as T
-import qualified LLIR.SPMD.AST.Render.Syntax.BlockLevel.Stmt    as S
-import qualified LLIR.SPMD.AST.Render.Syntax.TopLevel.Functions as Decl
-import qualified LLIR.SPMD.AST.Render.Syntax.TopLevel.Globals   as Decl
+import qualified LLIR.SPMD.Core.Index.Data.System            as Sys
+import qualified LLIR.SPMD.Core.Index.Scope.Bindable         as Scope
+import qualified LLIR.SPMD.Core.Index.Scope.Referable        as Scope
+import qualified LLIR.SPMD.Core.Index.Scope.Utils            as Scope
+import qualified LLIR.SPMD.Core.Index.Syntax.BlockLevel.Stmt as S
 -- *
 
 
@@ -104,35 +100,30 @@ import qualified LLIR.SPMD.AST.Render.Syntax.TopLevel.Globals   as Decl
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+isRecFunction :: Decl.Function -> Bool
+isRecFunction (Decl.Function _ name _ body) =
+    let
+        x1 = [ident | (S.Ref ident) <- Uni.universeBi body]
+        x2 = [ident | (S.FunCall ident _) <- Uni.universeBi body]
+    in
+        name `List.elem` (x1 ++ x2)
+
+isRecFunction _ = False
 
 
-
-renderFunctions :: [Decl.Function] -> Text
-renderFunctions xs =
-    map (packDoc Decl.renderFunction) xs
-        |> Text.unlines
+-- | For ViewPatterns
+--
 
 
-packDoc :: (a -> Doc) -> a -> Text
-packDoc f doc =
-    P.displayTStrict toSimpleDoc
-    where
-        toSimpleDoc = P.renderPretty 0.4 400 (f doc)
+isRecFunction' :: Decl.Function -> Maybe Decl.Function
+isRecFunction' fn@(Decl.Function _ name _ body) =
+    let
+        x1 = [ident | (S.Ref ident) <- Uni.universeBi body]
+        x2 = [ident | (S.FunCall ident _) <- Uni.universeBi body]
+    in
+        if name `List.elem` (x1 ++ x2) then
+            Just fn
+        else
+            Nothing
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+isRecFunction' _ = Nothing
