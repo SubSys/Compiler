@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d59fe8f395939ff3cdcb32cb47a6992301968eaa0c774949ee080776af236a96
+-- hash: c0bf1d5282e7731054476e53acc074831b90781c65a60d42cb76b69834c096e8
 
 name:           Compiler
 version:        0.1.0.0
@@ -247,6 +247,7 @@ library
       SLIR.HelmSyntax.AST.Utils.Auxiliary.Binders
       SLIR.HelmSyntax.AST.Utils.Auxiliary.Expr
       SLIR.HelmSyntax.AST.Utils.Auxiliary.Fresh
+      SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions
       SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.Inline
       SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.Recursive
       SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions.SudoFFI

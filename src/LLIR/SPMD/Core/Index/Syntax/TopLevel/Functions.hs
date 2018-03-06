@@ -112,7 +112,18 @@ traverseDecls = Scope.indexList indexFunction
 
 indexFunction :: Decl.Function -> Sys.Index Decl.Function
 indexFunction (Fun.isRecFunction -> True) = error "Support recursive functions at this stage?"
+
+indexFunction (Fun.isMain' -> Just (Decl.Function out name args body)) = do
+    (args', ss) <- List.unzip <$> M.mapM indexInput args
     
+    (body', _) <- Scope.withLocalSubst (Map.unions ss) (S.indexBlock body)
+    
+    enter
+        (Decl.Function out name args' body')
+        Map.empty
+
+
+-- Default Path
 indexFunction (Decl.Function out name args body) = do
     (name', s1) <- Scope.bindable name
     (args', ss) <- List.unzip <$> M.mapM indexInput args

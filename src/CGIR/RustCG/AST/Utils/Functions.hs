@@ -1,8 +1,11 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE OverloadedStrings #-}
 module CGIR.RustCG.AST.Utils.Functions (
     isRecFunction
   , isRecFunction'
+  , isMain
+  , isMain'
 ) where
 
 
@@ -123,5 +126,15 @@ isRecFunction' fn@(Decl.Function name _ _ _ body) =
             Nothing
 
 isRecFunction' _ = Nothing
+
+
+isMain :: Decl.Function -> Bool
+isMain (Decl.Function (ID.Ident "main") _ _ _ _) = True
+isMain _ = False
+
+-- | View Pattern Version
+isMain' :: Decl.Function -> Maybe Decl.Function
+isMain' fn@(isMain -> True) = Just fn
+isMain' _ = Nothing
 
 

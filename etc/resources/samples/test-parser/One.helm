@@ -168,5 +168,7 @@ test = phi id
 test2 = test 0
 
 
+main = 0
+
 
 

@@ -121,6 +121,19 @@ traverseDecls (fn:fns) = do
 
 
 indexFunction :: Decl.Function -> Sys.Index Decl.Function
+indexFunction (Decl.isMain' -> Just (Decl.Function name gs args out body)) = do
+    (gs',   gs) <- List.unzip <$> M.mapM indexGeneric gs
+    (args', ss) <- List.unzip <$> M.mapM (indexInput (Map.unions gs)) args
+    
+    
+    (body', _) <- Scope.withLocalSubst (Map.unions ss) (S.indexBlock body)
+    
+    (out', _) <- indexOutput (Map.unions gs) out
+    
+    binder
+        (Decl.Function name gs' args' out' body')
+        Map.empty
+
 indexFunction (Decl.isRecFunction' -> (Just (Decl.Function name gs args out body))) = do
     (name', s1) <- Scope.bindable name
     (gs',   gs) <- List.unzip <$> M.mapM indexGeneric gs

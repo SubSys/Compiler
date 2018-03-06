@@ -1,10 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns #-}
-module LLIR.SPMD.AST.Utils.Auxiliary.Functions (
-    isRecFunction
-  , isRecFunction'
-  , isMain
+module SLIR.HelmSyntax.AST.Utils.Auxiliary.Functions (
+    isMain
   , isMain'
 ) where
 
@@ -13,6 +11,7 @@ module LLIR.SPMD.AST.Utils.Auxiliary.Functions (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
+import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -58,91 +57,48 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-import qualified Data.Data                    as Data
-import qualified Data.String                  as String
+
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
 import qualified Data.Generics.Uniplate.Data as Uni
 
--- + OS APIS & Related
-import qualified System.IO as SIO
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
+-- + HelmSyntax Module Interface
+import qualified SLIR.HelmSyntax.Module.Data.Interface as I
 
-
--- + SPMD AST Interface
-import qualified LLIR.SPMD.Data.Interface as I
-
--- + SPMD AST
+-- + HelmSyntax AST
 -- ++ Base
-import qualified LLIR.SPMD.AST.Data.Base.Ident                 as ID
-import qualified LLIR.SPMD.AST.Data.Base.Literals              as Lit
-import qualified LLIR.SPMD.AST.Data.Base.Types                 as T
-import qualified LLIR.SPMD.AST.Data.Base.Etc                   as Etc
--- ++ Block Level
-import qualified LLIR.SPMD.AST.Data.BlockLevel.Stmt            as S
--- ++ Decl/Top Level
-import qualified LLIR.SPMD.AST.Data.TopLevel.Functions         as Decl
-import qualified LLIR.SPMD.AST.Data.TopLevel.Globals           as Decl
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc      as Etc
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident    as ID
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Types    as T
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Values   as V
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.Base.Metadata as Meta
 
--- + Local Prelude
-import LLIR.SPMD.Core.Index.Data.System (enter)
+-- ++ TermLevel
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Expr     as E
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.TermLevel.Patterns as P
 
--- + Local
-import qualified LLIR.SPMD.Core.Index.Data.System            as Sys
-import qualified LLIR.SPMD.Core.Index.Scope.Bindable         as Scope
-import qualified LLIR.SPMD.Core.Index.Scope.Referable        as Scope
-import qualified LLIR.SPMD.Core.Index.Scope.Utils            as Scope
-import qualified LLIR.SPMD.Core.Index.Syntax.BlockLevel.Stmt as S
+-- ++ TopLevel
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Fixities  as Decl
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Functions as Decl
+import qualified SLIR.HelmSyntax.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- *
 
 
 
-
-
-
-isRecFunction :: Decl.Function -> Bool
-isRecFunction (Decl.Function _ name _ body) =
-    let
-        x1 = [ident | (S.Ref ident) <- Uni.universeBi body]
-        x2 = [ident | (S.FunCall ident _) <- Uni.universeBi body]
-    in
-        name `List.elem` (x1 ++ x2)
-
-isRecFunction _ = False
-
-
--- | For ViewPatterns
---
-
-
-isRecFunction' :: Decl.Function -> Maybe Decl.Function
-isRecFunction' fn@(Decl.Function _ name _ body) =
-    let
-        x1 = [ident | (S.Ref ident) <- Uni.universeBi body]
-        x2 = [ident | (S.FunCall ident _) <- Uni.universeBi body]
-    in
-        if name `List.elem` (x1 ++ x2) then
-            Just fn
-        else
-            Nothing
-
-isRecFunction' _ = Nothing
-
-
-
 isMain :: Decl.Function -> Bool
-isMain (Decl.Function _ (ID.Ident "main" _) _ _) = True
+isMain (Decl.Function (Etc.Binder (ID.Ident "main" _ _) _) _ _ _ _)  = True
 isMain _ = False
 
 
--- | View Pattern Version
+-- | For View Patterns
 --
 isMain' :: Decl.Function -> Maybe Decl.Function
 isMain' fn@(isMain -> True) = Just fn
 isMain' _ = Nothing
+
 
 
