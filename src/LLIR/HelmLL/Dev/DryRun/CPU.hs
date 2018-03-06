@@ -1,15 +1,12 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module CGIR.GLSL.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderNamespace
-) where
+module LLIR.HelmLL.Dev.DryRun.CPU where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
+import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -56,7 +53,6 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
-import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -65,29 +61,36 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
 
--- + GLSL AST Interface
-import qualified CGIR.GLSL.Data.Interface as I
 
--- + GLSL AST
+-- + Upstream IRs
+import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
+import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
+
+-- + HelmLL Syntax Renderer
+import qualified LLIR.HelmLL.AST.Render.Syntax.Driver as Syntax
+
+-- + HelmLL AST Interface
+import qualified LLIR.HelmLL.Data.Interface as I
+
+-- + HelmLL AST
 -- ++ Base
-import qualified CGIR.GLSL.AST.Data.Base.Ident                 as ID
-import qualified CGIR.GLSL.AST.Data.Base.Literals              as Lit
-import qualified CGIR.GLSL.AST.Data.Base.Types                 as T
-import qualified CGIR.GLSL.AST.Data.Base.Etc                   as Etc
--- ++ Block Level
-import qualified CGIR.GLSL.AST.Data.BlockLevel.Stmt            as S
--- ++ Decl/Top Level
-import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as Decl
-import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as Decl
+import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
+import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
+import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
+import qualified LLIR.HelmLL.AST.Data.Base.Literals as Lit
+
+-- ++ TermLevel
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as E
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
+
+-- ++ TopLevel
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 -- *
 
 
@@ -98,17 +101,39 @@ import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as Decl
 
 
 
-renderIdent :: ID.Ident -> Doc
--- renderIdent (ID.Ident name Nothing  ) = render name
--- renderIdent (ID.Ident name (Just ns)) =
---     renderNamespace ns <> "." <> render name
-renderIdent (ID.Ident name _) =
-    render name
 
-renderNamespace :: ID.Namespace -> Doc
-renderNamespace (ID.Namespace segs) =
-    map render segs
-        |> Util.punctuate "."
-        |> Util.hcat
+inputFilePath
+    = "/Users/colbyn/SubSystems/Compiler/etc/resources/samples/test-parser/One.helm"
 
+
+
+
+
+upstream =
+    let
+        filePath   = inputFilePath
+        sourceCode = SIO.readFile inputFilePath
+    in
+        sourceCode
+            |> HelmSyntax.pipeline [] filePath
+            |> HelmSyntax.toHelmFlat
+            |> HelmFlat.pipeline
+            |> HelmFlat.toHelmLL
+
+
+
+run = do
+    result <- upstream
+    case result of
+        Left  err     -> putStrLn $ Text.unpack err
+        Right payload -> run' payload
+
+
+
+run' payload = do
+    
+    (TIO.putStrLn . Syntax.renderFunctions) fns
+
+    where
+        fns = I.getFunctions payload
 

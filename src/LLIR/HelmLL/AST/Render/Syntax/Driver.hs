@@ -1,8 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module CGIR.GLSL.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderNamespace
+module LLIR.HelmLL.AST.Render.Syntax.Driver (
+    renderFunctions
+  , renderUnions
+  , renderProgram
 ) where
 
 
@@ -10,6 +11,7 @@ module CGIR.GLSL.AST.Render.Syntax.Base.Ident (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
+-- import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -22,8 +24,7 @@ import Prelude
     , fromIntegral
     )
 
-import qualified Prelude    as Pre
-import qualified Core.Utils as Core
+import qualified Prelude as Pre
 
 
 import qualified Control.Monad              as M
@@ -55,41 +56,43 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-import qualified Data.Data                    as Data
-import qualified Data.String                  as String
+
 
 -- + Recursion Schemes & Related
-import qualified Data.Functor.Foldable       as F
-import qualified Data.Generics.Uniplate.Data as Uni
-
--- + OS APIS & Related
-import qualified System.IO as SIO
+import qualified Data.Functor.Foldable as F
 
 -- + Frameworks
 import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
+import qualified Framework.Text.Renderer.Utils         as Util
+import qualified Framework.Text.Renderer.Utils.Display as Display
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
 
--- + GLSL AST Interface
-import qualified CGIR.GLSL.Data.Interface as I
+-- + HelmLL Module Interface
+import qualified LLIR.HelmLL.Data.Interface as I
 
--- + GLSL AST
+-- + HelmLL AST
 -- ++ Base
-import qualified CGIR.GLSL.AST.Data.Base.Ident                 as ID
-import qualified CGIR.GLSL.AST.Data.Base.Literals              as Lit
-import qualified CGIR.GLSL.AST.Data.Base.Types                 as T
-import qualified CGIR.GLSL.AST.Data.Base.Etc                   as Etc
--- ++ Block Level
-import qualified CGIR.GLSL.AST.Data.BlockLevel.Stmt            as S
--- ++ Decl/Top Level
-import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as Decl
-import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as Decl
--- *
+import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
+import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
+import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
+import qualified LLIR.HelmLL.AST.Data.Base.Literals   as V
 
+-- ++ TermLevel
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as S
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
+
+-- ++ TopLevel
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
+
+-- + Local
+import qualified LLIR.HelmLL.AST.Render.Syntax.TopLevel.Functions as Decl
+import qualified LLIR.HelmLL.AST.Render.Syntax.TopLevel.Unions    as Decl
+-- *
 
 
 
@@ -98,17 +101,49 @@ import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as Decl
 
 
 
-renderIdent :: ID.Ident -> Doc
--- renderIdent (ID.Ident name Nothing  ) = render name
--- renderIdent (ID.Ident name (Just ns)) =
---     renderNamespace ns <> "." <> render name
-renderIdent (ID.Ident name _) =
-    render name
 
-renderNamespace :: ID.Namespace -> Doc
-renderNamespace (ID.Namespace segs) =
-    map render segs
-        |> Util.punctuate "."
-        |> Util.hcat
+renderFunctions :: [Decl.Function] -> Text
+renderFunctions xs =
+    map (Display.packDoc . Decl.renderFunction) xs
+        |> Text.unlines
+
+
+renderUnions :: [Decl.Union] -> Text
+renderUnions xs =
+    map (Display.packDoc . Decl.renderUnion) xs
+        |> Text.unlines
+
+
+renderProgram :: I.Program -> Text
+renderProgram x =
+    renderProgram_ x
+        |> Display.packDoc
+
+
+
+
+
+renderProgram_ :: I.Program -> Doc
+renderProgram_ payload =
+    let
+        fns = I.getFunctions payload
+            |> map Decl.renderFunction
+            |> Util.punctuate Util.linebreak
+            |> Util.vcat
+        
+        uns = I.getUnions payload
+            |> map Decl.renderUnion
+            |> Util.punctuate Util.linebreak
+            |> Util.vcat
+    in
+        uns <$$> fns
+
+
+
+
+
+
+
+
 
 

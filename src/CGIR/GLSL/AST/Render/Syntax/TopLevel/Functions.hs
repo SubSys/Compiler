@@ -104,6 +104,24 @@ import qualified CGIR.GLSL.AST.Render.Syntax.BlockLevel.Stmt as S
 
 
 renderFunction :: Decl.Function -> Doc
+
+renderFunction (Decl.Function outputType@T.Void name inputs body) =
+    let output'   = T.renderType outputType
+        name'     = ID.renderIdent name
+        inputs'   = map Etc.renderInput inputs
+            |> Util.punctuate ","
+            |> Util.punctuate Util.space
+            |> Util.hcat
+            |> Util.parens
+        body'     = S.renderBlock body
+    in
+            output'
+        <+> name'
+        <+> inputs'
+        <+> body'
+
+        <> Util.linebreak
+
 renderFunction (Decl.Function outputType name inputs (fixReturn -> body)) =
     let output'   = T.renderType outputType
         name'     = ID.renderIdent name

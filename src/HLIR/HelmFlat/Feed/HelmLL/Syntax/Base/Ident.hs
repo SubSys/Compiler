@@ -1,8 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module CGIR.GLSL.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderNamespace
+module HLIR.HelmFlat.Feed.HelmLL.Syntax.Base.Ident (
+    dropIdent
+  , dropNamespace
 ) where
 
 
@@ -10,6 +9,7 @@ module CGIR.GLSL.AST.Render.Syntax.Base.Ident (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
+import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -24,7 +24,6 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
-
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -55,8 +54,8 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
-import qualified Data.Data                    as Data
 import qualified Data.String                  as String
+
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -65,50 +64,75 @@ import qualified Data.Generics.Uniplate.Data as Uni
 -- + OS APIS & Related
 import qualified System.IO as SIO
 
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
-
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
 
--- + GLSL AST Interface
-import qualified CGIR.GLSL.Data.Interface as I
 
--- + GLSL AST
+
+-- + HelmFlat AST
 -- ++ Base
-import qualified CGIR.GLSL.AST.Data.Base.Ident                 as ID
-import qualified CGIR.GLSL.AST.Data.Base.Literals              as Lit
-import qualified CGIR.GLSL.AST.Data.Base.Types                 as T
-import qualified CGIR.GLSL.AST.Data.Base.Etc                   as Etc
--- ++ Block Level
-import qualified CGIR.GLSL.AST.Data.BlockLevel.Stmt            as S
--- ++ Decl/Top Level
-import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as Decl
-import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc      as HL.Etc
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident    as HL.ID
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types    as HL.T
+import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values   as HL.V
+
+-- ++ TermLevel
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as HL.E
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as HL.P
+
+-- ++ TopLevel
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as HL.Decl
+import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as HL.Decl
+
+
+-- + HelmLL AST
+-- ++ Base
+import qualified LLIR.HelmLL.AST.Data.Base.Etc      as LL.Etc
+import qualified LLIR.HelmLL.AST.Data.Base.Ident    as LL.ID
+import qualified LLIR.HelmLL.AST.Data.Base.Types    as LL.T
+import qualified LLIR.HelmLL.AST.Data.Base.Literals as LL.Lit
+
+-- ++ TermLevel
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as LL.S
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as LL.P
+
+-- ++ TopLevel
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as LL.Decl
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as LL.Decl
+
+-- + Local
 -- *
 
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+
+
+dropIdent :: HL.ID.Ident -> LL.ID.Ident
+dropIdent (HL.ID.Ident txt ns) =
+    LL.ID.Ident txt (dropNamespace ns)
+
+
+dropNamespace :: Maybe HL.ID.Namespace -> Maybe LL.ID.Namespace
+dropNamespace Nothing = Nothing
+dropNamespace (Just (HL.ID.Namespace segs)) =
+    Just $ LL.ID.Namespace segs
 
 
 
 
-renderIdent :: ID.Ident -> Doc
--- renderIdent (ID.Ident name Nothing  ) = render name
--- renderIdent (ID.Ident name (Just ns)) =
---     renderNamespace ns <> "." <> render name
-renderIdent (ID.Ident name _) =
-    render name
 
-renderNamespace :: ID.Namespace -> Doc
-renderNamespace (ID.Namespace segs) =
-    map render segs
-        |> Util.punctuate "."
-        |> Util.hcat
+
+
+
+
+
+
+
+
+
+
 
 

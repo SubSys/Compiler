@@ -1,8 +1,12 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-module CGIR.GLSL.AST.Render.Syntax.Base.Ident (
-    renderIdent
-  , renderNamespace
+{-# LANGUAGE DeriveDataTypeable #-}
+module LLIR.HelmLL.Data.Interface (
+    Program(..)
+  , getFunctions
+  , getUnions
+  , updateFunctions
+  , updateFunctions'
+  , updateUnions
 ) where
 
 
@@ -10,8 +14,9 @@ module CGIR.GLSL.AST.Render.Syntax.Base.Ident (
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
+import Data.Monoid ((<>))
 import Prelude
-    ( return
+    (return
     , String
     , IO
     , show
@@ -21,6 +26,8 @@ import Prelude
     , (>>)
     , fromIntegral
     )
+
+import Data.Data (Data, Typeable)
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
@@ -56,59 +63,79 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
-import qualified Data.String                  as String
+import qualified Data.String                  as Data
+
 
 -- + Recursion Schemes & Related
-import qualified Data.Functor.Foldable       as F
-import qualified Data.Generics.Uniplate.Data as Uni
+import qualified Data.Functor.Foldable as F
 
--- + OS APIS & Related
-import qualified System.IO as SIO
-
--- + Frameworks
-import Framework.Text.Renderer
-import qualified Framework.Text.Renderer.Utils as Util
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
 
--- + GLSL AST Interface
-import qualified CGIR.GLSL.Data.Interface as I
-
--- + GLSL AST
+-- + HelmLL AST
 -- ++ Base
-import qualified CGIR.GLSL.AST.Data.Base.Ident                 as ID
-import qualified CGIR.GLSL.AST.Data.Base.Literals              as Lit
-import qualified CGIR.GLSL.AST.Data.Base.Types                 as T
-import qualified CGIR.GLSL.AST.Data.Base.Etc                   as Etc
--- ++ Block Level
-import qualified CGIR.GLSL.AST.Data.BlockLevel.Stmt            as S
--- ++ Decl/Top Level
-import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as Decl
-import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as Decl
+import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
+import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
+import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
+import qualified LLIR.HelmLL.AST.Data.Base.Literals as Lit
+
+-- ++ TermLevel
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as E
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
+
+-- ++ TopLevel
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 -- *
 
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+data Program = Program
+    { unions    :: [Decl.Union]
+    , functions :: [Decl.Function]
+    }
+    deriving (Show, Data, Typeable)
 
 
 
 
-renderIdent :: ID.Ident -> Doc
--- renderIdent (ID.Ident name Nothing  ) = render name
--- renderIdent (ID.Ident name (Just ns)) =
---     renderNamespace ns <> "." <> render name
-renderIdent (ID.Ident name _) =
-    render name
 
-renderNamespace :: ID.Namespace -> Doc
-renderNamespace (ID.Namespace segs) =
-    map render segs
-        |> Util.punctuate "."
-        |> Util.hcat
+getFunctions :: Program -> [Decl.Function]
+getFunctions =
+    functions
+
+getUnions :: Program -> [Decl.Union]
+getUnions =
+    unions
+
+
+updateFunctions :: [Decl.Function] -> Program -> Program
+updateFunctions fns datum =
+    Program
+        { functions = fns
+        , unions = unions datum
+        }
+
+updateUnions :: [Decl.Union] -> Program -> Program
+updateUnions uns datum =
+    Program
+        { functions = functions datum
+        , unions = uns
+        }
+
+
+
+
+
+-- | Pipelining Style
+--
+
+updateFunctions' :: Program -> [Decl.Function] -> Program
+updateFunctions' program decls = updateFunctions decls program
+
 
 

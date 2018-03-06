@@ -6,6 +6,9 @@ module HLIR.HelmFlat.Pipeline (
   , GLSL.toGLSL
   , GLSL.toGLSL'
   
+  , HelmLL.toHelmLL
+  , HelmLL.toHelmLL'
+  
   , I.Program
 ) where
 
@@ -98,6 +101,7 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
 -- + AST Feeds
 import qualified HLIR.HelmFlat.Feed.RustCG.Driver as RustCG
 import qualified HLIR.HelmFlat.Feed.GLSL.Driver   as GLSL
+import qualified HLIR.HelmFlat.Feed.HelmLL.Driver as HelmLL
 
 -- + HelmFlat Drivers
 import qualified HLIR.HelmFlat.Core.Init.Driver as Driver
