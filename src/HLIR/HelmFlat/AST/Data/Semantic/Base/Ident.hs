@@ -1,9 +1,12 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE ViewPatterns #-}
 module HLIR.HelmFlat.AST.Data.Semantic.Base.Ident (
     IR.Ident
   , IR.Namespace(..)
   , pattern Ident
+  
+  , pattern Ident'
   , pattern Ident_
 ) where
 
@@ -30,6 +33,11 @@ pattern Ident name ns = IR.Ident name ns
 -- | Alternative variations & misc. helpers.
 --
 
+
+pattern Ident' :: Pre.String -> IR.Ident
+pattern Ident' name <- IR.Ident (Text.unpack -> name) _
+    where
+        Ident' name = IR.Ident (Text.pack name) Nothing
 
 pattern Ident_ :: Text -> IR.Ident
 pattern Ident_ name <- IR.Ident name _
