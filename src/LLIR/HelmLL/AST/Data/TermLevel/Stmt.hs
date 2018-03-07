@@ -56,8 +56,8 @@ pattern FunCall name args = IR.FunCallStmt (IR.Bounded name) args
 pattern ConCall :: IR.Ident -> [IR.Stmt] -> IR.Stmt
 pattern ConCall name args = IR.ConCallStmt name args
 
-pattern If :: IR.Stmt -> [(IR.Stmt, IR.Block)] -> IR.Block -> IR.Stmt
-pattern If con intros elseBlock = IR.IfStmt con intros elseBlock
+pattern If :: [(IR.Stmt, IR.Block)] -> IR.Block -> IR.Stmt
+pattern If intros elseBlock = IR.IfStmt intros elseBlock
 
 pattern Case :: IR.Stmt -> [IR.CaseAlt] -> IR.Stmt
 pattern Case con alts = IR.CaseStmt con alts
@@ -77,10 +77,10 @@ pattern Loop con body = IR.LoopStmt con body
 --
 
 
-pattern If_ :: IR.Stmt -> [(IR.Stmt, [IR.Stmt])] -> [IR.Stmt] -> IR.Stmt
-pattern If_ con intros elseBlock <- IR.IfStmt con (unwrapBranches -> intros) (unwrap -> elseBlock)
+pattern If_ :: [(IR.Stmt, [IR.Stmt])] -> [IR.Stmt] -> IR.Stmt
+pattern If_ intros elseBlock <- IR.IfStmt (unwrapBranches -> intros) (unwrap -> elseBlock)
     where
-        If_ con intros elseBlock =  IR.IfStmt con (wrapBranches intros) (IR.Block elseBlock)
+        If_ intros elseBlock =  IR.IfStmt (wrapBranches intros) (IR.Block elseBlock)
 
 pattern Loop_ :: IR.Stmt -> [IR.Stmt] -> IR.Stmt
 pattern Loop_ con body <- IR.LoopStmt con (unwrap -> body)

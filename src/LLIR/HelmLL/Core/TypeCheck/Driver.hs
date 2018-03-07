@@ -1,12 +1,16 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Dev.DryRun.CPU where
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ViewPatterns #-}
+module LLIR.HelmLL.Core.TypeCheck.Driver (
+    typeCheck
+  , typeCheck'
+) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -53,52 +57,50 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
 import qualified Data.Generics.Uniplate.Data as Uni
-
--- + OS APIS & Related
-import qualified System.IO as SIO
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
 
--- + Local Development & Debugging
-import qualified DevKit.Sample.Loader.CPU as SampleFile
 
-
-
--- + Upstream IRs
-import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
-import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
-
--- + HelmLL Syntax Renderer
-import qualified LLIR.HelmLL.AST.Render.Syntax.Driver as Syntax
-
--- + HelmLL AST Interface
+-- + HelmLL Module Interface
 import qualified LLIR.HelmLL.Data.Interface as I
+
+-- + HelmLL AST Utils
+import qualified LLIR.HelmLL.AST.Utils.Generic.Scope       as Scope
+import qualified LLIR.HelmLL.AST.Utils.Class.Ident         as ID
+import qualified LLIR.HelmLL.AST.Utils.Auxiliary.Functions as Fn
+import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 
 -- + HelmLL AST
 -- ++ Base
 import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals as Lit
+import qualified LLIR.HelmLL.AST.Data.Base.Literals   as V
 
 -- ++ TermLevel
-import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as E
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as S
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
 
 -- ++ TopLevel
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 
--- + HelmLL Drivers
-import qualified LLIR.HelmLL.Core.Index.Driver     as Driver
-import qualified LLIR.HelmLL.Core.TypeCheck.Driver as Driver
+
+-- + Local
+import qualified LLIR.HelmLL.Core.TypeCheck.Data.Report                as Report
+import qualified LLIR.HelmLL.Core.TypeCheck.Inference.Data.Env         as Env
+import qualified LLIR.HelmLL.Core.TypeCheck.Solver.Data.Constraint     as Con
+import qualified LLIR.HelmLL.Core.TypeCheck.Inference.Init.Unions      as Init
+import qualified LLIR.HelmLL.Core.TypeCheck.Inference.Engine           as Infer
+import qualified LLIR.HelmLL.Core.TypeCheck.Syntax.TopLevel.Functions  as Decl
 -- *
 
 
@@ -110,39 +112,91 @@ import qualified LLIR.HelmLL.Core.TypeCheck.Driver as Driver
 
 
 
+-- | Tmp...
+--
+type DebugFlag = Bool
 
 
 
-upstream = do
-    filePath <- SampleFile.alphaFilePath
 
-    (SIO.readFile filePath)
-        |> HelmSyntax.pipeline [] filePath
-        |> HelmSyntax.toHelmFlat
-        |> HelmFlat.pipeline
-        |> HelmFlat.toHelmLL
-        |> Driver.index
-        |> Driver.typeCheck
-
-
-
-run = do
+typeCheck :: IO (Either Text I.Program) -> IO (Either Text I.Program)
+typeCheck upstream = do
     result <- upstream
+    
     case result of
-        Left  err     -> putStrLn $ Text.unpack err
-        Right payload -> run' payload
+        Left err -> return $ Left err
+        Right payload ->
+            return $ typeCheck' payload
 
 
 
-run' payload = do
-    
-    (TIO.putStrLn . Syntax.renderUnions) uns
-    
-    putStrLn "\n"
-    
-    (TIO.putStrLn . Syntax.renderFunctions) fns
 
-    where
+typeCheck' :: I.Program -> Either Text I.Program
+typeCheck' payload =
+    let 
+        -- Setups
         fns = I.getFunctions payload
         uns = I.getUnions payload
+        
+        
+        
+        -- Initial Data
+        typesEnv =
+            Map.unions
+                [ initialEnv uns
+                ]
+
+        -- Finish
+        result =
+            Infer.resolveDecls Decl.inferDecl (typesEnv, Map.empty) fns
+        
+    in
+        case result of
+            Left err ->
+                Left
+                    (formatError err)
+
+            Right (fns', _, _) ->
+                Right $ I.updateFunctions fns' payload
+
+
+
+
+
+
+
+-- *
+-- | Internal
+-- *
+
+
+initialEnv :: [Decl.Union] -> Env.Types
+initialEnv us =
+    let unionTypes = map Init.genUnionSigs us
+            |> flatten
+            |> Map.fromList
+    in
+        unionTypes
+
+
+
+
+
+
+-- | Generate Error Messages
+-- (Something just barely good enough to be helpful..)
+
+
+formatError ::  Report.TypeError -> Text
+formatError err =
+    let
+        errText = Text.pack $ PP.prettyShow err
+    in
+        Text.unlines
+            [ errText
+            , Text.pack "LLIR.HelmLL.Core.TypeCheck.Driver"
+            ]
+
+
+
 

@@ -38,5 +38,3 @@ applyMaybe :: (a -> b) -> Maybe a -> Maybe b
 applyMaybe _ Nothing = Nothing
 applyMaybe f (Just x) = Just $ f x
 
-    
-

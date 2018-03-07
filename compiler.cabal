@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c0bf1d5282e7731054476e53acc074831b90781c65a60d42cb76b69834c096e8
+-- hash: 5c7f775bc09a94927a0a761fff8603fdfb2d9909ce24fa034a80677dc2697f41
 
 name:           Compiler
 version:        0.1.0.0
@@ -84,6 +84,36 @@ library
       Proto.Util.List
       Proto.Util.Misc
       Proto.Util.Text
+      DevKit.Sample.Loader.CPU
+      DevKit.Sample.Loader.GPU
+      CGIR.GLSL.AST.Data.Base.Etc
+      CGIR.GLSL.AST.Data.Base.Ident
+      CGIR.GLSL.AST.Data.Base.Literals
+      CGIR.GLSL.AST.Data.Base.Types
+      CGIR.GLSL.AST.Data.BlockLevel.Stmt
+      CGIR.GLSL.AST.Data.TopLevel.Functions
+      CGIR.GLSL.AST.Data.TopLevel.Globals
+      CGIR.GLSL.AST.Render.Syntax
+      CGIR.GLSL.AST.Render.Syntax.Base.Etc
+      CGIR.GLSL.AST.Render.Syntax.Base.Ident
+      CGIR.GLSL.AST.Render.Syntax.Base.Literals
+      CGIR.GLSL.AST.Render.Syntax.Base.Types
+      CGIR.GLSL.AST.Render.Syntax.BlockLevel.Stmt
+      CGIR.GLSL.AST.Render.Syntax.TopLevel.Functions
+      CGIR.GLSL.AST.Render.Syntax.TopLevel.Globals
+      CGIR.GLSL.AST.Utils.Auxiliary.Functions
+      CGIR.GLSL.AST.Utils.Generic.SudoFFI
+      CGIR.GLSL.Core.Index.Data.System
+      CGIR.GLSL.Core.Index.Driver
+      CGIR.GLSL.Core.Index.Scope.Bindable
+      CGIR.GLSL.Core.Index.Scope.Referable
+      CGIR.GLSL.Core.Index.Scope.Utils
+      CGIR.GLSL.Core.Index.Syntax.BlockLevel.Stmt
+      CGIR.GLSL.Core.Index.Syntax.TopLevel.Functions
+      CGIR.GLSL.Core.Index.Syntax.TopLevel.Globals
+      CGIR.GLSL.Data.Interface
+      CGIR.GLSL.Dev.DryRun
+      CGIR.GLSL.Internal.AST
       CGIR.RustCG.AST.Data.Semantic.Base.Etc
       CGIR.RustCG.AST.Data.Semantic.Base.Ident
       CGIR.RustCG.AST.Data.Semantic.Base.Literals
@@ -180,49 +210,87 @@ library
       HLIR.HelmFlat.Core.Monomorph.Driver
       HLIR.HelmFlat.Data.Interface
       HLIR.HelmFlat.Dev.DryRun
+      HLIR.HelmFlat.Feed.GLSL.Driver
+      HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Etc
+      HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Ident
+      HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Literals
+      HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Types
+      HLIR.HelmFlat.Feed.GLSL.Syntax.BlockLevel.Stmt
+      HLIR.HelmFlat.Feed.GLSL.Syntax.TopLevel.Functions
+      HLIR.HelmFlat.Feed.GLSL.Utils.Error
+      HLIR.HelmFlat.Feed.HelmLL.Driver
+      HLIR.HelmFlat.Feed.HelmLL.Syntax.Base.Etc
+      HLIR.HelmFlat.Feed.HelmLL.Syntax.Base.Ident
+      HLIR.HelmFlat.Feed.HelmLL.Syntax.Base.Literals
+      HLIR.HelmFlat.Feed.HelmLL.Syntax.Base.Types
+      HLIR.HelmFlat.Feed.HelmLL.Syntax.TermLevel.Patterns
+      HLIR.HelmFlat.Feed.HelmLL.Syntax.TermLevel.Stmt
+      HLIR.HelmFlat.Feed.HelmLL.Syntax.TopLevel.Functions
+      HLIR.HelmFlat.Feed.HelmLL.Syntax.TopLevel.Unions
       HLIR.HelmFlat.Feed.RustCG.Driver
       HLIR.HelmFlat.Feed.RustCG.Init.Variants
       HLIR.HelmFlat.Feed.RustCG.Post.Finalize
       HLIR.HelmFlat.Feed.RustCG.Syntax
-      HLIR.HelmFlat.Feed.SPMD.Driver
-      HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Etc
-      HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Ident
-      HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Literals
-      HLIR.HelmFlat.Feed.SPMD.Syntax.Base.Types
-      HLIR.HelmFlat.Feed.SPMD.Syntax.BlockLevel.Stmt
-      HLIR.HelmFlat.Feed.SPMD.Syntax.TopLevel.Functions
-      HLIR.HelmFlat.Feed.SPMD.Utils.Error
       HLIR.HelmFlat.Internal.AST
       HLIR.HelmFlat.LocalDev.DryRun
       HLIR.HelmFlat.Pipeline
-      LLIR.SPMD.AST.Data.Base.Etc
-      LLIR.SPMD.AST.Data.Base.Ident
-      LLIR.SPMD.AST.Data.Base.Literals
-      LLIR.SPMD.AST.Data.Base.Types
-      LLIR.SPMD.AST.Data.BlockLevel.Stmt
-      LLIR.SPMD.AST.Data.TopLevel.Functions
-      LLIR.SPMD.AST.Data.TopLevel.Globals
-      LLIR.SPMD.AST.Render.Syntax
-      LLIR.SPMD.AST.Render.Syntax.Base.Etc
-      LLIR.SPMD.AST.Render.Syntax.Base.Ident
-      LLIR.SPMD.AST.Render.Syntax.Base.Literals
-      LLIR.SPMD.AST.Render.Syntax.Base.Types
-      LLIR.SPMD.AST.Render.Syntax.BlockLevel.Stmt
-      LLIR.SPMD.AST.Render.Syntax.TopLevel.Functions
-      LLIR.SPMD.AST.Render.Syntax.TopLevel.Globals
-      LLIR.SPMD.AST.Utils.Auxiliary.Functions
-      LLIR.SPMD.AST.Utils.Generic.SudoFFI
-      LLIR.SPMD.Core.Index.Data.System
-      LLIR.SPMD.Core.Index.Driver
-      LLIR.SPMD.Core.Index.Scope.Bindable
-      LLIR.SPMD.Core.Index.Scope.Referable
-      LLIR.SPMD.Core.Index.Scope.Utils
-      LLIR.SPMD.Core.Index.Syntax.BlockLevel.Stmt
-      LLIR.SPMD.Core.Index.Syntax.TopLevel.Functions
-      LLIR.SPMD.Core.Index.Syntax.TopLevel.Globals
-      LLIR.SPMD.Data.Interface
-      LLIR.SPMD.Dev.DryRun
-      LLIR.SPMD.Internal.AST
+      LLIR.HelmLL.AST.Data.Base.Etc
+      LLIR.HelmLL.AST.Data.Base.Ident
+      LLIR.HelmLL.AST.Data.Base.Literals
+      LLIR.HelmLL.AST.Data.Base.Types
+      LLIR.HelmLL.AST.Data.TermLevel.Patterns
+      LLIR.HelmLL.AST.Data.TermLevel.Stmt
+      LLIR.HelmLL.AST.Data.TopLevel.Functions
+      LLIR.HelmLL.AST.Data.TopLevel.Unions
+      LLIR.HelmLL.AST.Render.Syntax.Base.Etc
+      LLIR.HelmLL.AST.Render.Syntax.Base.Ident
+      LLIR.HelmLL.AST.Render.Syntax.Base.Literals
+      LLIR.HelmLL.AST.Render.Syntax.Base.Types
+      LLIR.HelmLL.AST.Render.Syntax.Driver
+      LLIR.HelmLL.AST.Render.Syntax.TermLevel.Patterns
+      LLIR.HelmLL.AST.Render.Syntax.TermLevel.Stmt
+      LLIR.HelmLL.AST.Render.Syntax.TopLevel.Functions
+      LLIR.HelmLL.AST.Render.Syntax.TopLevel.Unions
+      LLIR.HelmLL.AST.Utils.Auxiliary.Functions
+      LLIR.HelmLL.AST.Utils.Class.Ident
+      LLIR.HelmLL.AST.Utils.Generic.Scope
+      LLIR.HelmLL.AST.Utils.Generic.SudoFFI
+      LLIR.HelmLL.Core.Index.Data.System
+      LLIR.HelmLL.Core.Index.Driver
+      LLIR.HelmLL.Core.Index.Scope.Referable
+      LLIR.HelmLL.Core.Index.Scope.Utils
+      LLIR.HelmLL.Core.Index.Syntax.Base.Etc
+      LLIR.HelmLL.Core.Index.Syntax.Base.Type
+      LLIR.HelmLL.Core.Index.Syntax.TermLevel.Patterns
+      LLIR.HelmLL.Core.Index.Syntax.TermLevel.Stmt
+      LLIR.HelmLL.Core.Index.Syntax.TopLevel.Functions
+      LLIR.HelmLL.Core.Index.Syntax.TopLevel.Unions
+      LLIR.HelmLL.Core.TypeCheck.Data.Report
+      LLIR.HelmLL.Core.TypeCheck.Driver
+      LLIR.HelmLL.Core.TypeCheck.Inference.Data.Env
+      LLIR.HelmLL.Core.TypeCheck.Inference.Data.System
+      LLIR.HelmLL.Core.TypeCheck.Inference.Engine
+      LLIR.HelmLL.Core.TypeCheck.Inference.Init.Unions
+      LLIR.HelmLL.Core.TypeCheck.Inference.Internal.FreshIdents
+      LLIR.HelmLL.Core.TypeCheck.Inference.Syntax.Base
+      LLIR.HelmLL.Core.TypeCheck.Inference.Syntax.Constrain
+      LLIR.HelmLL.Core.TypeCheck.Inference.Syntax.Scope
+      LLIR.HelmLL.Core.TypeCheck.Inference.Utils.General
+      LLIR.HelmLL.Core.TypeCheck.Inference.Utils.TypeSystem
+      LLIR.HelmLL.Core.TypeCheck.Solver.Data.Constraint
+      LLIR.HelmLL.Core.TypeCheck.Solver.Data.System
+      LLIR.HelmLL.Core.TypeCheck.Solver.Engine
+      LLIR.HelmLL.Core.TypeCheck.Solver.Unifier.Types
+      LLIR.HelmLL.Core.TypeCheck.Subst.Types
+      LLIR.HelmLL.Core.TypeCheck.Syntax.Base.Etc
+      LLIR.HelmLL.Core.TypeCheck.Syntax.Base.Values
+      LLIR.HelmLL.Core.TypeCheck.Syntax.TermLevel.Expr
+      LLIR.HelmLL.Core.TypeCheck.Syntax.TermLevel.Patterns
+      LLIR.HelmLL.Core.TypeCheck.Syntax.TopLevel.Functions
+      LLIR.HelmLL.Data.Interface
+      LLIR.HelmLL.Dev.DryRun.CPU
+      LLIR.HelmLL.Dev.DryRun.GPU
+      LLIR.HelmLL.Internal.AST
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Header
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident

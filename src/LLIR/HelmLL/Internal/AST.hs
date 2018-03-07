@@ -76,7 +76,7 @@ data Stmt
     | LitStmt LiteralValue
     | FunCallStmt Bounded [Stmt]
     | ConCallStmt Ident [Stmt]
-    | IfStmt Stmt [(Stmt, Block)] Block
+    | IfStmt [(Stmt, Block)] Block
     | CaseStmt Stmt [CaseAlt]
     
     | ListStmt [Stmt]

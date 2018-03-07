@@ -1,12 +1,14 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Dev.DryRun.CPU where
+-- {-# LANGUAGE ViewPatterns #-}
+module LLIR.HelmLL.Core.Index.Syntax.TopLevel.Unions (
+    traverseUnions
+) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -53,6 +55,7 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -66,83 +69,72 @@ import qualified Text.Show.Prettyprint as PP
 
 
 
--- + Local Development & Debugging
-import qualified DevKit.Sample.Loader.CPU as SampleFile
-
-
-
--- + Upstream IRs
-import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
-import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
-
--- + HelmLL Syntax Renderer
-import qualified LLIR.HelmLL.AST.Render.Syntax.Driver as Syntax
-
--- + HelmLL AST Interface
+-- + HelmLL Module Interface
 import qualified LLIR.HelmLL.Data.Interface as I
+
+-- + HelmLL AST Utils
+import qualified LLIR.HelmLL.AST.Utils.Generic.Scope       as Scope
+import qualified LLIR.HelmLL.AST.Utils.Class.Ident         as ID
+import qualified LLIR.HelmLL.AST.Utils.Auxiliary.Functions as Fn
+import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 
 -- + HelmLL AST
 -- ++ Base
 import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals as Lit
+import qualified LLIR.HelmLL.AST.Data.Base.Literals   as V
 
 -- ++ TermLevel
-import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as E
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as S
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
 
 -- ++ TopLevel
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 
--- + HelmLL Drivers
-import qualified LLIR.HelmLL.Core.Index.Driver     as Driver
-import qualified LLIR.HelmLL.Core.TypeCheck.Driver as Driver
+
+-- + Local Prelude
+import LLIR.HelmLL.Core.Index.Data.System (enter)
+
+-- + Local
+import qualified LLIR.HelmLL.Core.Index.Data.System     as Sys
+import qualified LLIR.HelmLL.Core.Index.Scope.Referable as Scope
+import qualified LLIR.HelmLL.Core.Index.Scope.Utils     as Scope
+
+-- ++ Sub-Indexers
+import qualified LLIR.HelmLL.Core.Index.Syntax.Base.Etc       as Etc
+import qualified LLIR.HelmLL.Core.Index.Syntax.Base.Type      as T
 -- *
 
 
+traverseUnions :: [Decl.Union] -> Sys.State [Decl.Union]
+traverseUnions = M.mapM indexUnion
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-
-
-
-
-
-
-upstream = do
-    filePath <- SampleFile.alphaFilePath
-
-    (SIO.readFile filePath)
-        |> HelmSyntax.pipeline [] filePath
-        |> HelmSyntax.toHelmFlat
-        |> HelmFlat.pipeline
-        |> HelmFlat.toHelmLL
-        |> Driver.index
-        |> Driver.typeCheck
-
-
-
-run = do
-    result <- upstream
-    case result of
-        Left  err     -> putStrLn $ Text.unpack err
-        Right payload -> run' payload
-
-
-
-run' payload = do
+indexUnion :: Decl.Union -> Sys.State Decl.Union
+indexUnion (Decl.Union name as cs) = do
+    Sys.resetTypeCounter
+    -- *
     
-    (TIO.putStrLn . Syntax.renderUnions) uns
+    -- *
+    (as', subs) <- List.unzip <$> M.mapM T.typeBindable as
+    cs' <- Scope.withLocalSubst (Map.unions subs) (M.mapM indexConstr cs)
+    -- *
     
-    putStrLn "\n"
-    
-    (TIO.putStrLn . Syntax.renderFunctions) fns
+    -- *
+    return
+        (Decl.Union name as' cs')
 
-    where
-        fns = I.getFunctions payload
-        uns = I.getUnions payload
+
+indexConstr :: Decl.Constr -> Sys.State Decl.Constr
+indexConstr (Decl.Constr ident args) = do
+    args' <- M.mapM T.indexType args
+    
+    return
+        (Decl.Constr ident args')
+        
+
+
+
 

@@ -1,12 +1,16 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Dev.DryRun.CPU where
+module LLIR.HelmLL.Core.Index.Scope.Utils (
+    withLocalSubst
+  , indexList
+  , indexMaybe
+  , indexTopLevels
+) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -53,6 +57,7 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -66,83 +71,72 @@ import qualified Text.Show.Prettyprint as PP
 
 
 
--- + Local Development & Debugging
-import qualified DevKit.Sample.Loader.CPU as SampleFile
-
-
-
--- + Upstream IRs
-import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
-import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
-
--- + HelmLL Syntax Renderer
-import qualified LLIR.HelmLL.AST.Render.Syntax.Driver as Syntax
-
--- + HelmLL AST Interface
+-- + HelmLL Module Interface
 import qualified LLIR.HelmLL.Data.Interface as I
+
+-- + HelmLL AST Utils
+import qualified LLIR.HelmLL.AST.Utils.Generic.Scope       as Scope
+import qualified LLIR.HelmLL.AST.Utils.Class.Ident         as ID
+import qualified LLIR.HelmLL.AST.Utils.Auxiliary.Functions as Fun
+import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 
 -- + HelmLL AST
 -- ++ Base
 import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals as Lit
+import qualified LLIR.HelmLL.AST.Data.Base.Literals   as V
 
 -- ++ TermLevel
-import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as E
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as S
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
 
 -- ++ TopLevel
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 
--- + HelmLL Drivers
-import qualified LLIR.HelmLL.Core.Index.Driver     as Driver
-import qualified LLIR.HelmLL.Core.TypeCheck.Driver as Driver
+-- + Local
+import qualified LLIR.HelmLL.Core.Index.Data.System as Sys
 -- *
 
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
-
-
-
-
-
-
-
-
-upstream = do
-    filePath <- SampleFile.alphaFilePath
-
-    (SIO.readFile filePath)
-        |> HelmSyntax.pipeline [] filePath
-        |> HelmSyntax.toHelmFlat
-        |> HelmFlat.pipeline
-        |> HelmFlat.toHelmLL
-        |> Driver.index
-        |> Driver.typeCheck
-
-
-
-run = do
-    result <- upstream
-    case result of
-        Left  err     -> putStrLn $ Text.unpack err
-        Right payload -> run' payload
-
-
-
-run' payload = do
+withLocalSubst :: Sys.Subst -> Sys.State a -> Sys.State a
+withLocalSubst s1 =
+    M.local modEnv
     
-    (TIO.putStrLn . Syntax.renderUnions) uns
-    
-    putStrLn "\n"
-    
-    (TIO.putStrLn . Syntax.renderFunctions) fns
-
     where
-        fns = I.getFunctions payload
-        uns = I.getUnions payload
+        
+        modEnv = Map.union s1
+
+
+indexList :: (a -> Sys.Index a) -> [a] -> Sys.Index [a]
+indexList f []     = Sys.enter [] Map.empty
+
+indexList f (x:xs) = do
+    (x', s)   <- f x
+    (xs', ss) <- withLocalSubst s (indexList f xs)
+    
+    return (x' : xs', Map.union ss s)
+
+
+indexTopLevels :: (a -> Sys.Index a) -> [a] -> Sys.Index [a]
+indexTopLevels f []     = Sys.enter [] Map.empty
+
+indexTopLevels f (x:xs) = do
+    Sys.resetTypeCounter
+    (x', s)   <- f x
+    (xs', ss) <- withLocalSubst s (indexTopLevels f xs)
+    
+    return (x' : xs', Map.union ss s)
+
+
+
+indexMaybe :: (a -> Sys.Index a) -> Maybe a -> Sys.Index (Maybe a)
+indexMaybe f Nothing = Sys.enter Nothing Map.empty
+indexMaybe f (Just x) = do
+    (x', s) <- f x
+
+    Sys.enter (Just x') s
 

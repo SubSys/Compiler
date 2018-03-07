@@ -1,6 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module LLIR.HelmLL.AST.Render.Syntax.TopLevel.Functions where
+module LLIR.HelmLL.AST.Render.Syntax.TopLevel.Functions (
+    renderFunction
+) where
 
 
 -- *
@@ -95,7 +97,7 @@ import qualified LLIR.HelmLL.AST.Render.Syntax.TermLevel.Stmt     as S
 
 
 
-
+renderFunction :: Decl.Function -> Doc
 renderFunction (Decl.Function name@(Etc.Binder ident _) args block sig) =
     let name' = case ident of
             (ID.Ident txt Nothing)   -> render txt
@@ -111,8 +113,10 @@ renderFunction' :: Doc -> [Etc.Binder] -> S.Block -> Maybe T.Scheme -> Doc
 renderFunction' name args expr Nothing =
     let
         args' = map Etc.renderBinder args
+          |> Util.punctuate ","
           |> Util.punctuate Util.space
           |> Util.hcat
+          -- |> Util.parens
         expr' = S.renderBlock expr
     in
         name <+> args' <+> "=" <$$> expr' <$$> Util.softline
@@ -121,8 +125,10 @@ renderFunction' name args expr Nothing =
 renderFunction' name args expr (Just sig) =
     let
         args' = map Etc.renderBinder args
+          |> Util.punctuate ","
           |> Util.punctuate Util.space
           |> Util.hcat
+          -- |> Util.parens
         expr' = S.renderBlock expr
         sig' = T.renderScheme sig
 

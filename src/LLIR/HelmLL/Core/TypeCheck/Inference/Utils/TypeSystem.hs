@@ -1,12 +1,18 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Dev.DryRun.CPU where
+module LLIR.HelmLL.Core.TypeCheck.Inference.Utils.TypeSystem (
+    closeOver
+  , instantiate
+  , generalize
+  , freshTSPair
+  , freshScheme
+  , freshType
+) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -53,96 +59,113 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
 import qualified Data.Generics.Uniplate.Data as Uni
-
--- + OS APIS & Related
-import qualified System.IO as SIO
 
 -- + Dev & Debugging
 import qualified Text.Show.Prettyprint as PP
 
 
 
--- + Local Development & Debugging
-import qualified DevKit.Sample.Loader.CPU as SampleFile
 
-
-
--- + Upstream IRs
-import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
-import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
-
--- + HelmLL Syntax Renderer
-import qualified LLIR.HelmLL.AST.Render.Syntax.Driver as Syntax
-
--- + HelmLL AST Interface
+-- + HelmLL Module Interface
 import qualified LLIR.HelmLL.Data.Interface as I
+
+-- + HelmLL AST Utils
+import qualified LLIR.HelmLL.AST.Utils.Generic.Scope       as Scope
+import qualified LLIR.HelmLL.AST.Utils.Class.Ident         as ID
+import qualified LLIR.HelmLL.AST.Utils.Auxiliary.Functions as Fn
+import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 
 -- + HelmLL AST
 -- ++ Base
 import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals as Lit
+import qualified LLIR.HelmLL.AST.Data.Base.Literals   as V
 
 -- ++ TermLevel
-import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as E
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as S
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
 
 -- ++ TopLevel
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 
--- + HelmLL Drivers
-import qualified LLIR.HelmLL.Core.Index.Driver     as Driver
-import qualified LLIR.HelmLL.Core.TypeCheck.Driver as Driver
+-- + Local
+import qualified LLIR.HelmLL.Core.TypeCheck.Inference.Data.System          as Sys
+import qualified LLIR.HelmLL.Core.TypeCheck.Solver.Data.Constraint         as Con
+import qualified LLIR.HelmLL.Core.TypeCheck.Data.Report                    as Report
+import qualified LLIR.HelmLL.Core.TypeCheck.Inference.Data.Env             as Env
+import qualified LLIR.HelmLL.Core.TypeCheck.Subst.Types                    as TySub
+import qualified LLIR.HelmLL.Core.TypeCheck.Inference.Internal.FreshIdents as Fresh
 -- *
 
 
 
 
-{-# ANN module ("HLint: ignore" :: String) #-}
+
+-- | Canonicalize and return the polymorphic toplevel type.
+--
+closeOver :: T.Type -> T.Scheme
+closeOver = generalize Map.empty
+
+
+instantiate ::  T.Scheme -> Sys.Infer T.Type
+instantiate (T.Forall as t) = do
+    as' <- M.mapM (const freshType) as
+    -- *
+
+    let s = TySub.Subst $ Map.fromList $ List.zip as as'
+
+    -- *
+    return $ TySub.apply s t
+
+
+generalize :: Env.Types -> T.Type -> T.Scheme
+generalize env t  =
+    let
+        xs = Set.toList $ TySub.fvs t `Set.difference` TySub.fvs env
+        -- ys = map ID.toLow xs
+    in
+        T.Forall xs t
+
+
+
+
+
+-- |
+-- 'Fresh Type-Scheme Pair'
+freshTSPair :: Sys.Infer (T.Type, T.Scheme)
+freshTSPair = do
+    t <- freshType
+
+    return (t, T.Forall [] t)
+
+freshScheme :: Sys.Infer T.Scheme
+freshScheme = do
+    t <- freshType
+
+    return $ T.Forall [] t
+
+freshType :: Sys.Infer T.Type
+freshType = do
+    ident <- Fresh.freshIdent
+
+    return $ T.Var ident
+
+
+
+-- *
+-- | Internal
+-- *
 
 
 
 
 
 
-
-
-upstream = do
-    filePath <- SampleFile.alphaFilePath
-
-    (SIO.readFile filePath)
-        |> HelmSyntax.pipeline [] filePath
-        |> HelmSyntax.toHelmFlat
-        |> HelmFlat.pipeline
-        |> HelmFlat.toHelmLL
-        |> Driver.index
-        |> Driver.typeCheck
-
-
-
-run = do
-    result <- upstream
-    case result of
-        Left  err     -> putStrLn $ Text.unpack err
-        Right payload -> run' payload
-
-
-
-run' payload = do
-    
-    (TIO.putStrLn . Syntax.renderUnions) uns
-    
-    putStrLn "\n"
-    
-    (TIO.putStrLn . Syntax.renderFunctions) fns
-
-    where
-        fns = I.getFunctions payload
-        uns = I.getUnions payload
 

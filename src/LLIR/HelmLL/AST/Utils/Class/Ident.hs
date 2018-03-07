@@ -1,12 +1,16 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Dev.DryRun.CPU where
+module LLIR.HelmLL.AST.Utils.Class.Ident (
+    Identifiable(..)
+  , gets
+  , getText
+  , getTexts
+) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
 import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
 import Prelude
     ( return
     , String
@@ -53,6 +57,7 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -66,19 +71,8 @@ import qualified Text.Show.Prettyprint as PP
 
 
 
--- + Local Development & Debugging
-import qualified DevKit.Sample.Loader.CPU as SampleFile
 
-
-
--- + Upstream IRs
-import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
-import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
-
--- + HelmLL Syntax Renderer
-import qualified LLIR.HelmLL.AST.Render.Syntax.Driver as Syntax
-
--- + HelmLL AST Interface
+-- + HelmLL Module Interface
 import qualified LLIR.HelmLL.Data.Interface as I
 
 -- + HelmLL AST
@@ -86,19 +80,15 @@ import qualified LLIR.HelmLL.Data.Interface as I
 import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals as Lit
+import qualified LLIR.HelmLL.AST.Data.Base.Literals   as V
 
 -- ++ TermLevel
-import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as E
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as S
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
 
 -- ++ TopLevel
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
 import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
-
--- + HelmLL Drivers
-import qualified LLIR.HelmLL.Core.Index.Driver     as Driver
-import qualified LLIR.HelmLL.Core.TypeCheck.Driver as Driver
 -- *
 
 
@@ -109,40 +99,33 @@ import qualified LLIR.HelmLL.Core.TypeCheck.Driver as Driver
 
 
 
+class Identifiable a where
+    get :: a -> ID.Ident
 
 
 
-
-upstream = do
-    filePath <- SampleFile.alphaFilePath
-
-    (SIO.readFile filePath)
-        |> HelmSyntax.pipeline [] filePath
-        |> HelmSyntax.toHelmFlat
-        |> HelmFlat.pipeline
-        |> HelmFlat.toHelmLL
-        |> Driver.index
-        |> Driver.typeCheck
+instance Identifiable Etc.Binder where
+    get (Etc.Binder name _) = name
 
 
+instance Identifiable Decl.Function where
+    get (Decl.Function (Etc.Binder name _) _ _ _) = name
 
-run = do
-    result <- upstream
-    case result of
-        Left  err     -> putStrLn $ Text.unpack err
-        Right payload -> run' payload
+
+instance Identifiable Decl.Union where
+    get (Decl.Union name _ _) = name
+
+instance Identifiable Decl.Constr where
+    get (Decl.Constr name _) = name
+
+gets :: Identifiable a => [a] -> [ID.Ident]
+gets = map get
 
 
 
-run' payload = do
-    
-    (TIO.putStrLn . Syntax.renderUnions) uns
-    
-    putStrLn "\n"
-    
-    (TIO.putStrLn . Syntax.renderFunctions) fns
+getText :: ID.Ident -> Text
+getText (ID.Ident txt _) = txt
 
-    where
-        fns = I.getFunctions payload
-        uns = I.getUnions payload
+getTexts :: [ID.Ident] -> [Text]
+getTexts  = map getText
 

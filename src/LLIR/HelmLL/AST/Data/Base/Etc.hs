@@ -8,6 +8,7 @@ module LLIR.HelmLL.AST.Data.Base.Etc (
 
   , pattern Binder'
   , pattern Binder''
+  , pattern Binder_
 ) where
 
 
@@ -47,4 +48,10 @@ pattern Binder'' ident ty <- IR.Binder (IR.Ident (Text.unpack -> ident) _) (Just
     where
         Binder'' ident ty = IR.Binder (IR.Ident (Text.pack ident) Nothing) (Just ty)
 
+
+
+pattern Binder_ :: IR.Ident -> IR.Binder
+pattern Binder_ ident <- IR.Binder ident _
+    where
+        Binder_ ident = IR.Binder ident Nothing
 
