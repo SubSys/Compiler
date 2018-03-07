@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns #-}
-module CGIR.GLSL.AST.Data.BlockLevel.Stmt (
+module CGIR.GLSL.AST.Data.TermLevel.Stmt (
     IR.Block
   , IR.Stmt
   

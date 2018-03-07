@@ -72,17 +72,17 @@ import qualified CGIR.RustCG.Data.Interface as I
 
 -- + RustCG AST
 -- ++ Base
-import qualified CGIR.RustCG.AST.Data.Semantic.Base.Ident                 as ID
-import qualified CGIR.RustCG.AST.Data.Semantic.Base.Literals              as Lit
-import qualified CGIR.RustCG.AST.Data.Semantic.Base.Types                 as T
-import qualified CGIR.RustCG.AST.Data.Semantic.Base.Etc                   as Etc
+import qualified CGIR.RustCG.AST.Data.Base.Ident                 as ID
+import qualified CGIR.RustCG.AST.Data.Base.Literals              as Lit
+import qualified CGIR.RustCG.AST.Data.Base.Types                 as T
+import qualified CGIR.RustCG.AST.Data.Base.Etc                   as Etc
 -- ++ Block Level
-import qualified CGIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt            as S
-import qualified CGIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns        as P
+import qualified CGIR.RustCG.AST.Data.TermLevel.Stmt            as S
+import qualified CGIR.RustCG.AST.Data.TermLevel.Patterns        as P
 -- ++ Decl/Top Level
-import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants   as Decl
-import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums            as Decl
-import qualified CGIR.RustCG.AST.Data.Semantic.DeclLevel.Functions        as Decl
+import qualified CGIR.RustCG.AST.Data.TopLevel.Enums.Variants   as Decl
+import qualified CGIR.RustCG.AST.Data.TopLevel.Enums            as Decl
+import qualified CGIR.RustCG.AST.Data.TopLevel.Functions        as Decl
 
 -- + Local
 import qualified CGIR.RustCG.Core.Index.Data.System as Sys

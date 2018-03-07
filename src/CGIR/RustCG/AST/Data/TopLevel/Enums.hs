@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums (
+module CGIR.RustCG.AST.Data.TopLevel.Enums (
     IR.Enum
   , pattern Enum
 ) where

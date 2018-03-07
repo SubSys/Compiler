@@ -123,6 +123,7 @@ upstream = do
         |> HelmFlat.toHelmLL
         |> Driver.index
         |> Driver.typeCheck
+        |> Driver.index
 
 
 

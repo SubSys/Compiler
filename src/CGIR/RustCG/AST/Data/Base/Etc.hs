@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module CGIR.RustCG.AST.Data.Semantic.Base.Etc (
+module CGIR.RustCG.AST.Data.Base.Etc (
     IR.Input
   , IR.Output
   , IR.Generic

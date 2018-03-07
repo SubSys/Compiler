@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants (
+module CGIR.RustCG.AST.Data.TopLevel.Enums.Variants (
     IR.Variant
   , pattern TupleVariant
   , pattern UnitVariant

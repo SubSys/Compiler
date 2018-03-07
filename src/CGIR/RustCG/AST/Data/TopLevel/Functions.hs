@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module CGIR.RustCG.AST.Data.Semantic.DeclLevel.Functions (
+module CGIR.RustCG.AST.Data.TopLevel.Functions (
     IR.Function
   , pattern Function
 ) where

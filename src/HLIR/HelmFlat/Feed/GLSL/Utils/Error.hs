@@ -92,7 +92,7 @@ import qualified CGIR.GLSL.AST.Data.Base.Literals              as S.Lit
 import qualified CGIR.GLSL.AST.Data.Base.Types                 as S.T
 import qualified CGIR.GLSL.AST.Data.Base.Etc                   as S.Etc
 -- ++ Block Level
-import qualified CGIR.GLSL.AST.Data.BlockLevel.Stmt            as S.S
+import qualified CGIR.GLSL.AST.Data.TermLevel.Stmt            as S.S
 -- ++ Decl/Top Level
 import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as S.Decl
 import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as S.Decl

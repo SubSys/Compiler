@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module CGIR.RustCG.AST.Data.Semantic.Base.Types (
+module CGIR.RustCG.AST.Data.Base.Types (
     IR.Type
 
   , pattern Fn

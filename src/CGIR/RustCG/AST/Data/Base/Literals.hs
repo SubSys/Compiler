@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module CGIR.RustCG.AST.Data.Semantic.Base.Literals (
+module CGIR.RustCG.AST.Data.Base.Literals (
     IR.LiteralValue
   , pattern Char
   , pattern String

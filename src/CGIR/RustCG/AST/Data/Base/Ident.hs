@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns #-}
-module CGIR.RustCG.AST.Data.Semantic.Base.Ident (
+module CGIR.RustCG.AST.Data.Base.Ident (
     IR.Ident
   , IR.Path
   , IR.Seg

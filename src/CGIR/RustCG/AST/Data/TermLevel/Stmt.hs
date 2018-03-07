@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module CGIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt (
+module CGIR.RustCG.AST.Data.TermLevel.Stmt (
     IR.Stmt
   , IR.Block(..)
   

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5c7f775bc09a94927a0a761fff8603fdfb2d9909ce24fa034a80677dc2697f41
+-- hash: 90e8e57d39e4dc2d5970922c2e6f8359ef1e53d553723f41390ff9677d751967
 
 name:           Compiler
 version:        0.1.0.0
@@ -90,7 +90,7 @@ library
       CGIR.GLSL.AST.Data.Base.Ident
       CGIR.GLSL.AST.Data.Base.Literals
       CGIR.GLSL.AST.Data.Base.Types
-      CGIR.GLSL.AST.Data.BlockLevel.Stmt
+      CGIR.GLSL.AST.Data.TermLevel.Stmt
       CGIR.GLSL.AST.Data.TopLevel.Functions
       CGIR.GLSL.AST.Data.TopLevel.Globals
       CGIR.GLSL.AST.Render.Syntax
@@ -114,15 +114,15 @@ library
       CGIR.GLSL.Data.Interface
       CGIR.GLSL.Dev.DryRun
       CGIR.GLSL.Internal.AST
-      CGIR.RustCG.AST.Data.Semantic.Base.Etc
-      CGIR.RustCG.AST.Data.Semantic.Base.Ident
-      CGIR.RustCG.AST.Data.Semantic.Base.Literals
-      CGIR.RustCG.AST.Data.Semantic.Base.Types
-      CGIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns
-      CGIR.RustCG.AST.Data.Semantic.BlockLevel.Stmt
-      CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums
-      CGIR.RustCG.AST.Data.Semantic.DeclLevel.Enums.Variants
-      CGIR.RustCG.AST.Data.Semantic.DeclLevel.Functions
+      CGIR.RustCG.AST.Data.Base.Etc
+      CGIR.RustCG.AST.Data.Base.Ident
+      CGIR.RustCG.AST.Data.Base.Literals
+      CGIR.RustCG.AST.Data.Base.Types
+      CGIR.RustCG.AST.Data.TermLevel.Patterns
+      CGIR.RustCG.AST.Data.TermLevel.Stmt
+      CGIR.RustCG.AST.Data.TopLevel.Enums
+      CGIR.RustCG.AST.Data.TopLevel.Enums.Variants
+      CGIR.RustCG.AST.Data.TopLevel.Functions
       CGIR.RustCG.AST.Render.Syntax
       CGIR.RustCG.AST.Render.Syntax.Base.Etc
       CGIR.RustCG.AST.Render.Syntax.Base.Ident

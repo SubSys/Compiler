@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE PatternSynonyms #-}
-module CGIR.RustCG.AST.Data.Semantic.BlockLevel.Patterns (
+module CGIR.RustCG.AST.Data.TermLevel.Patterns (
     IR.Pattern
   , IR.Arm(..)
   , pattern Var
