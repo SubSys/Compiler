@@ -3,6 +3,9 @@ module LLIR.HelmLL.Pipeline (
     pipeline
   , GLSL.toGLSL
   , GLSL.toGLSL'
+  
+  , Rust.toRust
+  , Rust.toRust'
 ) where
 
 
@@ -107,6 +110,7 @@ import qualified LLIR.HelmLL.Core.Init.Driver      as Driver
 
 -- + HelmLL Feeds
 import qualified LLIR.HelmLL.Feed.GLSL.Driver as GLSL
+import qualified LLIR.HelmLL.Feed.Rust.Driver as Rust
 -- *
 
 
@@ -116,6 +120,7 @@ pipeline payload =
     payload |> Driver.init
             |> Driver.typeCheck
             |> Driver.index
+
 
 
 

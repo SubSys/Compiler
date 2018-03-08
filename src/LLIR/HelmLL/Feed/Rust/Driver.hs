@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Feed.Rust.Syntax.Base.Etc (
-    toGeneric
-  , binder2Input
+module LLIR.HelmLL.Feed.Rust.Driver (
+    toRust
+  , toRust'
 ) where
 
 
@@ -70,6 +70,9 @@ import qualified Text.Show.Prettyprint as PP
 
 
 
+-- + Interfaces
+import qualified LLIR.HelmLL.Data.Interface as I
+import qualified CGIR.Rust.Data.Interface   as RustCG
 
 -- + HelmLL AST Utils
 import qualified LLIR.HelmLL.AST.Utils.Generic.Scope       as Scope
@@ -77,6 +80,7 @@ import qualified LLIR.HelmLL.AST.Utils.Class.Ident         as ID
 import qualified LLIR.HelmLL.AST.Utils.Auxiliary.Type      as Ty
 import qualified LLIR.HelmLL.AST.Utils.Auxiliary.Functions as Fn
 import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
+import qualified LLIR.HelmLL.AST.Utils.Generic.TypesEnv    as TyEnv
 
 -- + HelmLL AST
 -- ++ Base
@@ -108,22 +112,54 @@ import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as R.Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as R.Decl
 
 -- + Local
-import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Ident as ID
-import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Types as T
+import qualified LLIR.HelmLL.Feed.Rust.Init.Variants             as Init
+import qualified LLIR.HelmLL.Feed.Rust.Post.FnRefs               as Post
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.TopLevel.Functions as Decl
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.TopLevel.Unions    as Decl
 -- *
 
 
 
 
-toGeneric :: H.ID.Ident -> R.Etc.Generic
-toGeneric (H.ID.Ident_ txt) =
-    R.Etc.Generic (R.ID.Ident txt)
+
+toRust :: IO (Either Text I.Program) -> IO (Either Text RustCG.Program)
+toRust upstream = do
+    result <- upstream
+    
+    case result of
+        Left err -> return $ Left err
+        Right payload ->
+            return
+                $ Right
+                $ Post.setFunRefs (TyEnv.genTypesEnv (I.getFunctions payload)) (toRust' payload)
 
 
 
-binder2Input :: H.Etc.Binder -> R.Etc.Input
-binder2Input (H.Etc.Binder ident (Just ty)) =
-    R.Etc.Input
-        (ID.dropIdent ident)
-        (T.dropType ty)
+
+toRust' :: I.Program -> RustCG.Program
+toRust' payload =
+    let
+        fns = I.getFunctions payload
+            |> Init.setVariantPaths (I.getUnions payload)
+            |> map Decl.dropFunction
+        uns = I.getUnions payload
+            |> Init.setVariantPaths (I.getUnions payload)
+            |> map Decl.dropUnion
+    in
+        RustCG.Program
+            { RustCG.enums = uns
+            , RustCG.functions = fns
+            }
+    
+
+
+
+
+
+
+
+
+
+
+
 

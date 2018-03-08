@@ -1,5 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Feed.Rust.Syntax.Base.Ident where
+module LLIR.HelmLL.Feed.Rust.Syntax.Base.Ident (
+    dropIdent
+  , toPath
+  , binder2Ident
+) where
 
 
 -- *
@@ -80,7 +84,7 @@ import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 import qualified LLIR.HelmLL.AST.Data.Base.Etc           as H.Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident         as H.ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types         as H.T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.V
+import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.Lit
 
 -- ++ TermLevel
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as H.S
@@ -106,3 +110,19 @@ import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as R.Decl
 
 -- + Local
 -- *
+
+
+dropIdent :: H.ID.Ident -> R.ID.Ident
+dropIdent (H.ID.Ident_ txt) = R.ID.Ident txt
+
+
+toPath :: H.ID.Ident -> R.ID.Path
+toPath (H.ID.Ident txt Nothing) = R.ID.Path_ [txt]
+toPath (H.ID.Ident txt (Just (H.ID.Namespace segs))) =
+    R.ID.Path_ (segs ++ [txt])
+
+
+binder2Ident :: H.Etc.Binder -> R.ID.Ident
+binder2Ident (H.Etc.Binder_ ident) = dropIdent ident
+
+

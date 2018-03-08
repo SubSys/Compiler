@@ -140,7 +140,7 @@ renderStmt (S.ConCall path args) =
 
 renderStmt (S.Match con arms) =
     let con' = renderStmt con
-        arms' = map (P.renderArm renderStmt) arms
+        arms' = map (P.renderArm renderBlock) arms
             |> Util.punctuate ","
             |> Util.punctuate Util.linebreak
             |> Util.hcat
@@ -162,14 +162,35 @@ renderStmt (S.Tuple items) =
         |> Util.parens
 
 
+
+-- TODO: ...
+renderStmt (S.If intros elseBranch) =
+    let intros' = map renderBranch intros
+            |> Util.vcat
+
+        elseBranch' = "else" <$$> Util.indent 4 (renderBlock elseBranch)
+    in 
+        intros' <$$> elseBranch'
+
+
+
+
 -- TODO:
 -- renderStmt (S.Box value) = error "TODO"
--- renderStmt (S.If intros elseStmt) = error "TODO"
 
 
 
+-- | Internal Helpers
+--
 
-
+-- |
+-- TODO: ...
+renderBranch :: (S.Stmt, S.Block) -> Doc
+renderBranch (con, block) =
+    let con' = renderStmt con
+        block' = renderBlock block
+    in
+        "if" <+> con' <+> "then" <$$> Util.indent 4 block'
 
 
 

@@ -1,5 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Feed.Rust.Syntax.Base.Types where
+module LLIR.HelmLL.Feed.Rust.Syntax.Base.Types (
+    dropType
+) where
 
 
 
@@ -81,7 +83,7 @@ import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 import qualified LLIR.HelmLL.AST.Data.Base.Etc           as H.Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident         as H.ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types         as H.T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.V
+import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.Lit
 
 -- ++ TermLevel
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as H.S
@@ -106,4 +108,41 @@ import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as R.Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as R.Decl
 
 -- + Local
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Ident as ID
 -- *
+
+
+dropType :: H.T.Type -> R.T.Type
+dropType H.T.String = R.T.String
+dropType H.T.Char   = R.T.Char
+dropType H.T.Int    = R.T.Int
+dropType H.T.Float  = R.T.Float
+dropType H.T.Bool   = R.T.Bool
+
+dropType (H.T.List ty) =
+    R.T.List (dropType ty)
+
+dropType (H.T.Tuple ts) =
+    R.T.Tuple
+        (map dropType ts)
+
+dropType (H.T.Union name args) =
+    R.T.Union
+        (ID.toPath name)
+        (map dropType args)
+
+dropType (H.T.Var id') =
+    R.T.Generic (ID.dropIdent id')
+
+
+dropType ty@H.T.Arr{} =
+    let
+        inputTypes = Ty.getInputTypes ty
+        outputType = Ty.getReturnType ty
+    in
+        R.T.Fn_
+            (map dropType inputTypes)
+            (dropType outputType)
+
+
+

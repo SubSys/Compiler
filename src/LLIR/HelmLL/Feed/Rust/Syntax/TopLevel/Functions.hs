@@ -1,5 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Feed.Rust.Syntax.TopLevel.Functions where
+module LLIR.HelmLL.Feed.Rust.Syntax.TopLevel.Functions (
+    dropFunction
+) where
 
 
 -- *
@@ -80,7 +82,7 @@ import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 import qualified LLIR.HelmLL.AST.Data.Base.Etc           as H.Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident         as H.ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types         as H.T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.V
+import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.Lit
 
 -- ++ TermLevel
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as H.S
@@ -105,4 +107,26 @@ import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as R.Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as R.Decl
 
 -- + Local
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Ident         as ID
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Types         as T
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Literals      as Lit
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Etc           as Etc
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.TermLevel.Stmt     as S
 -- *
+
+
+dropFunction :: H.Decl.Function -> R.Decl.Function
+dropFunction (H.Decl.Function name args body (Just scheme@(H.T.Forall gs ty))) =
+    R.Decl.Function
+        (ID.binder2Ident name)
+        (map Etc.toGeneric gs)
+        (map Etc.binder2Input args)
+        (R.Etc.Output (T.dropType output))
+        (S.dropBlock body)
+    
+    where
+        output = Ty.getReturnType ty
+
+
+
+

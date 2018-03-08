@@ -146,7 +146,7 @@ data Stmt
     
     -- | Control Flow Constructs
     --
-    | IfStmt [(Stmt, Stmt)] Stmt
+    | IfStmt [(Stmt, Block)] Block
     | MatchStmt Stmt [Arm]
     
     -- | Collection Constructs
@@ -164,7 +164,7 @@ data Stmt
 -}
 
 
-data Arm = Arm Pattern Stmt
+data Arm = Arm Pattern Block
     deriving (Show, Eq, Ord, Data, Typeable)
 
 

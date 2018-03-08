@@ -72,9 +72,15 @@ import Framework.Text.Parser
 import qualified Text.Show.Prettyprint as PP
 
 
+
+
+-- + Local Development & Debugging
+import qualified DevKit.Sample.Loader.CPU as SampleFile
+
 -- + Upstream IRs
 import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
 import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
+import qualified LLIR.HelmLL.Pipeline     as HelmLL
 
 -- + RustCG AST Interface
 import qualified CGIR.Rust.Data.Interface as I
@@ -95,9 +101,6 @@ import qualified CGIR.Rust.AST.Data.TermLevel.Patterns        as P
 import qualified CGIR.Rust.AST.Data.TopLevel.Enums.Variants   as Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as Decl
-
--- + RustCG Drivers
-import qualified CGIR.Rust.Core.Index.Driver as Driver
 -- *
 
 
@@ -116,18 +119,17 @@ inputFilePath
 
 
 
-upstream =
-    let
-        filePath   = inputFilePath
-        sourceCode = SIO.readFile inputFilePath
-    in
-        sourceCode
-            |> HelmSyntax.pipeline [] filePath
-            |> HelmSyntax.toHelmFlat
-            |> HelmFlat.pipeline
-            |> HelmFlat.toRustCG
-            |> Driver.index
 
+upstream = do
+    filePath <- SampleFile.alphaFilePath
+
+    (SIO.readFile filePath)
+        |> HelmSyntax.pipeline [] filePath
+        |> HelmSyntax.toHelmFlat
+        |> HelmFlat.pipeline
+        |> HelmFlat.toHelmLL
+        |> HelmLL.pipeline
+        |> HelmLL.toRust
 
 
 run = do

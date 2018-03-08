@@ -90,14 +90,6 @@ import qualified CGIR.Rust.AST.Data.TermLevel.Patterns        as P
 import qualified CGIR.Rust.AST.Data.TopLevel.Enums.Variants   as Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as Decl
-
--- + Local Prelude
-import CGIR.Rust.Core.Index.Data.System (enter, binder)
-
--- + Local
-import qualified CGIR.Rust.Core.Index.Data.System                as Sys
-import qualified CGIR.Rust.Core.Index.Syntax.DeclLevel.Functions as Decl
-import qualified CGIR.Rust.Core.Index.Syntax.DeclLevel.Enums     as Decl
 -- *
 
 

@@ -91,9 +91,11 @@ import qualified SLIR.HelmSyntax.Module.Data.Interface         as HelmSyntax.Mod
 import qualified SLIR.HelmSyntax.Module.System.InitDeps.Driver as InitDeps
 
 -- + Local
+import qualified HLIR.HelmFlat.Pipeline as HelmFlat
+import qualified LLIR.HelmLL.Pipeline   as HelmLL
+import qualified CGIR.Rust.Pipeline     as Rust
+
 import qualified Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline.HelmSyntax  as HelmSyntax
-import qualified Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline.HelmFlat    as HelmFlat
-import qualified Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline.RustCG      as RustCG
 -- *
 
 
@@ -103,7 +105,9 @@ pipeline nodes =
     nodes |> HelmSyntax.pipeline'
           |> HelmSyntax.toHelmFlat
           |> HelmFlat.pipeline
-          |> HelmFlat.toRustCG
-          |> RustCG.pipeline
-          |> RustCG.toSyntax
+          |> HelmFlat.toHelmLL
+          |> HelmLL.pipeline
+          |> HelmLL.toRust
+          |> Rust.pipeline
+          |> Rust.toSyntax
 

@@ -118,7 +118,7 @@ isTrueBranch _ = Nothing
 
 
 isFalseBranch :: P.CaseAlt -> Maybe S.Block
-isFalseBranch (P.CaseAlt (P.Lit (Lit.Bool True)) block) = Just block
+isFalseBranch (P.CaseAlt (P.Lit (Lit.Bool False)) block) = Just block
 isFalseBranch _ = Nothing
 
 

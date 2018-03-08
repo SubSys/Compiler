@@ -41,8 +41,8 @@ pattern FunCall path args = IR.FunCallStmt path args
 pattern ConCall :: IR.Path -> [IR.Stmt] -> IR.Stmt
 pattern ConCall path args = IR.ConCallStmt path args
 
-pattern If :: [(IR.Stmt, IR.Stmt)] -> IR.Stmt -> IR.Stmt
-pattern If intros elseStmt = IR.IfStmt intros elseStmt
+pattern If :: [(IR.Stmt, IR.Block)] -> IR.Block -> IR.Stmt
+pattern If intros elseBlock = IR.IfStmt intros elseBlock
 
 pattern Match :: IR.Stmt -> [IR.Arm] -> IR.Stmt
 pattern Match con arms = IR.MatchStmt con arms

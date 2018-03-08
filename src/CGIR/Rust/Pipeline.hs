@@ -91,17 +91,12 @@ import qualified CGIR.Rust.AST.Data.TopLevel.Enums.Variants   as Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as Decl
 
--- + RustCG Drivers
-import qualified CGIR.Rust.Core.Index.Driver as Driver
-
 -- + RustCG AST Feeds
 import qualified CGIR.Rust.Feed.Syntax.Driver as Feed
 -- *
 
 
 pipeline :: IO (Either Text I.Program) -> IO (Either Text I.Program)
-pipeline payload =
-    payload
-        |> Driver.index
+pipeline payload = payload
 
 

@@ -1,15 +1,14 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Ident (
-    dropIdent
-  , dropNamespace
+module LLIR.HelmLL.AST.Utils.Auxiliary.Unions (
+    lookupUnion
+  , lookupUnionName
 ) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
-import Core.List.Util    (flatten, singleton)
-import Data.Monoid ((<>))
+import Core.List.Util    (singleton)
 import Prelude
     ( return
     , String
@@ -24,6 +23,7 @@ import Prelude
 
 import qualified Prelude    as Pre
 import qualified Core.Utils as Core
+
 
 import qualified Control.Monad              as M
 import qualified Control.Monad.State        as M
@@ -54,6 +54,7 @@ import qualified Data.Vector.Generic          as VG
 import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
+import qualified Data.Data                    as Data
 import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
@@ -67,46 +68,51 @@ import qualified System.IO as SIO
 import qualified Text.Show.Prettyprint as PP
 
 
--- + HelmFlat AST Utils
-import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
-import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
 
--- + HelmFlat AST
+
+-- + HelmLL Module Interface
+import qualified LLIR.HelmLL.Data.Interface as I
+
+-- + HelmLL AST
 -- ++ Base
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc           as H.Etc
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident         as H.ID
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types         as H.T
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values        as H.V
+import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
+import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
+import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
+import qualified LLIR.HelmLL.AST.Data.Base.Literals   as V
+
 -- ++ TermLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as H.E
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as H.P
--- ++ TopLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as H.Decl
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as H.Decl
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as S
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
 
--- + GLSL AST
--- ++ Base
-import qualified CGIR.GLSL.AST.Data.Base.Ident                 as S.ID
-import qualified CGIR.GLSL.AST.Data.Base.Literals              as S.Lit
-import qualified CGIR.GLSL.AST.Data.Base.Types                 as S.T
-import qualified CGIR.GLSL.AST.Data.Base.Etc                   as S.Etc
--- ++ Block Level
-import qualified CGIR.GLSL.AST.Data.TermLevel.Stmt            as S.S
--- ++ Decl/Top Level
-import qualified CGIR.GLSL.AST.Data.TopLevel.Functions         as S.Decl
-import qualified CGIR.GLSL.AST.Data.TopLevel.Globals           as S.Decl
+-- ++ TopLevel
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 
 -- + Local
-import qualified HLIR.HelmFlat.Feed.GLSL.Utils.Error as Error
+import qualified LLIR.HelmLL.AST.Utils.Generic.Scope as Scope
+import qualified LLIR.HelmLL.AST.Utils.Class.Ident   as ID
 -- *
 
 
 
-dropIdent :: H.ID.Ident -> S.ID.Ident
-dropIdent (H.ID.Ident label ns) = S.ID.Ident label (dropNamespace ns)
 
-dropNamespace :: Maybe H.ID.Namespace -> Maybe S.ID.Namespace
-dropNamespace Nothing = Nothing
-dropNamespace (Just (H.ID.Namespace segs)) = Just $ S.ID.Namespace segs
+type ConstructorName = ID.Ident
+
+lookupUnion :: ConstructorName -> [Decl.Union] -> Maybe Decl.Union
+lookupUnion name = List.find check
+    where
+        check union@(Decl.Union _ _ cs) =
+            List.any checkInner cs
+        
+        checkInner (Decl.Constr name' args)
+            | name' == name = True
+            | otherwise     = False
+
+
+
+lookupUnionName :: ConstructorName -> [Decl.Union] -> Maybe ID.Ident
+lookupUnionName name uns = Core.applyMaybe f $ lookupUnion name uns
+    where
+        f (Decl.Union ident _ _) = ident
+
+

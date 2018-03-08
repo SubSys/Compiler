@@ -1,5 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Feed.Rust.Syntax.Base.Literals where
+module LLIR.HelmLL.Feed.Rust.Syntax.Base.Literals (
+    dropLiteral
+) where
 
 
 -- *
@@ -80,7 +82,7 @@ import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 import qualified LLIR.HelmLL.AST.Data.Base.Etc           as H.Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident         as H.ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types         as H.T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.V
+import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.Lit
 
 -- ++ TermLevel
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as H.S
@@ -105,4 +107,19 @@ import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as R.Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as R.Decl
 
 -- + Local
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Ident as ID
 -- *
+
+
+
+
+dropLiteral :: H.Lit.LiteralValue -> R.Lit.LiteralValue
+dropLiteral (H.Lit.Char val) = R.Lit.Char val
+dropLiteral (H.Lit.String val) = R.Lit.String val
+dropLiteral (H.Lit.Int val) = R.Lit.Int val
+dropLiteral (H.Lit.Float val) = R.Lit.Float val
+dropLiteral (H.Lit.Bool val) = R.Lit.Bool val
+
+
+
+

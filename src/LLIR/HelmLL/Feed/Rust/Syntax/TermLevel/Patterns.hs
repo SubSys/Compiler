@@ -1,5 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Feed.Rust.Syntax.TermLevel.Patterns where
+module LLIR.HelmLL.Feed.Rust.Syntax.TermLevel.Patterns (
+    dropCaseAlt
+) where
 
 
 -- *
@@ -80,7 +82,7 @@ import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 import qualified LLIR.HelmLL.AST.Data.Base.Etc           as H.Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident         as H.ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types         as H.T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.V
+import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.Lit
 
 -- ++ TermLevel
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as H.S
@@ -105,4 +107,52 @@ import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as R.Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as R.Decl
 
 -- + Local
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Ident    as ID
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Types    as T
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Literals as Lit
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Etc      as Etc
 -- *
+
+
+
+dropCaseAlt :: (H.S.Block -> R.S.Block) -> H.P.CaseAlt -> R.P.Arm
+dropCaseAlt f (H.P.CaseAlt patrn block) =
+    R.P.Arm
+        (dropPattern patrn)
+        (f block)
+
+
+
+
+dropPattern :: H.P.Pattern -> R.P.Pattern
+dropPattern (H.P.Lit lit) =
+    R.P.Lit
+        (Lit.dropLiteral lit)
+
+dropPattern (H.P.List xs) =
+    R.P.List
+        (map dropPattern xs)
+
+dropPattern (H.P.ListCons xs rest) =
+    R.P.ListCons
+        (map dropPattern xs)
+        (Core.applyMaybe dropPattern rest)
+
+dropPattern (H.P.Tuple items) =
+    R.P.Tuple
+        (map dropPattern items)
+
+dropPattern (H.P.Constr ident args) =
+    R.P.Variant
+        (ID.toPath ident)
+        (map dropPattern args)
+
+dropPattern (H.P.Var ident) =
+    R.P.Var
+        (ID.binder2Ident ident)
+
+dropPattern H.P.Wildcard =
+    R.P.Wildcard
+
+
+

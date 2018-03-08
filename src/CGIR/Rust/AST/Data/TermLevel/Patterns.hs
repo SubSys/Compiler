@@ -2,7 +2,10 @@
 {-# LANGUAGE PatternSynonyms #-}
 module CGIR.Rust.AST.Data.TermLevel.Patterns (
     IR.Pattern
-  , IR.Arm(..)
+  , IR.Arm
+  
+  , pattern Arm
+  
   , pattern Var
   , pattern Lit
   , pattern List
@@ -21,7 +24,12 @@ import qualified CGIR.Rust.Internal.AST as IR
 -- *
 
 
+pattern Arm :: IR.Pattern -> IR.Block -> IR.Arm
+pattern Arm patrn block = IR.Arm patrn block
 
+
+-- | Pattern Items
+--
 pattern Var :: IR.Ident -> IR.Pattern
 pattern Var ident = IR.VarPattern ident
 

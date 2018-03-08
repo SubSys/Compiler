@@ -1,5 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module LLIR.HelmLL.Feed.Rust.Syntax.TermLevel.Stmt where
+{-# LANGUAGE ViewPatterns #-}
+module LLIR.HelmLL.Feed.Rust.Syntax.TermLevel.Stmt (
+    dropBlock
+) where
 
 
 -- *
@@ -80,7 +83,7 @@ import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
 import qualified LLIR.HelmLL.AST.Data.Base.Etc           as H.Etc
 import qualified LLIR.HelmLL.AST.Data.Base.Ident         as H.ID
 import qualified LLIR.HelmLL.AST.Data.Base.Types         as H.T
-import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.V
+import qualified LLIR.HelmLL.AST.Data.Base.Literals      as H.Lit
 
 -- ++ TermLevel
 import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as H.S
@@ -105,4 +108,67 @@ import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as R.Decl
 import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as R.Decl
 
 -- + Local
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Ident         as ID
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Types         as T
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Literals      as Lit
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.Base.Etc           as Etc
+import qualified LLIR.HelmLL.Feed.Rust.Syntax.TermLevel.Patterns as P
 -- *
+
+
+
+dropBlock :: H.S.Block -> R.S.Block
+dropBlock (H.S.Block stmts) =
+    R.S.Block (map dropStmt stmts)
+
+
+dropStmt :: H.S.Stmt -> R.S.Stmt
+dropStmt (H.S.Lit val) =
+    R.S.Lit
+        (Lit.dropLiteral val)
+
+dropStmt (H.S.Tuple items) =
+    R.S.Tuple
+        (map dropStmt items)
+
+dropStmt (H.S.List xs) =
+    R.S.List
+        (map dropStmt xs)
+
+dropStmt (H.S.Case con alts) =
+    R.S.Match
+        (dropStmt con)
+        (map (P.dropCaseAlt dropBlock) alts)
+
+dropStmt (H.S.FunCall name args) =
+    R.S.FunCall
+        (ID.toPath name)
+        (map dropStmt args)
+
+dropStmt (H.S.ConCall name args) =
+    R.S.ConCall
+        (ID.toPath name)
+        (map dropStmt args)
+
+dropStmt (H.S.Ref name) =
+    R.S.Ref
+        (ID.toPath name)
+
+
+dropStmt (H.S.If intros elseBlock) =
+    R.S.If
+        (dropBranches intros)
+        (dropBlock elseBlock)
+
+
+
+
+-- | Internal Helpers
+--
+dropBranches :: [(H.S.Stmt, H.S.Block)] -> [(R.S.Stmt, R.S.Block)]
+dropBranches (List.unzip -> (cons, blocks)) =
+    List.zip
+        (map dropStmt cons)
+        (map dropBlock blocks)
+
+

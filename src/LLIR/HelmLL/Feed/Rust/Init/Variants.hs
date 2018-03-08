@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE PatternGuards #-}
-module HLIR.HelmFlat.Feed.RustCG.Init.Variants (
+module LLIR.HelmLL.Feed.Rust.Init.Variants (
     setVariantPaths
 ) where
 
@@ -56,6 +56,7 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -69,29 +70,35 @@ import qualified Text.Show.Prettyprint as PP
 
 
 
--- + HelmFlat AST Interface
-import qualified HLIR.HelmFlat.Data.Interface as I
 
--- + HelmFlat AST Utils
-import qualified HLIR.HelmFlat.AST.Utils.Types                    as Type
-import qualified HLIR.HelmFlat.AST.Utils.Generic.SudoFFI          as SudoFFI
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv         as TyEnv
-import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
-import qualified HLIR.HelmFlat.AST.Utils.Unions                   as Union
 
--- + HelmFlat AST
+-- + HelmLL AST Utils
+import qualified LLIR.HelmLL.AST.Utils.Generic.Scope       as Scope
+import qualified LLIR.HelmLL.AST.Utils.Class.Ident         as ID
+import qualified LLIR.HelmLL.AST.Utils.Auxiliary.Type      as Ty
+import qualified LLIR.HelmLL.AST.Utils.Auxiliary.Functions as Fn
+import qualified LLIR.HelmLL.AST.Utils.Generic.SudoFFI     as SudoFFI
+import qualified LLIR.HelmLL.AST.Utils.Auxiliary.Unions    as Union
+
+-- + HelmLL AST
 -- ++ Base
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Etc           as Etc
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Ident         as ID
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Types         as T
-import qualified HLIR.HelmFlat.AST.Data.Semantic.Base.Values        as V
+import qualified LLIR.HelmLL.AST.Data.Base.Etc           as Etc
+import qualified LLIR.HelmLL.AST.Data.Base.Ident         as ID
+import qualified LLIR.HelmLL.AST.Data.Base.Types         as T
+import qualified LLIR.HelmLL.AST.Data.Base.Literals      as Lit
+
 -- ++ TermLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Expr     as E
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TermLevel.Patterns as P
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as S
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
+
 -- ++ TopLevel
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Functions as Decl
-import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as Decl
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
+
+-- + Local
 -- *
+
+
 
 
 
@@ -104,14 +111,14 @@ setVariantPaths uns input =
 -- | Internal Helpers
 --
 
-exprConstrs :: [Decl.Union] -> E.Expr -> E.Expr
-exprConstrs uns (E.ConCall ident [])
+exprConstrs :: [Decl.Union] -> S.Stmt -> S.Stmt
+exprConstrs uns (S.ConCall ident [])
     | Just (unionName2NS -> unionName) <- Union.lookupUnionName ident uns =
-        E.ConCall (updateNamespace unionName ident) []
+        S.ConCall (updateNamespace unionName ident) []
 
-exprConstrs uns (E.ConCall ident args)
+exprConstrs uns (S.ConCall ident args)
     | Just (unionName2NS -> unionName) <- Union.lookupUnionName ident uns =
-        E.ConCall (updateNamespace unionName ident) args
+        S.ConCall (updateNamespace unionName ident) args
 
 
 exprConstrs _ e = e
@@ -141,4 +148,3 @@ updateNamespace (ID.Namespace segs2) (ID.Ident txt (Just (ID.Namespace segs1))) 
 
 updateNamespace ns (ID.Ident txt Nothing) =
     ID.Ident txt (Just ns)
-    

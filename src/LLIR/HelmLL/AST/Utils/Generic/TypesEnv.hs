@@ -1,16 +1,17 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+-- {-# LANGUAGE PatternGuards #-}
 -- {-# LANGUAGE ViewPatterns #-}
-module CGIR.Rust.Core.Index.Scope.Referable (
-    referable
+module LLIR.HelmLL.AST.Utils.Generic.TypesEnv (
+    genTypesEnv
 ) where
 
 
 -- *
 import Core
 import Core.Control.Flow ((|>), (<|))
-import Core.List.Util    (flatten, singleton)
+import Core.List.Util    (singleton)
 import Prelude
-    (return
+    ( return
     , String
     , IO
     , show
@@ -55,6 +56,7 @@ import qualified Data.IORef                   as IORef
 import qualified Data.ByteString              as BS
 import qualified Data.Functor                 as Fun
 import qualified Data.Data                    as Data
+import qualified Data.String                  as String
 
 -- + Recursion Schemes & Related
 import qualified Data.Functor.Foldable       as F
@@ -68,41 +70,38 @@ import qualified Text.Show.Prettyprint as PP
 
 
 
--- + RustCG AST Interface
-import qualified CGIR.Rust.Data.Interface as I
 
--- + RustCG AST Utils
-import qualified CGIR.Rust.AST.Utils.Ident as ID
+-- + HelmLL Module Interface
+import qualified LLIR.HelmLL.Data.Interface as I
 
--- + RustCG AST
+-- + HelmLL AST
 -- ++ Base
-import qualified CGIR.Rust.AST.Data.Base.Ident                 as ID
-import qualified CGIR.Rust.AST.Data.Base.Literals              as Lit
-import qualified CGIR.Rust.AST.Data.Base.Types                 as T
-import qualified CGIR.Rust.AST.Data.Base.Etc                   as Etc
--- ++ Block Level
-import qualified CGIR.Rust.AST.Data.TermLevel.Stmt            as S
-import qualified CGIR.Rust.AST.Data.TermLevel.Patterns        as P
--- ++ Decl/Top Level
-import qualified CGIR.Rust.AST.Data.TopLevel.Enums.Variants   as Decl
-import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as Decl
-import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as Decl
+import qualified LLIR.HelmLL.AST.Data.Base.Etc      as Etc
+import qualified LLIR.HelmLL.AST.Data.Base.Ident    as ID
+import qualified LLIR.HelmLL.AST.Data.Base.Types    as T
+import qualified LLIR.HelmLL.AST.Data.Base.Literals   as V
+
+-- ++ TermLevel
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Stmt     as S
+import qualified LLIR.HelmLL.AST.Data.TermLevel.Patterns as P
+
+-- ++ TopLevel
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Functions as Decl
+import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 
 -- + Local
-import qualified CGIR.Rust.Core.Index.Data.System as Sys
+import qualified LLIR.HelmLL.AST.Utils.Generic.Scope as Scope
+import qualified LLIR.HelmLL.AST.Utils.Class.Ident   as ID
 -- *
 
 
 
-referable :: ID.Path -> Sys.State (ID.Path, Sys.Subst)
-referable path = do
-    s <- M.ask
 
-    case Map.lookup (ID.getRefAsIdent path) s of
-        Nothing    -> return (path, Map.empty)
-        Just ident -> return (ID.updatePathRef ident path, Map.empty)
-
-
+-- | NOTE: This assumes all binders have a unique index!
+--
+genTypesEnv :: (Data.Data a, Data.Typeable a) => a -> Map.Map ID.Ident T.Type
+genTypesEnv input =
+    Map.fromList [ (ident, ty) | (Etc.Binder ident (Just ty)) <- Uni.universeBi input ]
 
 
 

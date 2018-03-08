@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a2ccff7243ef65e16c611f6f9034b930fecd6d8743c8f424d1424194c799fef4
+-- hash: 15b4877f890ff65b9473a8805bbaef6d704999ffa963ed461099bc5c0e8cf328
 
 name:           Compiler
 version:        0.1.0.0
@@ -115,44 +115,33 @@ library
       CGIR.GLSL.Data.Interface
       CGIR.GLSL.Dev.DryRun
       CGIR.GLSL.Internal.AST
-      CGIR.RustCG.AST.Data.Base.Etc
-      CGIR.RustCG.AST.Data.Base.Ident
-      CGIR.RustCG.AST.Data.Base.Literals
-      CGIR.RustCG.AST.Data.Base.Types
-      CGIR.RustCG.AST.Data.TermLevel.Patterns
-      CGIR.RustCG.AST.Data.TermLevel.Stmt
-      CGIR.RustCG.AST.Data.TopLevel.Enums
-      CGIR.RustCG.AST.Data.TopLevel.Enums.Variants
-      CGIR.RustCG.AST.Data.TopLevel.Functions
-      CGIR.RustCG.AST.Render.Syntax
-      CGIR.RustCG.AST.Render.Syntax.Base.Etc
-      CGIR.RustCG.AST.Render.Syntax.Base.Ident
-      CGIR.RustCG.AST.Render.Syntax.Base.Literals
-      CGIR.RustCG.AST.Render.Syntax.Base.Types
-      CGIR.RustCG.AST.Render.Syntax.BlockLevel.Patterns
-      CGIR.RustCG.AST.Render.Syntax.BlockLevel.Stmt
-      CGIR.RustCG.AST.Render.Syntax.DeclLevel.Enums
-      CGIR.RustCG.AST.Render.Syntax.DeclLevel.Enums.Variants
-      CGIR.RustCG.AST.Render.Syntax.DeclLevel.Functions
-      CGIR.RustCG.AST.Utils.Functions
-      CGIR.RustCG.AST.Utils.Generic.SudoFFI
-      CGIR.RustCG.AST.Utils.Ident
-      CGIR.RustCG.Core.Index.Data.System
-      CGIR.RustCG.Core.Index.Driver
-      CGIR.RustCG.Core.Index.Scope.Bindable
-      CGIR.RustCG.Core.Index.Scope.Generic
-      CGIR.RustCG.Core.Index.Scope.Referable
-      CGIR.RustCG.Core.Index.Scope.Utils
-      CGIR.RustCG.Core.Index.Syntax.Base.Types
-      CGIR.RustCG.Core.Index.Syntax.BlockLevel.Patterns
-      CGIR.RustCG.Core.Index.Syntax.BlockLevel.Stmt
-      CGIR.RustCG.Core.Index.Syntax.DeclLevel.Enums
-      CGIR.RustCG.Core.Index.Syntax.DeclLevel.Functions
-      CGIR.RustCG.Data.Interface
-      CGIR.RustCG.Dev.DryRun
-      CGIR.RustCG.Feed.Syntax.Driver
-      CGIR.RustCG.Internal.AST
-      CGIR.RustCG.Pipeline
+      CGIR.Rust.AST.Data.Base.Etc
+      CGIR.Rust.AST.Data.Base.Ident
+      CGIR.Rust.AST.Data.Base.Literals
+      CGIR.Rust.AST.Data.Base.Types
+      CGIR.Rust.AST.Data.TermLevel.Patterns
+      CGIR.Rust.AST.Data.TermLevel.Stmt
+      CGIR.Rust.AST.Data.TopLevel.Enums
+      CGIR.Rust.AST.Data.TopLevel.Enums.Variants
+      CGIR.Rust.AST.Data.TopLevel.Functions
+      CGIR.Rust.AST.Render.Syntax
+      CGIR.Rust.AST.Render.Syntax.Base.Etc
+      CGIR.Rust.AST.Render.Syntax.Base.Ident
+      CGIR.Rust.AST.Render.Syntax.Base.Literals
+      CGIR.Rust.AST.Render.Syntax.Base.Types
+      CGIR.Rust.AST.Render.Syntax.BlockLevel.Patterns
+      CGIR.Rust.AST.Render.Syntax.BlockLevel.Stmt
+      CGIR.Rust.AST.Render.Syntax.DeclLevel.Enums
+      CGIR.Rust.AST.Render.Syntax.DeclLevel.Enums.Variants
+      CGIR.Rust.AST.Render.Syntax.DeclLevel.Functions
+      CGIR.Rust.AST.Utils.Functions
+      CGIR.Rust.AST.Utils.Generic.SudoFFI
+      CGIR.Rust.AST.Utils.Ident
+      CGIR.Rust.Data.Interface
+      CGIR.Rust.Dev.DryRun
+      CGIR.Rust.Feed.Syntax.Driver
+      CGIR.Rust.Internal.AST
+      CGIR.Rust.Pipeline
       Helm.Toolchain.Frontend.Manifest.Data
       Helm.Toolchain.Frontend.Manifest.Data.Report
       Helm.Toolchain.Frontend.Manifest.Dev
@@ -162,9 +151,7 @@ library
       Helm.Toolchain.Frontend.Pipeline.Compile.Dev
       Helm.Toolchain.Frontend.Pipeline.Compile.Driver
       Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline
-      Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline.HelmFlat
       Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline.HelmSyntax
-      Helm.Toolchain.Frontend.Pipeline.Compile.Pipeline.RustCG
       Helm.Toolchain.Frontend.Pipeline.Crawl.Dev
       Helm.Toolchain.Frontend.Pipeline.Crawl.Driver
       Helm.Toolchain.Frontend.Pipeline.Data.Node
@@ -211,14 +198,6 @@ library
       HLIR.HelmFlat.Core.Monomorph.Driver
       HLIR.HelmFlat.Data.Interface
       HLIR.HelmFlat.Dev.DryRun
-      HLIR.HelmFlat.Feed.GLSL.Driver
-      HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Etc
-      HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Ident
-      HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Literals
-      HLIR.HelmFlat.Feed.GLSL.Syntax.Base.Types
-      HLIR.HelmFlat.Feed.GLSL.Syntax.BlockLevel.Stmt
-      HLIR.HelmFlat.Feed.GLSL.Syntax.TopLevel.Functions
-      HLIR.HelmFlat.Feed.GLSL.Utils.Error
       HLIR.HelmFlat.Feed.HelmLL.Driver
       HLIR.HelmFlat.Feed.HelmLL.Syntax.Base.Etc
       HLIR.HelmFlat.Feed.HelmLL.Syntax.Base.Ident
@@ -228,10 +207,6 @@ library
       HLIR.HelmFlat.Feed.HelmLL.Syntax.TermLevel.Stmt
       HLIR.HelmFlat.Feed.HelmLL.Syntax.TopLevel.Functions
       HLIR.HelmFlat.Feed.HelmLL.Syntax.TopLevel.Unions
-      HLIR.HelmFlat.Feed.RustCG.Driver
-      HLIR.HelmFlat.Feed.RustCG.Init.Variants
-      HLIR.HelmFlat.Feed.RustCG.Post.Finalize
-      HLIR.HelmFlat.Feed.RustCG.Syntax
       HLIR.HelmFlat.Internal.AST
       HLIR.HelmFlat.LocalDev.DryRun
       HLIR.HelmFlat.Pipeline
@@ -256,9 +231,11 @@ library
       LLIR.HelmLL.AST.Tailored.GLSL.TermLevel.Stmt
       LLIR.HelmLL.AST.Utils.Auxiliary.Functions
       LLIR.HelmLL.AST.Utils.Auxiliary.Type
+      LLIR.HelmLL.AST.Utils.Auxiliary.Unions
       LLIR.HelmLL.AST.Utils.Class.Ident
       LLIR.HelmLL.AST.Utils.Generic.Scope
       LLIR.HelmLL.AST.Utils.Generic.SudoFFI
+      LLIR.HelmLL.AST.Utils.Generic.TypesEnv
       LLIR.HelmLL.Core.Index.Data.System
       LLIR.HelmLL.Core.Index.Driver
       LLIR.HelmLL.Core.Index.Scope.Referable
@@ -306,6 +283,17 @@ library
       LLIR.HelmLL.Feed.GLSL.Syntax.TopLevel.Functions
       LLIR.HelmLL.Feed.GLSL.Syntax.TopLevel.Globals
       LLIR.HelmLL.Feed.GLSL.Utils.Error
+      LLIR.HelmLL.Feed.Rust.Driver
+      LLIR.HelmLL.Feed.Rust.Init.Variants
+      LLIR.HelmLL.Feed.Rust.Post.FnRefs
+      LLIR.HelmLL.Feed.Rust.Syntax.Base.Etc
+      LLIR.HelmLL.Feed.Rust.Syntax.Base.Ident
+      LLIR.HelmLL.Feed.Rust.Syntax.Base.Literals
+      LLIR.HelmLL.Feed.Rust.Syntax.Base.Types
+      LLIR.HelmLL.Feed.Rust.Syntax.TermLevel.Patterns
+      LLIR.HelmLL.Feed.Rust.Syntax.TermLevel.Stmt
+      LLIR.HelmLL.Feed.Rust.Syntax.TopLevel.Functions
+      LLIR.HelmLL.Feed.Rust.Syntax.TopLevel.Unions
       LLIR.HelmLL.Internal.AST
       LLIR.HelmLL.Pipeline
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc

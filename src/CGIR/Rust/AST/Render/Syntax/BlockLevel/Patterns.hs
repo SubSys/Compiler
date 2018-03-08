@@ -103,7 +103,7 @@ import qualified CGIR.Rust.AST.Render.Syntax.Base.Literals as Lit
 -- | Render Arm branch (or Case Alt.)
 --
 
-renderArm :: (S.Stmt -> Doc) -> P.Arm -> Doc
+renderArm :: (S.Block -> Doc) -> P.Arm -> Doc
 renderArm f (P.Arm patrn stmt) =
     let patrn' = renderPattern patrn
         stmt'  = f stmt
