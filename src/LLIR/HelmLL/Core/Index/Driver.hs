@@ -100,6 +100,9 @@ import qualified LLIR.HelmLL.AST.Data.TopLevel.Unions    as Decl
 import qualified LLIR.HelmLL.Core.Index.Data.System               as Sys
 import qualified LLIR.HelmLL.Core.Index.Syntax.TopLevel.Functions as Decl
 import qualified LLIR.HelmLL.Core.Index.Syntax.TopLevel.Unions    as Decl
+
+-- + TODO: Move?
+import qualified LLIR.HelmLL.Core.TypeCheck.PostWork.Decls as PostWork
 -- *
 
 
@@ -120,6 +123,7 @@ index' :: I.Program -> I.Program
 index' payload =
     let fns = I.getFunctions payload
             |> globalize
+            |> PostWork.finalize
         uns = I.getUnions payload
             |> normalizeUnions
     in

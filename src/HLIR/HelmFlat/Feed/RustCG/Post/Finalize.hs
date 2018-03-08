@@ -73,17 +73,17 @@ import qualified HLIR.HelmFlat.AST.Utils.Generic.TypesEnv.Helpers as TyEnv
 
 -- + RustCG AST
 -- ++ Base
-import qualified CGIR.RustCG.AST.Data.Base.Ident                 as ID
-import qualified CGIR.RustCG.AST.Data.Base.Literals              as Lit
-import qualified CGIR.RustCG.AST.Data.Base.Types                 as T
-import qualified CGIR.RustCG.AST.Data.Base.Etc                   as Etc
+import qualified CGIR.Rust.AST.Data.Base.Ident                 as ID
+import qualified CGIR.Rust.AST.Data.Base.Literals              as Lit
+import qualified CGIR.Rust.AST.Data.Base.Types                 as T
+import qualified CGIR.Rust.AST.Data.Base.Etc                   as Etc
 -- ++ Block Level
-import qualified CGIR.RustCG.AST.Data.TermLevel.Stmt            as S
-import qualified CGIR.RustCG.AST.Data.TermLevel.Patterns        as P
+import qualified CGIR.Rust.AST.Data.TermLevel.Stmt            as S
+import qualified CGIR.Rust.AST.Data.TermLevel.Patterns        as P
 -- ++ Decl/Top Level
-import qualified CGIR.RustCG.AST.Data.TopLevel.Enums.Variants   as Decl
-import qualified CGIR.RustCG.AST.Data.TopLevel.Enums            as Decl
-import qualified CGIR.RustCG.AST.Data.TopLevel.Functions        as Decl
+import qualified CGIR.Rust.AST.Data.TopLevel.Enums.Variants   as Decl
+import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as Decl
+import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as Decl
 
 -- + Local
 import qualified HLIR.HelmFlat.Feed.RustCG.Syntax as Syntax

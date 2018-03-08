@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 90e8e57d39e4dc2d5970922c2e6f8359ef1e53d553723f41390ff9677d751967
+-- hash: a2ccff7243ef65e16c611f6f9034b930fecd6d8743c8f424d1424194c799fef4
 
 name:           Compiler
 version:        0.1.0.0
@@ -86,6 +86,7 @@ library
       Proto.Util.Text
       DevKit.Sample.Loader.CPU
       DevKit.Sample.Loader.GPU
+      CGIR.GLSL.AST.Aliases.TermLevel.Stmt
       CGIR.GLSL.AST.Data.Base.Etc
       CGIR.GLSL.AST.Data.Base.Ident
       CGIR.GLSL.AST.Data.Base.Literals
@@ -251,7 +252,10 @@ library
       LLIR.HelmLL.AST.Render.Syntax.TermLevel.Stmt
       LLIR.HelmLL.AST.Render.Syntax.TopLevel.Functions
       LLIR.HelmLL.AST.Render.Syntax.TopLevel.Unions
+      LLIR.HelmLL.AST.Tailored.GLSL.Base.Types
+      LLIR.HelmLL.AST.Tailored.GLSL.TermLevel.Stmt
       LLIR.HelmLL.AST.Utils.Auxiliary.Functions
+      LLIR.HelmLL.AST.Utils.Auxiliary.Type
       LLIR.HelmLL.AST.Utils.Class.Ident
       LLIR.HelmLL.AST.Utils.Generic.Scope
       LLIR.HelmLL.AST.Utils.Generic.SudoFFI
@@ -265,6 +269,8 @@ library
       LLIR.HelmLL.Core.Index.Syntax.TermLevel.Stmt
       LLIR.HelmLL.Core.Index.Syntax.TopLevel.Functions
       LLIR.HelmLL.Core.Index.Syntax.TopLevel.Unions
+      LLIR.HelmLL.Core.Init.Driver
+      LLIR.HelmLL.Core.Init.Pass.BoolCases
       LLIR.HelmLL.Core.TypeCheck.Data.Report
       LLIR.HelmLL.Core.TypeCheck.Driver
       LLIR.HelmLL.Core.TypeCheck.Inference.Data.Env
@@ -277,6 +283,7 @@ library
       LLIR.HelmLL.Core.TypeCheck.Inference.Syntax.Scope
       LLIR.HelmLL.Core.TypeCheck.Inference.Utils.General
       LLIR.HelmLL.Core.TypeCheck.Inference.Utils.TypeSystem
+      LLIR.HelmLL.Core.TypeCheck.PostWork.Decls
       LLIR.HelmLL.Core.TypeCheck.Solver.Data.Constraint
       LLIR.HelmLL.Core.TypeCheck.Solver.Data.System
       LLIR.HelmLL.Core.TypeCheck.Solver.Engine
@@ -290,7 +297,17 @@ library
       LLIR.HelmLL.Data.Interface
       LLIR.HelmLL.Dev.DryRun.CPU
       LLIR.HelmLL.Dev.DryRun.GPU
+      LLIR.HelmLL.Feed.GLSL.Driver
+      LLIR.HelmLL.Feed.GLSL.Syntax.Base.Etc
+      LLIR.HelmLL.Feed.GLSL.Syntax.Base.Ident
+      LLIR.HelmLL.Feed.GLSL.Syntax.Base.Literals
+      LLIR.HelmLL.Feed.GLSL.Syntax.Base.Types
+      LLIR.HelmLL.Feed.GLSL.Syntax.TermLevel.Stmt
+      LLIR.HelmLL.Feed.GLSL.Syntax.TopLevel.Functions
+      LLIR.HelmLL.Feed.GLSL.Syntax.TopLevel.Globals
+      LLIR.HelmLL.Feed.GLSL.Utils.Error
       LLIR.HelmLL.Internal.AST
+      LLIR.HelmLL.Pipeline
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Etc
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Header
       SLIR.HelmSyntax.AST.Data.Semantic.Base.Ident

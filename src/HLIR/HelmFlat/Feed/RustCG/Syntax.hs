@@ -89,17 +89,17 @@ import qualified HLIR.HelmFlat.AST.Data.Semantic.TopLevel.Unions    as H.Decl
 
 -- + RustCG AST
 -- ++ Base
-import qualified CGIR.RustCG.AST.Data.Base.Ident                 as R.ID
-import qualified CGIR.RustCG.AST.Data.Base.Literals              as R.Lit
-import qualified CGIR.RustCG.AST.Data.Base.Types                 as R.T
-import qualified CGIR.RustCG.AST.Data.Base.Etc                   as R.Etc
+import qualified CGIR.Rust.AST.Data.Base.Ident                 as R.ID
+import qualified CGIR.Rust.AST.Data.Base.Literals              as R.Lit
+import qualified CGIR.Rust.AST.Data.Base.Types                 as R.T
+import qualified CGIR.Rust.AST.Data.Base.Etc                   as R.Etc
 -- ++ Block Level
-import qualified CGIR.RustCG.AST.Data.TermLevel.Stmt            as R.S
-import qualified CGIR.RustCG.AST.Data.TermLevel.Patterns        as R.P
+import qualified CGIR.Rust.AST.Data.TermLevel.Stmt            as R.S
+import qualified CGIR.Rust.AST.Data.TermLevel.Patterns        as R.P
 -- ++ Decl/Top Level
-import qualified CGIR.RustCG.AST.Data.TopLevel.Enums.Variants   as R.Decl
-import qualified CGIR.RustCG.AST.Data.TopLevel.Enums            as R.Decl
-import qualified CGIR.RustCG.AST.Data.TopLevel.Functions        as R.Decl
+import qualified CGIR.Rust.AST.Data.TopLevel.Enums.Variants   as R.Decl
+import qualified CGIR.Rust.AST.Data.TopLevel.Enums            as R.Decl
+import qualified CGIR.Rust.AST.Data.TopLevel.Functions        as R.Decl
 -- *
 
 

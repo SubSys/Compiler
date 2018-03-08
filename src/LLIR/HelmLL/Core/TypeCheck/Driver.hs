@@ -101,6 +101,8 @@ import qualified LLIR.HelmLL.Core.TypeCheck.Solver.Data.Constraint     as Con
 import qualified LLIR.HelmLL.Core.TypeCheck.Inference.Init.Unions      as Init
 import qualified LLIR.HelmLL.Core.TypeCheck.Inference.Engine           as Infer
 import qualified LLIR.HelmLL.Core.TypeCheck.Syntax.TopLevel.Functions  as Decl
+
+import qualified LLIR.HelmLL.Core.TypeCheck.PostWork.Decls as PostWork
 -- *
 
 
@@ -157,9 +159,13 @@ typeCheck' payload =
                     (formatError err)
 
             Right (fns', _, _) ->
-                Right $ I.updateFunctions fns' payload
+                Right
+                    $ finalize fns' payload
 
 
+finalize :: [Decl.Function] -> I.Program -> I.Program
+finalize decls payload =
+    payload |> I.updateFunctions (PostWork.finalize decls)
 
 
 

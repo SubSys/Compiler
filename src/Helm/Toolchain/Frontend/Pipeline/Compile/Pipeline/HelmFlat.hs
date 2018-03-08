@@ -92,7 +92,7 @@ import qualified Helm.Toolchain.Frontend.Pipeline.Ordering.Driver as Ordering
 -- + IRs
 import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
 import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
-import qualified CGIR.RustCG.Pipeline     as RustCG
+import qualified CGIR.Rust.Pipeline     as RustCG
 -- *
 
 

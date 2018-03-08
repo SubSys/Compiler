@@ -70,6 +70,7 @@ import qualified Text.Show.Prettyprint as PP
 -- + Upstream IRs
 import qualified SLIR.HelmSyntax.Pipeline as HelmSyntax
 import qualified HLIR.HelmFlat.Pipeline   as HelmFlat
+import qualified LLIR.HelmLL.Pipeline     as HelmLL
 
 -- + SPMD Syntax Renderer
 import qualified CGIR.GLSL.AST.Render.Syntax as Syntax
@@ -118,8 +119,9 @@ upstream =
             |> HelmSyntax.pipeline [] filePath
             |> HelmSyntax.toHelmFlat
             |> HelmFlat.pipeline
-            |> HelmFlat.toGLSL
-            |> Driver.index
+            |> HelmFlat.toHelmLL
+            |> HelmLL.pipeline
+            |> HelmLL.toGLSL
 
 
 
